@@ -1,6 +1,8 @@
-package com.uofg.timescheduler.util;
+package com.uofg.timescheduler.utils;
 
-import com.uofg.timescheduler.internal.User;
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
+
+import com.uofg.timescheduler.service.internal.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -31,12 +33,12 @@ public class TimeUtil {
         Map<String, Long> dayToTimestampMap = new HashMap<>() {
             {
                 put("sun", 0L);
-                put("mon", 24 * 60 * 60 * 1000L);
-                put("tues", 2 * 24 * 60 * 60 * 1000L);
-                put("wednes", 3 * 24 * 60 * 60 * 1000L);
-                put("thurs", 4 * 24 * 60 * 60 * 1000L);
-                put("fri", 5 * 24 * 60 * 60 * 1000L);
-                put("satur", 6 * 24 * 60 * 60 * 1000L);
+                put("mon", ONE_DAY_MILLIS);
+                put("tues", 2 * ONE_DAY_MILLIS);
+                put("wednes", 3 * ONE_DAY_MILLIS);
+                put("thurs", 4 * ONE_DAY_MILLIS);
+                put("fri", 5 * ONE_DAY_MILLIS);
+                put("satur", 6 * ONE_DAY_MILLIS);
             }
         };
         // https://zhuanlan.zhihu.com/p/60052611

@@ -1,4 +1,4 @@
-package com.uofg.timescheduler.internal;
+package com.uofg.timescheduler.service.internal;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;

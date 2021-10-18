@@ -1,4 +1,4 @@
-package com.uofg.timescheduler.util;
+package com.uofg.timescheduler.utils;
 
 import java.io.File;
 import java.io.InputStream;

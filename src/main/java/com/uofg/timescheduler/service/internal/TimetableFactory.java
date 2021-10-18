@@ -1,9 +1,12 @@
-package com.uofg.timescheduler.internal;
+package com.uofg.timescheduler.service.internal;
+
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
 import com.alibaba.fastjson.JSON;
-import com.uofg.timescheduler.util.FileUtil;
+import com.uofg.timescheduler.utils.FileUtil;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ public class TimetableFactory {
                 .headRowNumber(0) // the aligned header is set to be 1 row by default, need to change it to 0.
                 .doRead();
 
+        long deviation = Math.round(user.getUTCTimeZone() * ONE_HOUR_MILLIS);
         timetable.setOwner(user);
 
         // handle dynamic vertical headers
@@ -43,8 +47,9 @@ public class TimetableFactory {
                 for (int j = 0; j < 7; j++) {
                     String scheduleName = tmpSchedules[j];
                     if (scheduleName != null) {
-                        Schedule schedule = new Schedule(lastStartTime.longValue(),
-                                currStartTime.longValue(),
+                        Schedule schedule = new Schedule(
+                                lastStartTime.longValue() + deviation,
+                                currStartTime.longValue() + deviation,
                                 scheduleName);
                         timetable.getScheduleList().get(j).add(schedule);
                     }
@@ -65,40 +70,19 @@ public class TimetableFactory {
                 .headRowNumber(1)  // has a default value 1 of number of rows of aligned headers.
                 .doRead();
 
-        currStartTime.set(24 * 60 * 60 * 1000L);
+        // handle last row schedule
+        currStartTime.set(ONE_DAY_MILLIS);
         for (int j = 0; j < 7; j++) {
             String scheduleName = tmpSchedules[j];
             if (scheduleName != null) {
-                Schedule schedule = new Schedule(lastStartTime.longValue(),
-                        currStartTime.longValue(),
+                Schedule schedule = new Schedule(
+                        lastStartTime.longValue() + deviation,
+                        currStartTime.longValue() + deviation,
                         scheduleName);
                 timetable.getScheduleList().get(j).add(schedule);
             }
         }
-        // 读取部分sheet
-//        fileName = TestFileUtil.getPath() + "demo" + File.separator + "demo.xlsx";
-//        ExcelReader excelReader = null;
-//        try {
-//            excelReader = EasyExcel.read(path).build();
-//
-//            // 这里为了简单 所以注册了 同样的head 和Listener 自己使用功能必须不同的Listener
-//            ReadSheet readSheet1 =
-//                    EasyExcel.readSheet(1)
-//                            .registerReadListener(new PageReadListener<RawPersonalInfoRowData>(dataList -> {
-//                                for (RawPersonalInfoRowData rowData : dataList) {
-//                                    LOGGER.info("读取到一条数据{}", JSON.toJSONString(rowData));
-//                                }
-//                            })).build();
-////            ReadSheet readSheet2 =
-////                    EasyExcel.readSheet(0).head(DemoData.class).registerReadListener(new DemoDataListener()).build();
-//            // 这里注意 一定要把sheet1 sheet2 一起传进去，不然有个问题就是03版的excel 会读取多次，浪费性能
-//            excelReader.read(readSheet1);
-//        } finally {
-//            if (excelReader != null) {
-//                // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
-//                excelReader.finish();
-//            }
-//        }
+
         timetable.mergeSegmentedSchedules();
         return timetable;
     }

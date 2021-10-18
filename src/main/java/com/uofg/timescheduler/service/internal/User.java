@@ -1,6 +1,6 @@
-package com.uofg.timescheduler.internal;
+package com.uofg.timescheduler.service.internal;
 
-import com.uofg.timescheduler.util.TimeUtil;
+import com.uofg.timescheduler.utils.TimeUtil;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;

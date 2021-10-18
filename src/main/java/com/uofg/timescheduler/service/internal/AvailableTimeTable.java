@@ -1,5 +1,7 @@
-package com.uofg.timescheduler.internal;
+package com.uofg.timescheduler.service.internal;
 
+
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,17 +23,23 @@ public class AvailableTimeTable {
 
     public AvailableTimeTable(Timetable t) {
         this();
-        reverseTimeRange(t);
+        findAvailableTimeFromTimetable(t);
+    }
+
+    public static AvailableTimeTable constructFromTimetable(Timetable t) {
+        AvailableTimeTable att = new AvailableTimeTable();
+        att.findAvailableTimeFromTimetable(t);
+        return att;
     }
 
     public static void main(String[] args) {
         System.out.println(new AvailableTimeTable().getAvailableTimeList().size());
     }
 
-    private void reverseTimeRange(Timetable t) {
+    private void findAvailableTimeFromTimetable(Timetable t) {
         List<List<Schedule>> weekList = t.getScheduleList();
         for (int i = 0; i < weekList.size(); i++) {
-            long leftGap = i * 24 * 60 * 60 * 1000L;
+            long leftGap = 0;
             List<TimeRange> dayAvailableTime = this.availableTimeList.get(i);
             for (Schedule s : weekList.get(i)) {
                 long scheduleStart = s.getStartTime();
@@ -40,8 +48,8 @@ public class AvailableTimeTable {
                 }
                 leftGap = s.getEndTime();
             }
-            if (leftGap < (i + 1) * 24 * 60 * 60 * 1000L) {
-
+            if (leftGap < ONE_DAY_MILLIS) {
+                dayAvailableTime.add(new TimeRange(leftGap, ONE_DAY_MILLIS));
             }
         }
     }
