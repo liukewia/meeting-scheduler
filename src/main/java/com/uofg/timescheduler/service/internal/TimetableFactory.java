@@ -1,7 +1,9 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.constant.TimeConstant.DAYS_IN_A_WEEK;
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.SEVEN_DAY_MILLIS;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
@@ -31,25 +33,35 @@ public class TimetableFactory {
                 .headRowNumber(0) // the aligned header is set to be 1 row by default, need to change it to 0.
                 .doRead();
 
-        long deviation = Math.round(user.getUTCTimeZone() * ONE_HOUR_MILLIS);
+        long timeZoneDeviation = Math.round(user.getUTCTimeZone() * ONE_HOUR_MILLIS);
         timetable.setOwner(user);
 
         // handle dynamic vertical headers
         AtomicLong lastStartTime = new AtomicLong();
         AtomicLong currStartTime = new AtomicLong();
-        String[] tmpSchedules = new String[7];
+        String[] tmpSchedules = new String[DAYS_IN_A_WEEK];
+
+        /**
+         * there is a time gap in the beginning of the timetable, since the timetable only provides information in
+         * one week, the program will treat it as a worst case, i.e., fill it with nonce schedule to prevent possible
+         * available time intersection, or say to prevent side effect of jet lag.
+         */
+        if (timeZoneDeviation > 0) {
+            timetable.getScheduleList().get(0)
+                    .add(new Schedule(0, timeZoneDeviation, "nonce-schedule"));
+        }
 
         EasyExcel.read(path, RawTimetableRowData.class, new PageReadListener<RawTimetableRowData>(dataList -> {
             for (RawTimetableRowData rowData : dataList) {
                 // handle data in the last row
                 LocalDateTime currStartDate = rowData.getStartTime();
                 currStartTime.set((currStartDate.getHour() * 60 + currStartDate.getMinute()) * 60 * 1000L);
-                for (int j = 0; j < 7; j++) {
+                for (int j = 0; j < DAYS_IN_A_WEEK; j++) {
                     String scheduleName = tmpSchedules[j];
                     if (scheduleName != null) {
                         Schedule schedule = new Schedule(
-                                lastStartTime.longValue() + deviation,
-                                currStartTime.longValue() + deviation,
+                                lastStartTime.longValue() + timeZoneDeviation,
+                                currStartTime.longValue() + timeZoneDeviation,
                                 scheduleName);
                         timetable.getScheduleList().get(j).add(schedule);
                     }
@@ -72,15 +84,19 @@ public class TimetableFactory {
 
         // handle last row schedule
         currStartTime.set(ONE_DAY_MILLIS);
-        for (int j = 0; j < 7; j++) {
+        for (int j = 0; j < DAYS_IN_A_WEEK; j++) {
             String scheduleName = tmpSchedules[j];
             if (scheduleName != null) {
                 Schedule schedule = new Schedule(
-                        lastStartTime.longValue() + deviation,
-                        currStartTime.longValue() + deviation,
+                        lastStartTime.longValue() + timeZoneDeviation,
+                        currStartTime.longValue() + timeZoneDeviation,
                         scheduleName);
                 timetable.getScheduleList().get(j).add(schedule);
             }
+        }
+        if (timeZoneDeviation < 0) {
+            timetable.getScheduleList().get(DAYS_IN_A_WEEK - 1)
+                    .add(new Schedule(SEVEN_DAY_MILLIS + timeZoneDeviation, SEVEN_DAY_MILLIS, "nonce-schedule"));
         }
 
         timetable.mergeSegmentedSchedules();

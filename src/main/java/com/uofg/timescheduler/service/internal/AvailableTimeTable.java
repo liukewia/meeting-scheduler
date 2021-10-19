@@ -1,6 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
 
+import static com.uofg.timescheduler.constant.TimeConstant.DAYS_IN_A_WEEK;
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 
 import java.util.ArrayList;
@@ -52,6 +53,17 @@ public class AvailableTimeTable {
                 dayAvailableTime.add(new TimeRange(leftGap, ONE_DAY_MILLIS));
             }
         }
+    }
+
+    public List<TimeRange> getFlatAvailableTime() {
+        List<TimeRange> res = new ArrayList<>();
+        for (int i = 0; i < DAYS_IN_A_WEEK; i++) {
+            long baseTime = i * ONE_DAY_MILLIS;
+            for (TimeRange period : this.availableTimeList.get(i)) {
+                res.add(new TimeRange(period.getStartTime() + baseTime, period.getEndTime() + baseTime));
+            }
+        }
+        return res;
     }
 
     /**

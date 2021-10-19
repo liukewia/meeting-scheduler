@@ -1,9 +1,14 @@
 package com.uofg.timescheduler.utils;
 
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
+import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
 
+import com.uofg.timescheduler.service.internal.AvailableTimeTable;
+import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.User;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,8 +27,8 @@ public class TimeUtil {
             throw new IllegalArgumentException("Invalid time zone format with value [ " + value + " ] !");
         }
         float temp = Float.parseFloat(m.group("sign") + m.group("num"));
-        if (temp < -12 || temp > 14) {
-            throw new OutOfRangeException(temp, -12, 14);
+        if (!TimeUtil.checkUTCTimeZoneValidity(temp)) {
+            throw new OutOfRangeException(temp, UTC_LOWER_BOUND, UTC_UPPER_BOUND);
         }
         return temp;
     }
@@ -44,7 +49,7 @@ public class TimeUtil {
         // https://zhuanlan.zhihu.com/p/60052611
         Pattern p = Pattern
                 .compile(
-                        "\\W*(?<day>sun|mon|tues|wednes|thurs|fri|satur)(day)?\\D*(?<time>(?<hour>\\d{1,2})\\W*(?<minute>\\d{1,2})?\\W*(?<hourSys>[ap]m)?)");
+                        "\\W*(?<day>sun|mon|tues|wednes|thurs|fri|satur)(?:day)?\\D*(?<time>(?<hour>\\d{1,2})\\W*(?<minute>\\d{1,2})?\\W*(?<hourSys>[ap]m)?)");
         Matcher m = p.matcher(value.toLowerCase());
 //        System.out.println(m.matches());
         if (!m.matches()) {
@@ -107,6 +112,17 @@ public class TimeUtil {
         return relativeTime;
     }
 
+    /**
+     * expect a legal input to be like "Mon5pm", "Thurs 10(:30) AM", "fri-11.00", "Saturday 11(:00)"
+     * Mon5pm -- 86400000+3600000*17 = 147600000
+     * Mon5:00pm -- 147600000
+     * Thurs 10 AM -- 86400000*4+3600000*10 = 381600000
+     * Thurs 10:30 AM -- 86400000*4+3600000*22.5 = 383400000
+     * Thurs 10:30 PM -- 86400000*4+3600000*22.5 = 426600000
+     * Thurs 10:45 PM -- 86400000*4+3600000*22.75 = 427500000
+     * fri-11.00 -- 86400000*5+3600000*11 = 471600000
+     * Saturday 11 -- 86400000*6+3600000*11 = 558000000
+     **/
     public static void main(String[] args) throws Exception {
 //        System.out.println(normalizeTimeZone("UTC+10"));
 
@@ -122,19 +138,22 @@ public class TimeUtil {
             System.out.println("---------------------pass---------------------");
         }
 
-        String input = "Sun 0";
-        System.out.println("input: " + input);
-        System.out.println(normalizeMoment(input));
-        // expect a legal input to be like "Mon5pm", "Thurs 10(:30) AM", "fri-11.00", "Saturday 11(:00)"
-        // Mon5pm -- 86400000+3600000*17 = 147600000
-        // Mon5:00pm -- 147600000
-        // Thurs 10 AM -- 86400000*4+3600000*10 = 381600000
-        // Thurs 10:30 AM -- 86400000*4+3600000*22.5 = 383400000
-        // Thurs 10:30 PM -- 86400000*4+3600000*22.5 = 426600000
-        // Thurs 10:45 PM -- 86400000*4+3600000*22.75 = 427500000
-        // fri-11.00 -- 86400000*5+3600000*11 = 471600000
-        // Saturday 11 -- 86400000*6+3600000*11 = 558000000
+//        String input = "Sun 0";
+//        System.out.println("input: " + input);
+//        System.out.println(normalizeMoment(input));
 
+    }
+
+    public static List<TimeRange> computeIntersection(List<AvailableTimeTable> atts) {
+
+        List<TimeRange> initial = atts.remove(0).getFlatAvailableTime();
+        return atts.stream()
+                .map(AvailableTimeTable::getFlatAvailableTime)
+                .reduce(initial, AlgoUtil::intervalIntersection);
+    }
+
+    public static boolean checkUTCTimeZoneValidity(Float temp) {
+        return temp >= UTC_LOWER_BOUND && temp <= UTC_UPPER_BOUND;
     }
 
 }

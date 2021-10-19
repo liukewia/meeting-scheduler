@@ -1,5 +1,8 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
+
 import lombok.Data;
 
 @Data
@@ -55,5 +58,14 @@ public class TimeRange {
      */
     public long getLength() {
         return this.endTime - this.startTime;
+    }
+
+    @Override public String toString() {
+        return "TimeRange{" +
+                "startTime= Day " + ((int) Math.floor(startTime / ONE_DAY_MILLIS) + 1) + " @ "
+                + (startTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS +
+                "; endTime= Day " + ((int) Math.floor(endTime / ONE_DAY_MILLIS) + 1) + " @ "
+                + (endTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS +
+                '}';
     }
 }

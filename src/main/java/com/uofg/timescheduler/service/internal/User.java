@@ -1,10 +1,14 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
+import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
+
 import com.uofg.timescheduler.utils.TimeUtil;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.Data;
+import org.apache.commons.math3.exception.OutOfRangeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +29,16 @@ public class User {
         this.preferences = new LinkedList<>();
     }
 
+    public void setUTCTimeZone(Float temp) {
+        if (!TimeUtil.checkUTCTimeZoneValidity(temp)) {
+            throw new OutOfRangeException(temp, UTC_LOWER_BOUND, UTC_UPPER_BOUND);
+        }
+        this.UTCTimeZone = temp;
+    }
+
     public void updateCorrespondingField(String key, String value) {
-        String lowerCaseKey = key
-                .toLowerCase();  // prevents errors from users mixing upper and lower cases when setting keys.
+        // prevents errors from users mixing upper and lower cases when setting keys.
+        String lowerCaseKey = key.toLowerCase();
         if (lowerCaseKey.equals("id")) {
             this.setId(Integer.parseInt(value));
             return;

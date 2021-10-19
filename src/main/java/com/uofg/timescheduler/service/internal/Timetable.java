@@ -1,5 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.constant.TimeConstant.DAYS_IN_A_WEEK;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +24,7 @@ public class Timetable {
     private User owner;
 
     public Timetable() {
-        List<List<Schedule>> tmpList = new ArrayList<>(7);
+        List<List<Schedule>> tmpList = new ArrayList<>(DAYS_IN_A_WEEK);
         for (int i = 0; i < 7; i++) {
             tmpList.add(new ArrayList<>());
         }
@@ -40,7 +42,7 @@ public class Timetable {
 
     public void mergeSegmentedSchedules() {
 
-        List<List<Schedule>> newList = new ArrayList<>(7);
+        List<List<Schedule>> newList = new ArrayList<>(DAYS_IN_A_WEEK);
         for (List<Schedule> oldSubList : this.scheduleList) {
             List<Schedule> newSubList = new ArrayList<>();
             int formerSize = oldSubList.size();
