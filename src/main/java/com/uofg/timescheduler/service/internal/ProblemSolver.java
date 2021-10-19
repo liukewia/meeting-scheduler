@@ -20,6 +20,7 @@ public class ProblemSolver {
         // people, where n is the total number of all people, and not loop this process until n = 2 (there is no
         // significance to organize a meeting for one single person).
         int peopleMinus = 0;
+        List<TimeRange> intersection = null;
         do {
             // choose {peopleMinus} in {peopleNum} and do all possible combinations
             List<List<Integer>> combinations = AlgoUtil.getSubsetCombination(peopleNum, peopleMinus);
@@ -33,11 +34,14 @@ public class ProblemSolver {
                         availableTimeTablesToWorkOn.add(atts.get(i));
                     }
                 }
-                List<TimeRange> intersection = TimeUtil.computeIntersection(availableTimeTablesToWorkOn);
+                intersection = TimeUtil.computeIntersection(availableTimeTablesToWorkOn);
                 System.out.println(intersection);
                 System.out.println(1);
+                peopleMinus++;
             }
-        } while (peopleNum - peopleMinus > 1);
+        } while (intersection != null
+                && intersection.size() == 0
+                && peopleNum - peopleMinus > 1);
     }
 
     public static void main(String[] args) {
