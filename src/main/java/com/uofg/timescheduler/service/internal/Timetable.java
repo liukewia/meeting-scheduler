@@ -1,7 +1,5 @@
 package com.uofg.timescheduler.service.internal;
 
-import static com.uofg.timescheduler.constant.TimeConstant.DAYS_IN_A_WEEK;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,15 +18,12 @@ public class Timetable {
 //    private String[] fridaySchedules = new String[96];
 //    private String[] saturdaySchedules = new String[96];
 
-    private List<List<Schedule>> scheduleList = null;
-    private User owner;
+    private List<Schedule> scheduleList = null;
+    private User owner = null;
 
     public Timetable() {
-        List<List<Schedule>> tmpList = new ArrayList<>(DAYS_IN_A_WEEK);
-        for (int i = 0; i < 7; i++) {
-            tmpList.add(new ArrayList<>());
-        }
-        this.scheduleList = Collections.unmodifiableList(tmpList);
+        this.scheduleList = new ArrayList<>();
+        this.owner = new User();
     }
 
     public static void main(String[] args) {
@@ -42,39 +37,36 @@ public class Timetable {
 
     public void mergeSegmentedSchedules() {
 
-        List<List<Schedule>> newList = new ArrayList<>(DAYS_IN_A_WEEK);
-        for (List<Schedule> oldSubList : this.scheduleList) {
-            List<Schedule> newSubList = new ArrayList<>();
-            int formerSize = oldSubList.size();
-            int slow = 0;
-            int fast = 0;
-            while (fast < formerSize - 1) {
-                Schedule curr = oldSubList.get(slow);
-                Schedule next = oldSubList.get(fast + 1);
+        List<Schedule> oldList = this.scheduleList;
+        int formerSize = oldList.size();
+        List<Schedule> newList = new ArrayList<>(formerSize);
+        int slow = 0;
+        int fast = 0;
+        while (fast < formerSize - 1) {
+            Schedule curr = oldList.get(slow);
+            Schedule next = oldList.get(fast + 1);
 
-                while (next != null
-                        && curr.getEndTime() == next.getStartTime()
-                        && curr.getName().equals(next.getName())) {
-                    fast++;
-                    curr = oldSubList.get(fast);
-                    next = fast + 1 < formerSize ? oldSubList.get(fast + 1) : null;
-                }
-
-                Schedule prev = oldSubList.get(slow);
-                if (slow == fast) {
-                    newSubList.add(prev);
-                } else {
-                    Schedule merged = new Schedule(prev.getStartTime(),
-                            curr.getEndTime(),
-                            curr.getName());
-
-                    newSubList.add(merged);
-                }
-                slow = ++fast;
+            while (next != null
+                    && curr.getEndTime() == next.getStartTime()
+                    && curr.getName().equals(next.getName())) {
+                fast++;
+                curr = oldList.get(fast);
+                next = fast + 1 < formerSize ? oldList.get(fast + 1) : null;
             }
-            newSubList.addAll(oldSubList.subList(slow, oldSubList.size()));
-            newList.add(newSubList);
+
+            Schedule prev = oldList.get(slow);
+            if (slow == fast) {
+                newList.add(prev);
+            } else {
+                Schedule merged = new Schedule(prev.getStartTime(),
+                        curr.getEndTime(),
+                        curr.getName());
+
+                newList.add(merged);
+            }
+            slow = ++fast;
         }
+        newList.addAll(oldList.subList(slow, oldList.size()));
 
         this.scheduleList = Collections.unmodifiableList(newList);
     }

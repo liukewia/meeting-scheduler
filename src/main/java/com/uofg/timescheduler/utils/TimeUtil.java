@@ -4,7 +4,6 @@ import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
 
-import com.uofg.timescheduler.service.internal.AvailableTimeTable;
 import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.User;
 import java.util.HashMap;
@@ -144,11 +143,11 @@ public class TimeUtil {
 
     }
 
-    public static List<TimeRange> computeIntersection(List<AvailableTimeTable> atts) {
+    public static List<TimeRange> computeIntersection(List<List<TimeRange>> atts) {
 
-        List<TimeRange> initial = atts.remove(0).getFlatAvailableTime();
+        List<TimeRange> initial = atts.remove(0);
         return atts.stream()
-                .map(AvailableTimeTable::getFlatAvailableTime)
+//                .map(AvailableTimeTable::getFlatAvailableTime)
                 .reduce(initial, AlgoUtil::intervalIntersection);
     }
 

@@ -10,11 +10,11 @@ public class ProblemSolver {
 
     public static void solveWithExcelAsInput(String... inputPaths) {
         int peopleNum = inputPaths.length;
-        List<AvailableTimeTable> atts = new ArrayList<>(peopleNum);
+        List<List<TimeRange>> atts = new ArrayList<>(peopleNum);
         for (String path : inputPaths) {
             Timetable tn = TimetableFactory.readTimetableFromExcel(path);
-            AvailableTimeTable attn = AvailableTimeTable.constructFromTimetable(tn);
-            atts.add(attn);
+            List<TimeRange> att = TimetableFactory.findAvailableTimeFromTimetable(tn);
+            atts.add(att);
         }
         // calculates intersection. If there is not a meeting time suitable for everyone, try to find a scheme for (n-1)
         // people, where n is the total number of all people, and not loop this process until n = 2 (there is no
@@ -27,7 +27,7 @@ public class ProblemSolver {
 //                List<AvailableTimeTable> availableTimeTablesToWorkOn = atts.stream()
 //                        .filter(att -> !combination.contains(atts.indexOf(att))).collect(
 //                                Collectors.toList());
-                List<AvailableTimeTable> availableTimeTablesToWorkOn = new ArrayList<>();
+                List<List<TimeRange>> availableTimeTablesToWorkOn = new ArrayList<>();
                 for (int i = 0; i < peopleNum; i++) {
                     if (!combination.contains(i)) {
                         availableTimeTablesToWorkOn.add(atts.get(i));
