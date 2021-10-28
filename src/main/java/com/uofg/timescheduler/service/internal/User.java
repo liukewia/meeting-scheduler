@@ -30,7 +30,7 @@ public class User {
     }
 
     public void setUTCTimeZone(Float temp) {
-        if (!TimeUtil.checkUTCTimeZoneValidity(temp)) {
+        if (!TimeUtil.isUTCTimeZoneValid(temp)) {
             throw new OutOfRangeException(temp, UTC_LOWER_BOUND, UTC_UPPER_BOUND);
         }
         this.UTCTimeZone = temp;

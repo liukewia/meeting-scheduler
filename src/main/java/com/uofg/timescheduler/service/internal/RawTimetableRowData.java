@@ -7,20 +7,20 @@ import lombok.Data;
 @Data
 public class RawTimetableRowData {
 
-    @ExcelProperty(index = 0)
+    @ExcelProperty("")
     private LocalDateTime startTime;
-    @ExcelProperty(index = 1)
-    private String sundaySchedule;
-    @ExcelProperty(index = 2)
+    @ExcelProperty("Monday")
     private String mondaySchedule;
-    @ExcelProperty(index = 3)
+    @ExcelProperty("Tuesday")
     private String tuesdaySchedule;
-    @ExcelProperty(index = 4)
+    @ExcelProperty("Wednesday")
     private String wednesdaySchedule;
-    @ExcelProperty(index = 5)
+    @ExcelProperty("Thursday")
     private String thursdaySchedule;
-    @ExcelProperty(index = 6)
+    @ExcelProperty("Friday")
     private String fridaySchedule;
-    @ExcelProperty(index = 7)
+    @ExcelProperty("Saturday")
     private String saturdaySchedule;
+    @ExcelProperty("Sunday")
+    private String sundaySchedule;
 }

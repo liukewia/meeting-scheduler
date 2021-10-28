@@ -1,14 +1,18 @@
 package com.uofg.timescheduler.utils;
 
-import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
 
+import com.uofg.timescheduler.constant.TimeConstant;
 import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.User;
-import java.util.HashMap;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.math3.exception.OutOfRangeException;
@@ -26,7 +30,7 @@ public class TimeUtil {
             throw new IllegalArgumentException("Invalid time zone format with value [ " + value + " ] !");
         }
         float temp = Float.parseFloat(m.group("sign") + m.group("num"));
-        if (!TimeUtil.checkUTCTimeZoneValidity(temp)) {
+        if (!TimeUtil.isUTCTimeZoneValid(temp)) {
             throw new OutOfRangeException(temp, UTC_LOWER_BOUND, UTC_UPPER_BOUND);
         }
         return temp;
@@ -34,17 +38,7 @@ public class TimeUtil {
 
     public static long normalizeMoment(String value) throws Exception {
         // expect a legal input to be like "Mon5pm", "Thurs 10(:30) AM", "fri-11.00", "Saturday 11:00"
-        Map<String, Long> dayToTimestampMap = new HashMap<>() {
-            {
-                put("sun", 0L);
-                put("mon", ONE_DAY_MILLIS);
-                put("tues", 2 * ONE_DAY_MILLIS);
-                put("wednes", 3 * ONE_DAY_MILLIS);
-                put("thurs", 4 * ONE_DAY_MILLIS);
-                put("fri", 5 * ONE_DAY_MILLIS);
-                put("satur", 6 * ONE_DAY_MILLIS);
-            }
-        };
+
         // https://zhuanlan.zhihu.com/p/60052611
         Pattern p = Pattern
                 .compile(
@@ -64,7 +58,7 @@ public class TimeUtil {
         if (day == null) {
             throw new IllegalArgumentException("Cannot recognize the day within [ " + value + " ] !");
         }
-        Long relativeTime = dayToTimestampMap.get(day);
+        Long relativeTime = TimeConstant.dayToTimestampMap.get(day);
         if (relativeTime == null) {
             throw new IllegalArgumentException("Cannot find relative base time by day [ " + day + " ] !");
         }
@@ -125,22 +119,23 @@ public class TimeUtil {
     public static void main(String[] args) throws Exception {
 //        System.out.println(normalizeTimeZone("UTC+10"));
 
-        if (normalizeMoment("Mon5pm") == 147600000
-                && normalizeMoment("Mon5:00pm") == 147600000
-                && normalizeMoment("Thurs 10 AM") == 381600000
-                && normalizeMoment("Thurs 10:30 AM") == 383400000
-                && normalizeMoment("Thurs 10:30 PM") == 426600000
-                && normalizeMoment("Thurs 10:45 PM") == 427500000
-                && normalizeMoment("fri-11.00") == 471600000
-                && normalizeMoment("Saturday 11") == 558000000
-        ) {
-            System.out.println("---------------------pass---------------------");
-        }
+//        if (normalizeMoment("Mon5pm") == 147600000
+//                && normalizeMoment("Mon5:00pm") == 147600000
+//                && normalizeMoment("Thurs 10 AM") == 381600000
+//                && normalizeMoment("Thurs 10:30 AM") == 383400000
+//                && normalizeMoment("Thurs 10:30 PM") == 426600000
+//                && normalizeMoment("Thurs 10:45 PM") == 427500000
+//                && normalizeMoment("fri-11.00") == 471600000
+//                && normalizeMoment("Saturday 11") == 558000000
+//        ) {
+//            System.out.println("---------------------pass---------------------");
+//        }
 
 //        String input = "Sun 0";
 //        System.out.println("input: " + input);
 //        System.out.println(normalizeMoment(input));
 
+        getStartTimeOfWeek();
     }
 
     public static List<TimeRange> computeIntersection(List<List<TimeRange>> atts) {
@@ -151,8 +146,18 @@ public class TimeUtil {
                 .reduce(initial, AlgoUtil::intervalIntersection);
     }
 
-    public static boolean checkUTCTimeZoneValidity(Float temp) {
+    public static boolean isUTCTimeZoneValid(Float temp) {
         return temp >= UTC_LOWER_BOUND && temp <= UTC_UPPER_BOUND;
+    }
+
+    public static long getStartTimeOfWeek() {
+        Instant instant = Instant.now();
+        ZoneId zoneId = ZoneId.of("UTC");
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
+        ZonedDateTime startTimeOfWeek = zdt.with(ChronoField.DAY_OF_WEEK, 1)
+                .truncatedTo(ChronoUnit.DAYS);
+//        System.out.println(startTimeOfWeek);
+        return startTimeOfWeek.toLocalDateTime().toInstant(ZoneOffset.ofHours(0)).toEpochMilli();
     }
 
 }

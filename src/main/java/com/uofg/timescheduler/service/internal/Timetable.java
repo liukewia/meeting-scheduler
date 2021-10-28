@@ -74,7 +74,7 @@ public class Timetable {
 
 }
 
-//    public void mergeSegmentedSchedules() {
+//    public void mergeSegmentedSchedules()
 //
 //        List<List<Schedule>> newList = new ArrayList<>(7);
 //        for (List<Schedule> dailySchedules : this.scheduleList) {

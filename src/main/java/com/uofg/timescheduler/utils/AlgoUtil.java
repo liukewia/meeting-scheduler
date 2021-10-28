@@ -45,6 +45,14 @@ public class AlgoUtil {
         }
     }
 
+    /**
+     * time complexity: O(A.length + B.length)
+     * space complexity: O(A.length + B.length)
+     *
+     * @param A
+     * @param B
+     * @return
+     */
     public static List<TimeRange> intervalIntersection(List<TimeRange> A, List<TimeRange> B) {
         List<TimeRange> ans = new ArrayList<>();
         int i = 0, j = 0;
