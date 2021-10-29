@@ -1,10 +1,11 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
 
 import com.uofg.timescheduler.utils.TimeUtil;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.Data;
@@ -26,7 +27,7 @@ public class User {
     private List<Long> preferences;
 
     public User() {
-        this.preferences = new LinkedList<>();
+        this.preferences = new ArrayList<>();
     }
 
     public void setUTCTimeZone(Float temp) {
@@ -68,14 +69,12 @@ public class User {
                 return;
             }
             // restrict each preference to be a moment, not a time range for now.
-            {
-                try {
-                    this.getPreferences()
-                            .add(TimeUtil.normalizeMoment(value) + Math.round(this.UTCTimeZone * 60 * 60 * 1000));
-                } catch (Exception e) {
-                    LOGGER.error("Cannot set user's time preferences!");
-                    e.printStackTrace();
-                }
+            try {
+                this.getPreferences()
+                        .add(TimeUtil.normalizeMoment(value) - ((long) Math.round(this.UTCTimeZone * ONE_HOUR_MILLIS)));
+            } catch (Exception e) {
+                LOGGER.error("Cannot set user's time preferences!");
+                e.printStackTrace();
             }
             return;
         }

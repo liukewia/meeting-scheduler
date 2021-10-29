@@ -3,19 +3,20 @@ package com.uofg.timescheduler.utils;
 import static com.uofg.timescheduler.constant.TimeConstant.DAYS_IN_A_WEEK;
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_MINUTE_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.SEVEN_DAY_MILLIS;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.alibaba.fastjson.JSON;
 import com.uofg.timescheduler.service.internal.RawPersonalInfoRowData;
 import com.uofg.timescheduler.service.internal.RawSolutionRowData;
 import com.uofg.timescheduler.service.internal.RawTimetableRowData;
 import com.uofg.timescheduler.service.internal.Schedule;
-import com.uofg.timescheduler.service.internal.TimeRange;
+import com.uofg.timescheduler.service.internal.TimeRangeEvaluator;
 import com.uofg.timescheduler.service.internal.Timetable;
 import com.uofg.timescheduler.service.internal.TimetableFactory;
+import com.uofg.timescheduler.service.internal.User;
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -26,12 +27,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimetableFactory.class);
+
+    public static ArrayList<String> getAllFilesIn(String folderPath) {
+        File folder = new File(folderPath);
+        // get the folder list
+        File[] files = folder.listFiles();
+        ArrayList<String> res = new ArrayList<>();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                String path = file.getPath();
+                if (!path.contains("~$")) {
+                    res.add(path);
+                }
+            } else if (file.isDirectory()) {
+                getAllFilesIn(file.getPath());
+            }
+        }
+        return res;
+    }
 
     public static Timetable readTimetableFromExcel(String path) {
         Timetable timetable = new Timetable();
@@ -44,7 +65,7 @@ public class FileUtil {
 //                LOGGER.info("秒数{}", JSON.toJSONString(rowData.getStartTime()));
             }
         }))
-                .sheet(1) // read sheet 2, where saves personal information.
+                .sheet(1) // read sheet 2, where personal information is saved.
                 .headRowNumber(0) // the aligned header is set to be 1 row by default, need to change it to 0.
                 .doRead();
 
@@ -73,7 +94,7 @@ public class FileUtil {
             for (RawTimetableRowData rowData : dataList) {
                 // handle data in the previous row
                 LocalDateTime currStartDate = rowData.getStartTime();
-                currStartTime.set((currStartDate.getHour() * 60 + currStartDate.getMinute()) * 60 * 1000L);
+                currStartTime.set((currStartDate.getHour() * 60 + currStartDate.getMinute()) * ONE_MINUTE_MILLIS);
                 for (Map.Entry<Integer, String> entry : rowDataMap.entrySet()) {
                     int dayNo = entry.getKey();
                     String scheduleName = entry.getValue();
@@ -153,18 +174,27 @@ public class FileUtil {
             }
         }
         timetable.mergeSegmentedSchedules();
+
+        // validity check: filter out time preferences that is not in one person's available time.
+        User owner = timetable.getOwner();
+        owner.setPreferences(owner.getPreferences()
+                .stream()
+                .filter(p -> timetable.getScheduleList()
+                        .stream()
+                        .noneMatch(s -> p >= s.getStartTime() && p < s.getEndTime()))
+                .collect(Collectors.toList()));
         return timetable;
     }
 
     // write to new excel
-    public static void writeResultToExcel(List<TimeRange> intersections) {
+    public static void writeResultToExcel(List<TimeRangeEvaluator> intersections) {
 //        String templateFileName = FileUtil.getPath() + File.separator + "output-template.xlsx";
-        String outFileName = FileUtil.getPath() + "solution" /** + System.currentTimeMillis() **/ + ".xlsx";
+        String outFileName = FileUtil.getPath() + "solution" + ".xlsx";
 
         EasyExcel.write(outFileName, RawSolutionRowData.class)
                 .head(head())
 //                .withTemplate(templateFileName)
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+//                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
                 .sheet()
                 .doWrite(data(intersections));
     }
@@ -201,16 +231,16 @@ public class FileUtil {
         FileUtil.readTimetableFromExcel(FileUtil.getPath() + "filled-timetable-example.xlsx");
     }
 
-    private static List<RawSolutionRowData> data(List<TimeRange> trs) {
+    private static List<RawSolutionRowData> data(List<TimeRangeEvaluator> trs) {
         List<RawSolutionRowData> list = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("E HH:mm");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         long baseTime = TimeUtil.getStartTimeOfWeek();
-        for (TimeRange tr : trs) {
+        for (TimeRangeEvaluator tr : trs) {
             RawSolutionRowData row = new RawSolutionRowData();
-            row.setStartTime(sdf.format(baseTime + tr.getStartTime()));
-            row.setEndTime(sdf.format(baseTime + tr.getEndTime()));
-            row.setNote(null);
+            row.setStartTime(sdf.format(baseTime + tr.getTimeRange().getStartTime()));
+            row.setEndTime(sdf.format(baseTime + tr.getTimeRange().getEndTime()));
+            row.setNote(tr.getNote());
             list.add(row);
         }
         return list;

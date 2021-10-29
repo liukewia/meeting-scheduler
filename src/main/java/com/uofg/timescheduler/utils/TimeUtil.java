@@ -1,5 +1,7 @@
 package com.uofg.timescheduler.utils;
 
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.constant.TimeConstant.ONE_MINUTE_MILLIS;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
 
@@ -88,7 +90,7 @@ public class TimeUtil {
                 LOGGER.error("Cannot cast the minute [ " + minute + " ] into 24 hour system!");
                 throw new OutOfRangeException(minute, 0, 59);
             }
-            relativeTime += hour * 60 * 60 * 1000L + minute * 60 * 1000L;
+            relativeTime += hour * ONE_HOUR_MILLIS + minute * ONE_MINUTE_MILLIS;
         } else {
             // the time format is 12 hour system
             // check hour and minute validity
@@ -100,7 +102,7 @@ public class TimeUtil {
                 LOGGER.error("Cannot cast the minute [ " + minute + " ] into 12 hour system!");
                 throw new OutOfRangeException(minute, 0, 59);
             }
-            relativeTime += ((hourSys.equals("pm") ? 12 : 0) + hour) * 60 * 60 * 1000L + minute * 60 * 1000L;
+            relativeTime += ((hourSys.equals("pm") ? 12 : 0) + hour) * ONE_HOUR_MILLIS + minute * ONE_MINUTE_MILLIS;
         }
         return relativeTime;
     }
@@ -158,6 +160,10 @@ public class TimeUtil {
                 .truncatedTo(ChronoUnit.DAYS);
 //        System.out.println(startTimeOfWeek);
         return startTimeOfWeek.toLocalDateTime().toInstant(ZoneOffset.ofHours(0)).toEpochMilli();
+    }
+
+    public static boolean isMomentInRange(long moment, TimeRange range) {
+        return moment >= range.getStartTime() && moment <= range.getEndTime();
     }
 
 }

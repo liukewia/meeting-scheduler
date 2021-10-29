@@ -25,25 +25,25 @@ public interface TimeConstant {
 
     Map<String, Long> dayToTimestampMap = new HashMap<>() {
         {
-            put("sun", 0L);
-            put("mon", ONE_DAY_MILLIS);
-            put("tues", TWO_DAY_MILLIS);
-            put("wednes", THREE_DAY_MILLIS);
-            put("thurs", FOUR_DAY_MILLIS);
-            put("fri", FIVE_DAY_MILLIS);
-            put("satur", SIX_DAY_MILLIS);
+            put("mon", 0L);
+            put("tues", ONE_DAY_MILLIS);
+            put("wednes", TWO_DAY_MILLIS);
+            put("thurs", THREE_DAY_MILLIS);
+            put("fri", FOUR_DAY_MILLIS);
+            put("satur", FIVE_DAY_MILLIS);
+            put("sun", SIX_DAY_MILLIS);
         }
     };
 
     Map<Long, String> timestampToDayMap = new HashMap<>() {
         {
-            put(0L, "Sunday");
-            put(1L, "Monday");
-            put(2L, "Tuesday");
-            put(3L, "Wednesday");
-            put(4L, "Thursday");
-            put(5L, "Friday");
-            put(6L, "Saturday");
+            put(0L, "Monday");
+            put(1L, "Tuesday");
+            put(2L, "Wednesday");
+            put(3L, "Thursday");
+            put(4L, "Friday");
+            put(5L, "Saturday");
+            put(6L, "Sunday");
         }
     };
 }
