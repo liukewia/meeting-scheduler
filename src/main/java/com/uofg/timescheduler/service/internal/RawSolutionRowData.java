@@ -7,9 +7,7 @@ import com.alibaba.excel.enums.poi.FillPatternTypeEnum;
 import lombok.Data;
 
 @Data
-// 头背景设置成红色 IndexedColors.RED.getIndex()
 @HeadStyle(fillPatternType = FillPatternTypeEnum.SOLID_FOREGROUND, fillForegroundColor = 9)
-// 头字体设置成20
 @HeadFontStyle(fontHeightInPoints = 12, fontName = "Calibri")
 public class RawSolutionRowData {
 

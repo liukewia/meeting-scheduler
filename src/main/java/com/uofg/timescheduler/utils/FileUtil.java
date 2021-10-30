@@ -8,6 +8,7 @@ import static com.uofg.timescheduler.constant.TimeConstant.SEVEN_DAY_MILLIS;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.alibaba.fastjson.JSON;
 import com.uofg.timescheduler.service.internal.RawPersonalInfoRowData;
 import com.uofg.timescheduler.service.internal.RawSolutionRowData;
@@ -15,7 +16,6 @@ import com.uofg.timescheduler.service.internal.RawTimetableRowData;
 import com.uofg.timescheduler.service.internal.Schedule;
 import com.uofg.timescheduler.service.internal.TimeRangeEvaluator;
 import com.uofg.timescheduler.service.internal.Timetable;
-import com.uofg.timescheduler.service.internal.TimetableFactory;
 import com.uofg.timescheduler.service.internal.User;
 import java.io.File;
 import java.io.InputStream;
@@ -28,12 +28,10 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class FileUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimetableFactory.class);
 
     public static ArrayList<String> getAllFilesIn(String folderPath) {
         File folder = new File(folderPath);
@@ -45,12 +43,17 @@ public class FileUtil {
             if (file.isFile()) {
                 String path = file.getPath();
                 if (!path.contains("~$")) {
+                    // is temporary file
                     res.add(path);
                 }
             } else if (file.isDirectory()) {
                 getAllFilesIn(file.getPath());
             }
         }
+        // debug
+        res.sort(String::compareTo);
+        // debug
+
         return res;
     }
 
@@ -60,9 +63,9 @@ public class FileUtil {
         System.out.println("Path of the current input file: " + path);
         EasyExcel.read(path, RawPersonalInfoRowData.class, new PageReadListener<RawPersonalInfoRowData>(dataList -> {
             for (RawPersonalInfoRowData rowData : dataList) {
-                LOGGER.info("读取到一条个人数据{}", JSON.toJSONString(rowData));
+                log.info("Read personal info data in this row: {}", JSON.toJSONString(rowData));
                 timetable.getOwner().updateCorrespondingField(rowData.getKey(), rowData.getValue());
-//                LOGGER.info("秒数{}", JSON.toJSONString(rowData.getStartTime()));
+//                log.info("秒数{}", JSON.toJSONString(rowData.getStartTime()));
             }
         }))
                 .sheet(1) // read sheet 2, where personal information is saved.
@@ -106,18 +109,8 @@ public class FileUtil {
                         tmpWeekList.get(dayNo).add(schedule);
                     }
                 }
-//                for (int j = 0; j < DAYS_IN_A_WEEK; j++) {
-//                    String scheduleName = tmpRowData[j];
-//                    if (scheduleName != null) {
-//                        Schedule schedule = new Schedule(
-//                                lastStartTime.longValue() - timeZoneDeviation,
-//                                currStartTime.longValue() - timeZoneDeviation,
-//                                scheduleName);
-//                        tmpWeekList.get(j).add(schedule);
-//                    }
-//                }
 
-                LOGGER.info("读取到一条日程数据{}", JSON.toJSONString(rowData));
+                log.info("Read schedule data in this row: {}", JSON.toJSONString(rowData));
                 lastStartTime.set(currStartTime.longValue());
                 rowDataMap.put(0, rowData.getMondaySchedule());
                 rowDataMap.put(1, rowData.getTuesdaySchedule());
@@ -188,13 +181,12 @@ public class FileUtil {
 
     // write to new excel
     public static void writeResultToExcel(List<TimeRangeEvaluator> intersections) {
-//        String templateFileName = FileUtil.getPath() + File.separator + "output-template.xlsx";
         String outFileName = FileUtil.getPath() + "solution" + ".xlsx";
 
         EasyExcel.write(outFileName, RawSolutionRowData.class)
                 .head(head())
 //                .withTemplate(templateFileName)
-//                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
                 .sheet()
                 .doWrite(data(intersections));
     }
@@ -249,9 +241,9 @@ public class FileUtil {
     private static List<List<String>> head() {
         List<List<String>> list = new ArrayList<List<String>>();
         List<String> head0 = new ArrayList<String>();
-        head0.add("Start Time");
+        head0.add("Start Time (UTC+0)");
         List<String> head1 = new ArrayList<String>();
-        head1.add("End Time");
+        head1.add("End Time (UTC+0)");
         List<String> head2 = new ArrayList<String>();
         head2.add("Note");
         list.add(head0);

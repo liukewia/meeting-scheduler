@@ -4,7 +4,7 @@ import com.uofg.timescheduler.service.internal.TimeRange;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlgoUtil {
+public class AlgorithmUtil {
 
     public static void main(String[] args) {
         System.out.println(getSubsetCombination(5, 0));
@@ -18,7 +18,6 @@ public class AlgoUtil {
             num[i] = i + 1;
         }
 
-//        List<Integer> team = new ArrayList<Integer>();
         combine_dfs(-1, k, valueList, jud, n);
         return valueList;
     }

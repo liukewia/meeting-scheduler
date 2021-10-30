@@ -9,15 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.exception.OutOfRangeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Data
+@Log4j2
 //@Entity
 public class User {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(User.class);
 
     private Integer id;
     private String Name;
@@ -51,10 +50,10 @@ public class User {
         if (lowerCaseKey.equals("time zone")) {
             float temp;
             try {
-                temp = TimeUtil.normalizeTimeZone(value);
+                temp = TimeUtil.parseTimeZone(value);
                 this.setUTCTimeZone(temp); // The time zone deviation could be decimal numbers, like +10.5, -2.25.
             } catch (Exception e) {
-                LOGGER.error("Cannot set user's time zone!");
+                log.error("Cannot set user's time zone!");
                 e.printStackTrace();
             }
             return;
@@ -65,19 +64,19 @@ public class User {
                 return;
             }
             if (this.UTCTimeZone == null) {
-                LOGGER.error("UTC time zone of this user have not been set, cannot calibrate time!");
+                log.error("UTC time zone of this user have not been set, cannot calibrate time!");
                 return;
             }
             // restrict each preference to be a moment, not a time range for now.
             try {
                 this.getPreferences()
-                        .add(TimeUtil.normalizeMoment(value) - ((long) Math.round(this.UTCTimeZone * ONE_HOUR_MILLIS)));
+                        .add(TimeUtil.parseMoment(value) - ((long) Math.round(this.UTCTimeZone * ONE_HOUR_MILLIS)));
             } catch (Exception e) {
-                LOGGER.error("Cannot set user's time preferences!");
+                log.error("Cannot set user's time preferences!");
                 e.printStackTrace();
             }
             return;
         }
-        LOGGER.error("Unrecognized field with data key {} and value {} !", key, value);
+        log.error("Unrecognized field with data key {} and value {} !", key, value);
     }
 }

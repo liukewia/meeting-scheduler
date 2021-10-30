@@ -20,15 +20,12 @@ public class TimeRange {
         if (endTime < startTime) {
             throw new IllegalArgumentException("The end time is earlier than the start time!");
         }
-//        long baseTime = getCurrentWeekStartTime();
-//        if (isRelativeTime(startTime)) {
-//            startTime += baseTime;
-//        }
-//        if (isRelativeTime(endTime)) {
-//            endTime += baseTime;
-//        }
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new TimeRange(0, 64800000));
     }
 
     /**
@@ -48,10 +45,12 @@ public class TimeRange {
 
     @Override public String toString() {
         return "TimeRange{" +
-                "startTime= Day " + ((int) Math.floor(startTime / ONE_DAY_MILLIS) + 1) + " @ "
-                + (startTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS +
-                "; endTime= Day " + ((int) Math.floor(endTime / ONE_DAY_MILLIS) + 1) + " @ "
-                + (endTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS +
+                "startTime = Day " + ((int) startTime / ONE_DAY_MILLIS + 1) + " @ "
+                + (startTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
+                + (startTime % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60 +
+                "; endTime = Day " + ((int) endTime / ONE_DAY_MILLIS + 1) + " @ "
+                + (endTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
+                + (endTime % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60 +
                 '}';
     }
 }

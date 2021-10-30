@@ -47,7 +47,7 @@ public class TimeRangeEvaluator {
                 if (TimeUtil.isMomentInRange(preference, timeRange)) {
                     rating += (size - i) / sum
                             * weightForEachPerson
-                            // if close to end time, lower the rating.
+                            // if the current time is close to the end time, lower the rating.
                             * (timeRange.getEndTime() - preference) / timeRange.getLength();
 //                    System.err.println(this.timeRange);
 //                    System.err.println("people idx: " + peoplesPreferences.indexOf(preferencesOfEachPerson));
@@ -62,7 +62,9 @@ public class TimeRangeEvaluator {
         if (this.note == null) {
             this.note = "";
         }
-        this.note += String.join(", ", peopleNotAvailable) + " is not available for this slot.";
+        this.note += String.join(", ", peopleNotAvailable)
+                + " " + (peopleNotAvailable.size() > 1 ? "are" : "is")
+                + " not available for this slot.";
     }
 
     public void appendNotes(String s) {
