@@ -11,6 +11,23 @@
     <link rel="icon" href="<%= context.config.publicPath +'favicon.ico'%>" type="image/x-icon" />
   </head>
   <body>
+    <link
+      rel="stylesheet/less"
+      type="text/css"
+      href="<%= context.config.publicPath +'color.less'%>"
+    />
+    <script>
+      window.less = {
+        async: true,
+        env: 'development', // 'production'
+      };
+    </script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.7.2/less.min.js"
+    ></script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
     <!-- <noscript>
       <div class="noscript-container">
         Hi there! Please
