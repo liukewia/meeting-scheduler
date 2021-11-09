@@ -1,7 +1,15 @@
-<!-- remore i18n， only english -->
-上方header
-亮暗色 localstorage
-主题颜色更改 localstorage
+# umi project
 
-权限
-日程表移植
+## Getting Started
+
+Install dependencies,
+
+```bash
+$ yarn
+```
+
+Start the dev server,
+
+```bash
+$ yarn start
+```
