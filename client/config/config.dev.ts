@@ -1,0 +1,21 @@
+// https://umijs.org/config/
+import { defineConfig } from 'umi';
+
+export default defineConfig({
+  plugins: [
+    // https://github.com/zthxxx/react-dev-inspector
+    'react-dev-inspector/plugins/umi/react-inspector',
+  ],
+  // https://github.com/zthxxx/react-dev-inspector#inspector-loader-props
+  inspectorConfig: {
+    exclude: [],
+    babelPlugins: [],
+    babelOptions: {},
+  },
+  devServer: {
+    port: 7000,
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
+  },
+});

@@ -1,15 +1,22 @@
-# umi project
+<!-- remove i18n -->
+搭建antd 非pro layout
 
-## Getting Started
+全局初始数据
+https://pro.ant.design/zh-CN/docs/initial-state/
 
-Install dependencies,
+access
+https://pro.ant.design/zh-CN/docs/authority-management/
 
-```bash
-$ yarn
-```
+重建亮暗色切换
+https://github1s.com/mzohaibqc/antd-theme-generator/blob/master/examples/customize-cra/color.js
 
-Start the dev server,
+搭原来界面
 
-```bash
-$ yarn start
-```
+预估时间不够，所以用material ui的scheduler
+https://devexpress.github.io/devextreme-reactive/react/scheduler/demos/featured/data-editing/
+从另一本地仓库继续工作
+
+mui支持切换亮暗色，antd控制内层mui的亮暗色(theme provider)
+https://github.com/DevExpress/devextreme-reactive/blob/21f6b999d94ed9da47b25437368ae34378002f14/packages/dx-react-scheduler-demos/src/theme-sources/material-ui/demo-container.jsx
+
+https://codesandbox.io/s/pedantic-dhawan-rhoy0?file=/demo.js

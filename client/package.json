@@ -1,8 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "start": "umi dev",
-    "build": "umi build",
+    "colorize": "node color.js",
+    "start": "npm run colorize && umi dev",
+    "build": "rm -rf ./src/.umi && npm run colorize && umi build",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
     "test": "umi-test",
@@ -20,16 +21,21 @@
     ]
   },
   "dependencies": {
-    "antd": "4.16.13",
+    "antd": "^4.16.13",
+    "antd-theme-generator": "^1.2.10",
+    "babel-plugin-import": "^1.13.3",
     "react": "17.x",
+    "react-color": "^2.19.3",
     "react-dom": "17.x",
+    "react-responsive": "^9.0.0-beta.4",
     "umi": "^3.5.20"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@umijs/plugin-access": "^2.4.2",
-    "@umijs/plugin-antd": "^0.11.0",
+    "@umijs/plugin-initial-state": "^2.4.0",
+    "@umijs/plugin-model": "^2.6.1",
     "@umijs/test": "^3.5.20",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.0",

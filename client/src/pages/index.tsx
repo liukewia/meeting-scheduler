@@ -1,9 +1,15 @@
-import styles from './index.less';
+import 'antd/dist/antd.css';
+import Home from '@/pages/Home';
+import { ConfigProvider } from 'antd';
+import enUS from 'antd/lib/locale/en_US';
+import '@/../public/color.less';
 
-export default function IndexPage() {
+const IndexPage = () => {
   return (
-    <div>
-      <h1 className={styles.title}>Page index</h1>
-    </div>
+    <ConfigProvider locale={enUS}>
+      <Home />
+    </ConfigProvider>
   );
-}
+};
+
+export default IndexPage;
