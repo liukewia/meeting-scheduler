@@ -1,7 +1,14 @@
 <!-- remove i18n -->
-搭建antd 非pro layout
+<!-- 搭建antd 非pro layout -->
+
+搭建Pagecontainer
+搬settings
+
+header右侧填充 avatardropdown
+
 
 全局初始数据
+get intial state,如果未登录则调到login界面，无layout
 https://pro.ant.design/zh-CN/docs/initial-state/
 
 access

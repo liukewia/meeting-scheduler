@@ -1,0 +1,83 @@
+@import '~antd/es/style/themes/default.less';
+
+// replace default antd styles
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vertical-flex-center {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// fix the auto marginning of the image, so that it is centered.
+.ant-result-image {
+  margin: 0 auto 24px;
+}
+
+// former
+
+// .colorWeak {
+//   filter: invert(80%);
+// }
+
+:root {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  .ant-layout {
+    min-height: 100vh;
+  }
+
+  .ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+    left: unset;
+  }
+
+  canvas {
+    display: block;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+  }
+
+  @media (max-width: @screen-xs) {
+    .ant-table {
+      width: 100%;
+      overflow-x: auto;
+      &-thead > tr,
+      &-tbody > tr {
+        > th,
+        > td {
+          white-space: pre;
+          > span {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  // Compatible with IE11
+  @media screen and(-ms-high-contrast: active), (-ms-high-contrast: none) {
+    body .ant-design-pro > .ant-layout {
+      min-height: 100vh;
+    }
+  }
+}

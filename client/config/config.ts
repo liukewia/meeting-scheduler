@@ -7,6 +7,11 @@ import proxy from './proxy';
 import routes from './routes';
 const { REACT_APP_ENV } = process.env;
 export default defineConfig({
+  alias: {
+    public: '/public',
+    // service: '/src/services',
+    // constant: '/src/constants',
+  },
   hash: true,
   // locale: {
   //   default: 'en-US',
@@ -71,7 +76,7 @@ export default defineConfig({
         libraryDirectory: 'es',
         style: true,
       },
-    ]
+    ],
   ],
   lessLoader: {
     javascriptEnabled: true,

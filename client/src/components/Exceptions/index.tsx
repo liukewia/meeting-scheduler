@@ -59,6 +59,7 @@ const Exception404 = () => (
   //   }
   // />
   <Result
+    className="vertical-flex-center"
     status="404"
     title="404"
     subTitle="Sorry, the page you visited does not exist."
@@ -82,6 +83,7 @@ const Exception500 = () => (
   //   }
   // />
   <Result
+    className="vertical-flex-center"
     status="500"
     title="500"
     subTitle="Sorry, something went wrong."
@@ -111,7 +113,8 @@ const Exception403 = () => (
   //   }
   // />
   <Result
-    status="403"
+  className='vertical-flex-center'
+  status="403"
     title="403"
     subTitle="Sorry, you don't have access to this page."
     extra={

@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react';
-import ReactDOM from 'react-dom';
-// import 'antd/dist/antd.css';
+import React, { useContext, useState, Suspense, useEffect } from 'react';
 import { Layout, Menu, Breadcrumb } from 'antd';
+import { history, useModel } from 'umi';
 import {
   DesktopOutlined,
   PieChartOutlined,
@@ -11,14 +10,23 @@ import {
 } from '@ant-design/icons';
 import ThemeContext from '@/contexts/ThemeContext';
 import classNames from 'classnames';
-import { PREFIX_CLS } from '@/constants';
-import logoSrc from './logo.svg';
+import { LOGIN_PATH, REGISTER_PATH, PREFIX_CLS } from '@/constants';
+import logoSrc from 'public/logo.svg';
+import CenteredSpinner from '@/components/CenteredSpinner';
+import { Exception403 } from '@/components/Exceptions';
+import { stringify } from 'use-json-comparison';
+// import 'antd/dist/antd.css';
 import './index.less';
 
 const { Header, Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
+const Router = () => {
+  
+}
+
 export default () => {
+
   // used to control if logo and title should show
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -29,7 +37,7 @@ export default () => {
 
   return (
     <ThemeContext.Provider value={themeContext}>
-      <Layout style={{ minHeight: '100vh' }}>
+      <Layout>
         <Sider
           theme={theme}
           collapsible
@@ -67,12 +75,14 @@ export default () => {
           />
           {/* like ct dashboard 封装pagecontainer */}
           <Content style={{ margin: '16px 16px' }}>
-            <div
-              className="site-layout-background"
-              style={{ padding: 24, minHeight: 360 }}
-            >
-              Bill is a cat.
-            </div>
+            <Suspense fallback={<CenteredSpinner tip="loading" />}>
+              <div
+                className="site-layout-background"
+                style={{ padding: 24, minHeight: 360 }}
+              >
+                Bill is a cat.
+              </div>
+            </Suspense>
           </Content>
         </Layout>
       </Layout>

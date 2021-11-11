@@ -1065,10 +1065,10 @@ tr > .ant-picker-cell-in-view.ant-picker-cell-range-hover-start:last-child::afte
 .ant-mentions-dropdown-menu-item-active {background-color: @item-hover-bg;}
 .ant-menu-item-danger.ant-menu-item {color: #ff4d4f;}
 .ant-menu-item-danger.ant-menu-item:hover, .ant-menu-item-danger.ant-menu-item-active {color: #ff4d4f;}
-.ant-menu-item-danger.ant-menu-item:active {background: #fff1f0;}
+.ant-menu-item-danger.ant-menu-item:active {background: color(~`colorPalette("@{slider-dot-border-color-active}", 1)`);}
 .ant-menu-item-danger.ant-menu-item-selected {color: #ff4d4f;}
 .ant-menu-item-danger.ant-menu-item-selected > a, .ant-menu-item-danger.ant-menu-item-selected > a:hover {color: #ff4d4f;}
-.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-danger.ant-menu-item-selected {background-color: #fff1f0;}
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-danger.ant-menu-item-selected {background-color: color(~`colorPalette("@{slider-dot-border-color-active}", 1)`);}
 .ant-menu-inline .ant-menu-item-danger.ant-menu-item::after {border-right-color: #ff4d4f;}
 .ant-menu-dark .ant-menu-item-danger.ant-menu-item, .ant-menu-dark .ant-menu-item-danger.ant-menu-item:hover, .ant-menu-dark .ant-menu-item-danger.ant-menu-item > a {color: #ff4d4f;}
 .ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-danger.ant-menu-item-selected {color: #fff;background-color: #ff4d4f;}
@@ -1609,11 +1609,11 @@ tr.ant-table-expanded-row:hover > td {background: @table-expanded-row-bg;}
 .ant-tag-checkable:active, .ant-tag-checkable-checked {color: #fff;}
 .ant-tag-checkable-checked {background-color: @primary-color;}
 .ant-tag-checkable:active {background-color: color(~`colorPalette("@{primary-color}", 7)`);}
-.ant-tag-pink {color: #c41d7f;background: color(~`colorPalette("@{drawer-bg}", 1)`);border-color: #ffadd2;}
+.ant-tag-pink {color: #c41d7f;background: color(~`colorPalette("@{select-background}", 1)`);border-color: #ffadd2;}
 .ant-tag-pink-inverse {color: #fff;background: #eb2f96;border-color: #eb2f96;}
-.ant-tag-magenta {color: #c41d7f;background: color(~`colorPalette("@{drawer-bg}", 1)`);border-color: #ffadd2;}
+.ant-tag-magenta {color: #c41d7f;background: color(~`colorPalette("@{select-background}", 1)`);border-color: #ffadd2;}
 .ant-tag-magenta-inverse {color: #fff;background: #eb2f96;border-color: #eb2f96;}
-.ant-tag-red {color: #cf1322;background: #fff1f0;border-color: #ffa39e;}
+.ant-tag-red {color: #cf1322;background: color(~`colorPalette("@{slider-dot-border-color-active}", 1)`);border-color: #ffa39e;}
 .ant-tag-red-inverse {color: #fff;background: #f5222d;border-color: #f5222d;}
 .ant-tag-volcano {color: #d4380d;background: #fff2e8;border-color: #ffbb96;}
 .ant-tag-volcano-inverse {color: #fff;background: #fa541c;border-color: #fa541c;}
@@ -1621,7 +1621,7 @@ tr.ant-table-expanded-row:hover > td {background: @table-expanded-row-bg;}
 .ant-tag-orange-inverse {color: #fff;background: #fa8c16;border-color: #fa8c16;}
 .ant-tag-yellow {color: #d4b106;background: #feffe6;border-color: #fffb8f;}
 .ant-tag-yellow-inverse {color: #fff;background: #fadb14;border-color: #fadb14;}
-.ant-tag-gold {color: #d48806;background: color(~`colorPalette("@{select-multiple-item-disabled-border-color}", 1)`);border-color: #ffe58f;}
+.ant-tag-gold {color: #d48806;background: #fffbe6;border-color: #ffe58f;}
 .ant-tag-gold-inverse {color: #fff;background: #faad14;border-color: #faad14;}
 .ant-tag-cyan {color: #08979c;background: #e6fffb;border-color: #87e8de;}
 .ant-tag-cyan-inverse {color: #fff;background: #13c2c2;border-color: #13c2c2;}
@@ -1631,13 +1631,13 @@ tr.ant-table-expanded-row:hover > td {background: @table-expanded-row-bg;}
 .ant-tag-green-inverse {color: #fff;background: #52c41a;border-color: #52c41a;}
 .ant-tag-blue {color: #096dd9;background: #e6f7ff;border-color: #91d5ff;}
 .ant-tag-blue-inverse {color: #fff;background: #1890ff;border-color: #1890ff;}
-.ant-tag-geekblue {color: #1d39c4;background: color(~`colorPalette("@{menu-dark-inline-submenu-bg}", 1)`);border-color: #adc6ff;}
+.ant-tag-geekblue {color: #1d39c4;background: color(~`colorPalette("@{alert-success-icon-color}", 3)`);border-color: #adc6ff;}
 .ant-tag-geekblue-inverse {color: #fff;background: #2f54eb;border-color: #2f54eb;}
 .ant-tag-purple {color: #531dab;background: #f9f0ff;border-color: #d3adf7;}
 .ant-tag-purple-inverse {color: #fff;background: #722ed1;border-color: #722ed1;}
 .ant-tag-success {color: #52c41a;background: #f6ffed;border-color: #b7eb8f;}
 .ant-tag-processing {color: #1890ff;background: #e6f7ff;border-color: #91d5ff;}
-.ant-tag-error {color: #f5222d;background: #fff1f0;border-color: #ffa39e;}
+.ant-tag-error {color: #f5222d;background: color(~`colorPalette("@{slider-dot-border-color-active}", 1)`);border-color: #ffa39e;}
 .ant-tag-warning {color: #fa8c16;background: #fff7e6;border-color: #ffd591;}
 .ant-timeline {color: @text-color;}
 .ant-timeline-item-tail {border-left: 2px solid @timeline-color;}
@@ -1856,8 +1856,8 @@ a.ant-typography.ant-typography-disabled:hover, .ant-typography a.ant-typography
 .ant-upload-list-picture-card .ant-upload-list-item-uploading.ant-upload-list-item {background-color: @background-color-light;}
 .ant-upload-list .ant-upload-animate-inline-appear, .ant-upload-list .ant-upload-animate-inline-enter, .ant-upload-list .ant-upload-animate-inline-leave {animation-fill-mode: cubic-bezier(0.78, 0.14, 0.15, 0.86);}
 .theme-card .toggle {background: white;border: 1px solid #e8e8e8;}
-.ant-sider-shadow {box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);}
-.ant-sider-logo h1 {color: white;}
+.ant-layout-sider-light {box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);}
+.ant-layout-sider-logo h1 {color: @primary-color;}
 .site-layout-background {background: @component-background;}
 .ant-layout-header {background: @component-background !important;}
 .ant-layout-header-shadow {box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);}
@@ -1897,6 +1897,12 @@ body *::-webkit-scrollbar-thumb {background-color: #696969;border-radius: 10px;b
 .component-preview .colors .color-row .color-item.text-color-inverse {background: @text-color inverse;}
 .component-preview .colors .color-row .color-item.text-color-dark {background: @text-color dark;}
 .component-preview .colors .color-row .color-item.text-color-secondary-dark {background: @text-color-secondary dark;}
+.container {background: @layout-body-background;}
+.title {color: @heading-color;}
+.desc {color: @text-color-secondary;}
+.main .icon {color: rgba(0, 0, 0, 0.2);}
+.main .icon:hover {color: @primary-color;}
+.main .prefixIcon {color: @primary-color;}
 .dashboard {color: @text-color;}
 .secondary {color: @secondary-color;}
 .components .component-row .component-col .badge-square {border-radius: 4px;}
