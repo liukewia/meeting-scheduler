@@ -1,18 +1,25 @@
 @import '~antd/es/style/themes/default.less';
 
-@sider-prefix-cls: ~'@{ant-prefix}-sider';
+@sider-prefix-cls: ~'@{ant-prefix}-layout-sider';
 
 .@{sider-prefix-cls} {
   // only show in light mode
-  &-shadow {
+  &-light {
     box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
   }
+
+  // &.-collapsed {
+  //   .@{sider-prefix-cls}-logo {
+  //     padding: 16px 8px !important;
+  //   }
+  // }
 
   &-logo {
     position: relative;
     display: flex;
+    justify-content: center;
     align-items: center;
-    padding: 16px 16px;
+    padding: 16px 12px;
     cursor: pointer;
     transition: padding 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
@@ -21,6 +28,7 @@
       align-items: center;
       justify-content: center;
       min-height: 32px;
+      transition: color 0.3s;
     }
 
     img {
@@ -32,8 +40,8 @@
     h1 {
       display: inline-block;
       height: 32px;
-      margin: 0 0 0 12px;
-      color: white;
+      margin: 0 0 0 18px;
+      color: @primary-color;
       font-weight: 600;
       font-size: 18px;
       line-height: 32px;
@@ -48,9 +56,9 @@
     display: none;
     opacity: 0;
   }
-  80% {
-    display: none;
-    opacity: 0;
+  50% {
+    display: unset;
+    opacity: 0.5;
   }
   100% {
     display: unset;
