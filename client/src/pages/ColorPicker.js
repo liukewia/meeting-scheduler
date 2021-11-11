@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ChromePicker, SketchPicker } from 'react-color';
 
-const noop = () => { };
+const noop = () => {};
 
 const pickers = {
   chrome: ChromePicker,
@@ -13,7 +13,7 @@ export default class ColorPicker extends Component {
     onChange: noop,
     onChangeComplete: noop,
     position: 'bottom',
-  }
+  };
 
   constructor(props) {
     super();
@@ -101,8 +101,18 @@ export default class ColorPicker extends Component {
     ) : null;
 
     if (position === 'top') {
-      return <div>{picker}{swatch}</div>;
+      return (
+        <div>
+          {picker}
+          {swatch}
+        </div>
+      );
     }
-    return <div>{swatch}{picker}</div>;
+    return (
+      <div>
+        {swatch}
+        {picker}
+      </div>
+    );
   }
 }
