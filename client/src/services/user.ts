@@ -5,6 +5,7 @@ export async function queryCurrentUser(options?: { [key: string]: any }) {
     data: {
       name: 'finn',
       id: '0001',
+      role: 'admin',
     },
   };
   // return request('/api/user/current/', {

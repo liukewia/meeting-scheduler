@@ -22,12 +22,21 @@ export async function getInitialState(): Promise<{
 
   if (history.location.pathname !== LOGIN_PATH) {
     const currentUser = await fetchUserInfo();
+    // console.log('initialState: ', {
+    //   fetchUserInfo,
+    //   currentUser,
+    //   settings: {},
+    // });
     return {
       fetchUserInfo,
       currentUser,
       settings: {},
     };
   }
+  // console.log('initialState: ', {
+  //   fetchUserInfo,
+  //   settings: {},
+  // });
 
   return {
     fetchUserInfo,

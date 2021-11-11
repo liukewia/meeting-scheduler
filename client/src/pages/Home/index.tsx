@@ -21,13 +21,10 @@ import './index.less';
 const { Header, Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
-const Router = () => {
-  
-}
+const Router = () => {};
 
-export default () => {
-
-  // used to control if logo and title should show
+export default (props) => {
+  // to control if logo and title should show
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const themeContext = useContext(ThemeContext);
@@ -55,8 +52,11 @@ export default () => {
             </a>
             {!isCollapsed && <h1>Scheduler</h1>}
           </div>
-          <Menu theme={theme} defaultSelectedKeys={['setting']} mode="inline">
-            <Menu.Item key="setting" icon={<FileOutlined />}>
+          <Menu theme={theme} defaultSelectedKeys={['timetable']} mode="inline">
+            <Menu.Item key="timetable" icon={<FileOutlined />}>
+              Timetable
+            </Menu.Item>
+            <Menu.Item key="settings" icon={<FileOutlined />}>
               Settings
             </Menu.Item>
             <SubMenu key="1" icon={<TeamOutlined />} title="Team">
@@ -76,12 +76,7 @@ export default () => {
           {/* like ct dashboard 封装pagecontainer */}
           <Content style={{ margin: '16px 16px' }}>
             <Suspense fallback={<CenteredSpinner tip="loading" />}>
-              <div
-                className="site-layout-background"
-                style={{ padding: 24, minHeight: 360 }}
-              >
-                Bill is a cat.
-              </div>
+              {props.children}
             </Suspense>
           </Content>
         </Layout>
