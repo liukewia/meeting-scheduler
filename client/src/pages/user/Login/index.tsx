@@ -31,7 +31,9 @@ const Login: React.FC = (props) => {
   const [userLoginState, setUserLoginState] = useState<any>({});
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
-  // go to the redirect url if already logged in
+
+
+  // TODO go to the redirect url if already logged in
   useEffect(() => {
     if (
       initialState?.currentUser?.access === 'admin' ||

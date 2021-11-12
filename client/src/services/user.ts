@@ -1,5 +1,8 @@
 /** getuserinfo GET /api/currentUser */
 export async function queryCurrentUser(options?: { [key: string]: any }) {
+  // debug
+  // return null;
+
   return {
     success: true,
     data: {

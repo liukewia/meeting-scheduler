@@ -1,6 +1,6 @@
 @import '~antd/es/style/themes/default.less';
 
-// replace default antd styles
+// new styles, i.e. not overriding existing ones
 
 .flex-center {
   display: flex;
@@ -16,18 +16,20 @@
   justify-content: center;
 }
 
-// fix the auto marginning of the image, so that it is centered.
-.ant-result-image {
-  margin: 0 auto 24px;
-}
-
-// former
-
-// .colorWeak {
-//   filter: invert(80%);
-// }
-
 :root {
+  // replace default antd styles
+
+  // fix the auto marginning of the image, so that it is centered.
+  .ant-result-image {
+    margin: 0 auto 24px;
+  }
+
+  // former
+
+  // .colorWeak {
+  //   filter: invert(80%);
+  // }
+
   html,
   body,
   #root {

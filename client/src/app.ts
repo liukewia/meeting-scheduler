@@ -1,6 +1,15 @@
-import { history, Link, useModel } from 'umi';
+import { history } from 'umi';
 import { queryCurrentUser } from '@/services/user';
-import { LOGIN_PATH } from '@/constants';
+import {
+  LOGIN_PATH,
+  SessionStorageItems,
+  SiderOpenedKey,
+  SiderSelectedKey,
+} from '@/constants';
+import {
+  initSiderOpenedKeys,
+  initSiderSelectedKeys,
+} from './utils/model/siderUtils';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -10,6 +19,10 @@ export async function getInitialState(): Promise<{
   currentUser?: any;
   fetchUserInfo?: () => Promise<any>;
 }> {
+  // set initial selected keys and opened keys in sider.
+  initSiderSelectedKeys();
+  initSiderOpenedKeys();
+
   const fetchUserInfo = async () => {
     try {
       const msg = await queryCurrentUser();

@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "colorize": "node color.js",
-    "start": "npm run colorize && umi dev",
+    "dev": "rm -rf ./src/.umi && npm run colorize && umi dev",
     "build": "rm -rf ./src/.umi && npm run colorize && umi build",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
@@ -21,7 +21,7 @@
     ]
   },
   "dependencies": {
-    "@umijs/plugin-request": "^2.8.0",
+    "@ahooksjs/use-request": "^3.0.0-alpha.0",
     "antd": "^4.16.13",
     "antd-theme-generator": "^1.2.10",
     "babel-plugin-import": "^1.13.3",
@@ -30,16 +30,22 @@
     "react-color": "^2.19.3",
     "react-dom": "17.x",
     "react-responsive": "^9.0.0-beta.4",
-    "umi": "^3.5.20",
-    "use-json-comparison": "^1.0.6"
+    "umi": "^3.5.20"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.0.0",
     "@umijs/plugin-access": "^2.4.2",
     "@umijs/plugin-initial-state": "^2.4.0",
     "@umijs/plugin-model": "^2.6.1",
     "@umijs/test": "^3.5.20",
+    "eslint": "^7.5.0",
+    "eslint-plugin-modules-newline": "0.0.6",
+    "eslint-plugin-newline-destructuring": "^1.0.0",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^4.0.8",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.0",
     "typescript": "^4.1.2",
