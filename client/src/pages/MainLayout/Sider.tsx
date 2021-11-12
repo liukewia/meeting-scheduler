@@ -1,4 +1,4 @@
-import { useContext, useState, Suspense, useMemo } from 'react';
+import { useContext, useState, Suspense, useMemo, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
 import { Link, history, useModel } from 'umi';
 import {
@@ -9,30 +9,29 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import logoSrc from 'public/logo.svg';
-import CenteredSpinner from '@/components/CenteredSpinner';
-import { SiderOpenedKey } from '@/constants';
+import { initSider } from '@/utils/model/siderUtils';
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
-const siderItems = [
+export const siderItems = [
   {
     key: 'home',
     icon: HomeOutlined,
     label: 'Home',
-    href: '/home',
+    path: '/home',
   },
   {
     key: 'timetable',
     icon: CalendarOutlined,
     label: 'My Timetable',
-    href: '/timetable',
+    path: '/timetable',
   },
   {
     key: 'newmeeting',
     icon: TeamOutlined,
     label: 'New Meeting',
-    href: '/newmeeting',
+    path: '/newmeeting',
   },
   {
     key: 'settings',
@@ -41,12 +40,12 @@ const siderItems = [
     children: [
       {
         key: 'settings-site',
-        href: '/settings/site',
+        path: '/settings/site',
         label: 'Site Settings',
       },
       {
         key: 'settings-etc',
-        href: '/settings/etc',
+        path: '/settings/etc',
         label: 'etc',
       },
     ],
@@ -57,13 +56,13 @@ const siderItems = [
     label: 'Settings2',
     children: [
       {
-        key: 'settings-site2',
-        href: '/settings/site2',
+        key: 'settings2-site2',
+        path: '/settings2/site2',
         label: 'Site Settings2',
       },
       {
-        key: 'settings-etc2',
-        href: '/settings/etc2',
+        key: 'settings2-etc2',
+        path: '/settings2/etc2',
         label: 'etc2',
       },
     ],
@@ -88,8 +87,23 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
 
   const openedKeysMemo = useMemo(() => {
     if (isCollapsed) {
-      // if the sider is collapsed, remember the last opened keys, and
+      if (!getOpenedKeys()) {
+        initSider(history?.location?.pathname, siderItems);
+      }
+      // if the sider is collapsed, remember the last opened keys
       return getOpenedKeys();
+    }
+  }, [isCollapsed]);
+
+  useEffect(() => {
+    if (isCollapsed) {
+      // if the sider is collapsed, remember the last opened keys
+      if (!getOpenedKeys()) {
+        initSider(history?.location?.pathname, siderItems);
+      }
+      // if the sider is collapsed, remember the last opened keys
+      getOpenedKeys();
+
     }
   }, [isCollapsed]);
 
@@ -122,9 +136,9 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
       <Menu
         mode="inline"
         theme={theme}
-        defaultSelectedKeys={getSelectedKeys()}
+        defaultSelectedKeys={getSelectedKeys() || []}
         // selectedKeys={selectedKeys}
-        defaultOpenKeys={getOpenedKeys()}
+        defaultOpenKeys={getOpenedKeys() || []}
         // openKeys={openedKeys}
         onOpenChange={(newKeys) => setOpenedKeys(newKeys)}
         // overflowedIndicator={<EllipsisOutlined />}
@@ -138,7 +152,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
                     key={subItem.key}
                     onClick={({ key }) => setSelectedKeys([key])}
                   >
-                    <Link to={subItem.href}>{subItem.label}</Link>
+                    <Link to={subItem.path}>{subItem.label}</Link>
                   </Menu.Item>
                 ))}
               </SubMenu>
@@ -150,7 +164,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
                 icon={<item.icon />}
                 onClick={({ key }) => setSelectedKeys([key])}
               >
-                <Link to={item.href}>{item.label}</Link>
+                <Link to={item.path}>{item.label}</Link>
               </Menu.Item>
             );
           }
