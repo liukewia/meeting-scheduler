@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "colorize": "node color.js",
+    "colorize": "node config/colorize.js",
     "dev": "rm -rf ./src/.umi && npm run colorize && umi dev",
     "build": "rm -rf ./src/.umi && npm run colorize && umi build",
     "postinstall": "umi generate tmp",

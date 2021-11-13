@@ -101,7 +101,6 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
     appTheme: model.appTheme,
   }));
 
-  // console.log('isCollapsed: ', isCollapsed);
   return (
     <Sider
       theme={appTheme}
@@ -110,15 +109,10 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
       collapsedWidth={47}
       onCollapse={(bool) => {
         if (!bool) {
-          setTimeout(() => {
-            setOpenedKeys(memoizedOpenedKeys || []);
-          });
+          setTimeout(() => setOpenedKeys(memoizedOpenedKeys || []));
         }
         setIsCollapsed(bool);
       }}
-      // className={classNames({
-      //   [`${siderPrefixCls}-light`]: isLightTheme,
-      // })}
     >
       <div
         className={`${siderPrefixCls}-logo`}
@@ -137,7 +131,6 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
         defaultOpenKeys={initOpenedKeys}
         openKeys={openedKeys}
         onOpenChange={setOpenedKeys}
-        // overflowedIndicator={<EllipsisOutlined />}
       >
         {siderItems.map((item) => {
           if (item.children) {

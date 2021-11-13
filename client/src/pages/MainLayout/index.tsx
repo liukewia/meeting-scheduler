@@ -30,14 +30,9 @@ export default (props) => {
             [`${PREFIX_CLS}-layout-header-shadow`]: isLightTheme,
           })}
         />
-        {/* like ct dashboard 封装pagecontainer */}
         <Content style={{ margin: '16px 16px' }}>
           <Suspense fallback={<CenteredSpinner tip="loading" />}>
             {props.children}
-            {/* <PageHeader ghost={false} title="活动列表" />
-            <Space direction="vertical" size="middle">
-              {props.children}
-            </Space> */}
           </Suspense>
         </Content>
       </Layout>

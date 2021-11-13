@@ -35,4 +35,4 @@ server/*.ipr
 ### VS Code ###
 .vscode/
 
-client/public/color.less
+/client/public/color.less

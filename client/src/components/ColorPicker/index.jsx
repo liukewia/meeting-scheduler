@@ -72,6 +72,8 @@ export default class ColorPicker extends Component {
       },
       wrapper: {
         position: 'inherit',
+        top: '20px',
+        left: '-60px',
         zIndex: '100',
       },
     };
@@ -109,7 +111,7 @@ export default class ColorPicker extends Component {
       );
     }
     return (
-      <div>
+      <div className="flex-center">
         {swatch}
         {picker}
       </div>
