@@ -1,12 +1,8 @@
 export const PREFIX_CLS = 'ant';
 export const LOGIN_PATH = '/user/login';
-export const SIGN_UP_PATH = 'user/signup';
+export const SIGN_UP_PATH = '/user/signup';
 
-// achieve O(1) searching time in time complexity
-export const UN_AUTH_PATHS: { [key: string]: true } = {
-  [LOGIN_PATH]: true,
-  [SIGN_UP_PATH]: true,
-};
+export const UN_AUTH_PATHS = [LOGIN_PATH, SIGN_UP_PATH];
 
 export enum SessionStorageItems {
   SiderSelectedKey = 'sider-selected-keys',

@@ -1,64 +1,68 @@
-// https://umijs.org/zh-CN/docs/routing#wrappers
-
-const wrappers = ['@/wrappers/auth'];
 export default [
+  // no layout wrapped
   {
-    path: '/',
+    path: '/login',
     exact: true,
-    // the value redirected to is relative URL, not the relative PATH of components
-    redirect: '/home',
+    redirect: '/user/login',
   },
   {
-    path: '/home',
+    path: '/signup',
     exact: true,
-    component: './Home',
-    wrappers,
-  },
-  {
-    path: '/timetable',
-    exact: true,
-    component: './Timetable',
-    wrappers,
-  },
-  {
-    path: '/newmeeting',
-    exact: true,
-    component: './NewMeeting',
-    wrappers,
-  },
-  {
-    path: '/settings/site',
-    exact: true,
-    component: './SiteSettings',
-    wrappers,
+    redirect: '/user/signup',
   },
   {
     path: '/user',
-    exact: false,
-    // layout: false,
     routes: [
       {
         path: '/user/login',
-        // layout: false,
-        // name: 'Login',
+        exact: true,
         component: './user/Login',
       },
       {
         path: '/user/signup',
-        // layout: false,
-        // name: 'Sign Up',
+        exact: true,
         component: './user/SignUp',
       },
       {
-        component: './user/Login',
+        // component: './user/Login',
+        redirect: '/user/login',
       },
     ],
   },
+  // has layout wrapped
   {
-    // All illegal routes goes here
-    component: '@/components/Exceptions/404',
-    // the wrappers here mean that, a user that has not logged in need to log in to see the 404 page, otherwise, it jumps to login page.
-    // on the other hand, the 404 page is wrapped with the Main Layout if a user logged in.
-    wrappers,
+    path: '/',
+    component: '@/layouts/index',
+    // the value redirected to is relative URL, not the relative PATH of components
+    // redirect: '/home',
+    routes: [
+      { exact: true, path: '/', redirect: '/home' },
+      {
+        path: '/home',
+        exact: true,
+        component: './Home',
+      },
+      {
+        path: '/timetable',
+        exact: true,
+        component: './Timetable',
+      },
+      {
+        path: '/newmeeting',
+        exact: true,
+        component: './NewMeeting',
+      },
+      {
+        path: '/settings/site',
+        exact: true,
+        component: './SiteSettings',
+      },
+      {
+        // All illegal routes goes here
+        component: '@/components/Exceptions/404',
+        // the wrappers here mean that, a user that has not logged in need to log in to see the 404 page, otherwise, it jumps to login page.
+        // on the other hand, the 404 page is wrapped with the Main Layout if a user logged in.
+      },
+    ],
   },
 ];

@@ -1,15 +1,13 @@
-import { useContext, useState, Suspense, useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { Link, history, useModel } from 'umi';
 import {
-  EllipsisOutlined,
   HomeOutlined,
   CalendarOutlined,
   TeamOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import logoSrc from 'public/logo.svg';
-import { initSider } from '@/utils/model/siderUtils';
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -70,42 +68,49 @@ export const siderItems = [
 ];
 
 export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
-  // make this a controlled component to control if logo and title should show, and misc selected keys...
-  const {
-    isCollapsed,
-    setIsCollapsed,
-    getSelectedKeys,
-    setSelectedKeys,
-    getOpenedKeys,
-    setOpenedKeys,
-  } = useModel('sider');
+  // make this a controlled component to control if logo and title should show
+  const { isCollapsed, setIsCollapsed } = useModel('sider');
+
+  const { initSelectedKeys, initOpenedKeys } = useMemo(() => {
+    const initSelectedKeys: string[] = [];
+    const initOpenedKeys: string[] = [];
+    const pathname = history.location.pathname.replace(/\/$/, '');
+    const match = (routes: any) =>
+      routes.some((item: any) => {
+        if (item.children) {
+          return match(item.children);
+        }
+        return item.path === pathname;
+      });
+    if (!match(siderItems)) {
+      return { initSelectedKeys, initOpenedKeys };
+    }
+    const tmp = pathname.split('/').filter((e) => e !== '');
+    const selectedKey = tmp.join('-');
+    initSelectedKeys.push(selectedKey);
+    const superOpenedKey = tmp.slice(0, tmp.length - 1);
+    if (superOpenedKey.length) {
+      initOpenedKeys.push(superOpenedKey.join('/'));
+    }
+    return { initSelectedKeys, initOpenedKeys };
+  }, [history.location.pathname]);
+
+  // two controlled values
+  const [selectedKeys, setSelectedKeys] = useState(initSelectedKeys);
+  const [openedKeys, setOpenedKeys] = useState(initOpenedKeys);
+
+  useEffect(() => {
+    setSelectedKeys(initSelectedKeys);
+  }, [initSelectedKeys]);
+
+  useEffect(() => {
+    setOpenedKeys(initOpenedKeys);
+  }, [initOpenedKeys]);
 
   const { theme, isLightTheme } = useModel('theme', (model) => ({
     theme: model.theme,
     isLightTheme: model.isLightTheme,
   }));
-
-  const openedKeysMemo = useMemo(() => {
-    if (isCollapsed) {
-      if (!getOpenedKeys()) {
-        initSider(history?.location?.pathname, siderItems);
-      }
-      // if the sider is collapsed, remember the last opened keys
-      return getOpenedKeys();
-    }
-  }, [isCollapsed]);
-
-  useEffect(() => {
-    if (isCollapsed) {
-      // if the sider is collapsed, remember the last opened keys
-      if (!getOpenedKeys()) {
-        initSider(history?.location?.pathname, siderItems);
-      }
-      // if the sider is collapsed, remember the last opened keys
-      getOpenedKeys();
-
-    }
-  }, [isCollapsed]);
 
   // console.log('isCollapsed: ', isCollapsed);
   return (
@@ -114,12 +119,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
       collapsible
       collapsed={isCollapsed}
       collapsedWidth={47}
-      onCollapse={(bool) => {
-        setIsCollapsed(bool);
-        if (!bool) {
-          setOpenedKeys(openedKeysMemo);
-        }
-      }}
+      onCollapse={setIsCollapsed}
       // className={classNames({
       //   [`${siderPrefixCls}-light`]: isLightTheme,
       // })}
@@ -136,11 +136,11 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
       <Menu
         mode="inline"
         theme={theme}
-        defaultSelectedKeys={getSelectedKeys() || []}
-        // selectedKeys={selectedKeys}
-        defaultOpenKeys={getOpenedKeys() || []}
-        // openKeys={openedKeys}
-        onOpenChange={(newKeys) => setOpenedKeys(newKeys)}
+        defaultSelectedKeys={initSelectedKeys}
+        selectedKeys={selectedKeys}
+        defaultOpenKeys={initOpenedKeys}
+        openKeys={openedKeys}
+        onOpenChange={setOpenedKeys}
         // overflowedIndicator={<EllipsisOutlined />}
       >
         {siderItems.map((item) => {

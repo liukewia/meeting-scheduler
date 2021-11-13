@@ -1,7 +1,10 @@
 /** getuserinfo GET /api/currentUser */
 export async function queryCurrentUser(options?: { [key: string]: any }) {
-  // debug
-  // return null;
+  // will throw 404 error if not logged in,
+  // return {
+  //   success: false,
+  //   data: {},
+  // };
 
   return {
     success: true,
@@ -11,6 +14,7 @@ export async function queryCurrentUser(options?: { [key: string]: any }) {
       role: 'admin',
     },
   };
+
   // return request('/api/user/current/', {
   //   method: 'GET',
   //   ...(options || {}),
