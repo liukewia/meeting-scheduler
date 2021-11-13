@@ -16,18 +16,15 @@ const LayoutWrapper = ({
   const isUnAuthPaths = matchPath(pathname, {
     path: UN_AUTH_PATHS,
   });
-  console.log(1);
   // if is login / signup page, go to them directly.
   if (isUnAuthPaths) {
     return <>{children}</>;
   }
-  console.log(12);
   // not un-auth paths, but the user also has not logged in, e.g. an unauth user wants to go to homepage.
   if (!isUnAuthPaths && !initialState?.currentUser?.id) {
     // jump to login page
     return <Redirect to="/user/login" />;
   }
-  console.log(14);
 
   // else, the user has logged in.
   return <MainLayout>{children}</MainLayout>;

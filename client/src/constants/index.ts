@@ -21,5 +21,4 @@ export enum SiderSelectedKey {
 // multiple submenu keys can be opened at a time
 export enum SiderOpenedKey {
   Settings = 'settings',
-  Settings2 = 'settings2',
 }

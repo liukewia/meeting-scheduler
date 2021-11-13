@@ -28,25 +28,20 @@ export async function getInitialState(): Promise<{
     })
   ) {
     const currentUser = await fetchUserInfo();
-    console.log(22, currentUser);
     console.log('initialState: ', {
       fetchUserInfo,
       currentUser,
       settings: {},
     });
-    console.log(24);
     if (currentUser?.id === undefined) {
-      console.log(27);
       history.push(LOGIN_PATH);
     }
-    console.log(29);
     return {
       fetchUserInfo,
       currentUser,
       settings: {},
     };
   }
-  console.log(26);
   console.log('initialState: ', {
     fetchUserInfo,
     settings: {},

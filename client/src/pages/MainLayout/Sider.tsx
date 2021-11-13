@@ -42,26 +42,9 @@ export const siderItems = [
         label: 'Site Settings',
       },
       {
-        key: 'settings-etc',
-        path: '/settings/etc',
-        label: 'etc',
-      },
-    ],
-  },
-  {
-    key: 'settings2',
-    icon: SettingOutlined,
-    label: 'Settings2',
-    children: [
-      {
-        key: 'settings2-site2',
-        path: '/settings2/site2',
-        label: 'Site Settings2',
-      },
-      {
-        key: 'settings2-etc2',
-        path: '/settings2/etc2',
-        label: 'etc2',
+        key: 'settings-accont',
+        path: '/settings/account',
+        label: 'Account Settings',
       },
     ],
   },
@@ -99,6 +82,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
   const [selectedKeys, setSelectedKeys] = useState(initSelectedKeys);
   const [openedKeys, setOpenedKeys] = useState(initOpenedKeys);
 
+  // on reload by url
   useEffect(() => {
     setSelectedKeys(initSelectedKeys);
   }, [initSelectedKeys]);
@@ -107,19 +91,31 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
     setOpenedKeys(initOpenedKeys);
   }, [initOpenedKeys]);
 
-  const { theme, isLightTheme } = useModel('theme', (model) => ({
-    theme: model.theme,
-    isLightTheme: model.isLightTheme,
+  const memoizedOpenedKeys = useMemo(() => {
+    if (isCollapsed) {
+      return openedKeys;
+    }
+  }, [isCollapsed]);
+
+  const { appTheme } = useModel('theme', (model) => ({
+    appTheme: model.appTheme,
   }));
 
   // console.log('isCollapsed: ', isCollapsed);
   return (
     <Sider
-      theme={theme}
+      theme={appTheme}
       collapsible
       collapsed={isCollapsed}
       collapsedWidth={47}
-      onCollapse={setIsCollapsed}
+      onCollapse={(bool) => {
+        if (!bool) {
+          setTimeout(() => {
+            setOpenedKeys(memoizedOpenedKeys || []);
+          });
+        }
+        setIsCollapsed(bool);
+      }}
       // className={classNames({
       //   [`${siderPrefixCls}-light`]: isLightTheme,
       // })}
@@ -135,7 +131,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
       </div>
       <Menu
         mode="inline"
-        theme={theme}
+        theme={appTheme}
         defaultSelectedKeys={initSelectedKeys}
         selectedKeys={selectedKeys}
         defaultOpenKeys={initOpenedKeys}

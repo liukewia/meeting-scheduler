@@ -36,7 +36,11 @@ export default [
     // the value redirected to is relative URL, not the relative PATH of components
     // redirect: '/home',
     routes: [
-      { exact: true, path: '/', redirect: '/home' },
+      {
+        path: '/',
+        exact: true,
+        redirect: '/home',
+      },
       {
         path: '/home',
         exact: true,
@@ -53,15 +57,26 @@ export default [
         component: './NewMeeting',
       },
       {
-        path: '/settings/site',
-        exact: true,
-        component: './SiteSettings',
+        path: '/settings',
+        routes: [
+          {
+            path: '/settings/site',
+            exact: true,
+            component: './settings/SiteSettings',
+          },
+          {
+            path: '/settings/account',
+            exact: true,
+            component: './settings/AccountSettings',
+          },
+          {
+            redirect: '/home',
+          },
+        ],
       },
       {
         // All illegal routes goes here
         component: '@/components/Exceptions/404',
-        // the wrappers here mean that, a user that has not logged in need to log in to see the 404 page, otherwise, it jumps to login page.
-        // on the other hand, the 404 page is wrapped with the Main Layout if a user logged in.
       },
     ],
   },
