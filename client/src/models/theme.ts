@@ -34,8 +34,10 @@ export default () => {
       ...(isLightTheme ? lightVars : darkVars),
       ...customColors,
     };
-    window.less.modifyVars(newVars).catch((error) => {
-      message.error(`Failed to init theme`);
+    setTimeout(() => {
+      window.less.modifyVars(newVars).catch((error) => {
+        message.error(`Failed to init theme`);
+      });
     });
   }, []);
 
@@ -49,7 +51,6 @@ export default () => {
     window.less.modifyVars(next).catch((error) => {
       message.error(`Failed to update theme`);
     });
-    setCustomColors(customColors);
   }, [appTheme]);
 
   useUpdateEffect(() => {
