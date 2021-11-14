@@ -42,7 +42,7 @@ export const siderItems = [
         label: 'Site Settings',
       },
       {
-        key: 'settings-accont',
+        key: 'settings-account',
         path: '/settings/account',
         label: 'Account Settings',
       },
@@ -54,6 +54,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
   // make this a controlled component to control if logo and title should show
   const { isCollapsed, setIsCollapsed } = useModel('sider');
 
+  // get correct selected keys and opened keys when opening an url
   const { initSelectedKeys, initOpenedKeys } = useMemo(() => {
     const initSelectedKeys: string[] = [];
     const initOpenedKeys: string[] = [];
@@ -113,6 +114,8 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
         }
         setIsCollapsed(bool);
       }}
+      // https://chinese.freecodecamp.org/news/fixed-side-and-bottom-navbar-with-css-flexbox/
+      style={{ overflowY: 'scroll' }}
     >
       <div
         className={`${siderPrefixCls}-logo`}

@@ -54,9 +54,17 @@ export default () => {
       '@white': '#fff',
       '@black': '#000',
     };
-    window.less.modifyVars(next).catch((error) => {
-      message.error(`Failed to update theme`);
-    });
+
+    // window.less.modifyVars(next).catch((error) => {
+    //   message.error(`Failed to update theme`);
+    // });
+
+    requestIdleCallback(() =>
+      window.less.modifyVars(next).catch((error) => {
+        message.error(`Failed to update theme`);
+      }),
+    );
+
     localStorage.setItem('app-theme', appTheme);
     localStorage.setItem('app-colors', JSON.stringify(customColors));
   }, [appTheme]);
@@ -80,16 +88,25 @@ export default () => {
       ...prev,
       ...customColors,
     };
-    window.less.modifyVars(next).catch((error) => {
-      message.error(`Failed to update custom colors`);
-    });
+
+    // window.less.modifyVars(next).catch((error) => {
+    //   message.error(`Failed to update custom colors`);
+    // });
+
+    requestIdleCallback(() =>
+      window.less.modifyVars(next).catch((error) => {
+        message.error(`Failed to update custom colors`);
+      }),
+    );
     localStorage.setItem('app-colors', JSON.stringify(customColors));
   }, [customColors]);
 
   const resetAllThemes = useCallback(() => {
-    window.less.modifyVars(lightVars).catch((error) => {
-      message.error(`Failed to reset theme`);
-    });
+    requestIdleCallback(() =>
+      window.less.modifyVars(lightVars).catch((error) => {
+        message.error(`Failed to reset theme`);
+      }),
+    );
     localStorage.setItem('app-theme', 'light');
     localStorage.setItem('app-colors', '{}');
     setAppTheme('light');

@@ -3,6 +3,13 @@
 @sider-prefix-cls: ~'@{ant-prefix}-layout-sider';
 
 .@{sider-prefix-cls} {
+  // overflow: auto;
+  // height: 100vh;
+  // position: fixed;
+  // left: 0;
+  z-index: 3;
+
+
   // only show in light mode
   &-light {
     box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
@@ -66,24 +73,25 @@
   }
 }
 
-@global-header-prefix-cls: ~'@{ant-prefix}-layout-header';
-@nav-header-height: 48px;
-@header-box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-
 .site-layout-background {
   background: @component-background;
 }
 
-.@{global-header-prefix-cls} {
-  height: @nav-header-height !important;
-  padding: 0 16px !important;
-  background: @component-background !important;
+// @global-header-prefix-cls: ~'@{ant-prefix}-layout-header';
+// @nav-header-height: 48px;
+// @header-box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
-  // only show in light mode
-  &-shadow {
-    box-shadow: @header-box-shadow;
-  }
-}
+
+// .@{global-header-prefix-cls} {
+//   height: @nav-header-height !important;
+//   padding: 0 16px !important;
+//   background: @component-background !important;
+
+//   // only show in light mode
+//   &-shadow {
+//     box-shadow: @header-box-shadow;
+//   }
+// }
 
 // .@{ant-prefix}-global-header-shadow {
 //   box-shadow: @header-box-shadow;

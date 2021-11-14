@@ -1,5 +1,5 @@
-import { useState, Suspense } from 'react';
-import { Layout, PageHeader, Space } from 'antd';
+import { Suspense } from 'react';
+import { Layout } from 'antd';
 import { useModel } from 'umi';
 
 import classNames from 'classnames';
@@ -20,17 +20,17 @@ export default (props) => {
   const siderPrefixCls = `${PREFIX_CLS}-layout-sider`;
 
   return (
-    <Layout>
+    <Layout style={{ overflow: 'hidden', height: '100vh' }}>
       <Sider siderPrefixCls={siderPrefixCls} />
 
-      <Layout>
+      <Layout style={{ overflowY: 'scroll' }}>
         <Header
           className={classNames({
             [`${PREFIX_CLS}-layout-header`]: true,
-            [`${PREFIX_CLS}-layout-header-shadow`]: isLightTheme,
+            [`${PREFIX_CLS}-layout-header-light`]: isLightTheme,
           })}
         />
-        <Content style={{ margin: '16px 16px' }}>
+        <Content>
           <Suspense fallback={<CenteredSpinner tip="loading" />}>
             {props.children}
           </Suspense>

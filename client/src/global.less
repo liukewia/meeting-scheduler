@@ -19,16 +19,28 @@
 :root {
   // replace default antd styles
 
-  // fix the auto marginning of the image, so that it is centered.
+  // override the auto marginning of the image, so that the result component is vertically centered.
   .ant-result-image {
     margin: 0 auto 24px;
   }
+  @global-header-prefix-cls: ~'@{ant-prefix}-layout-header';
+  @nav-header-height: 48px;
+  @header-box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
-  // former
+  .@{global-header-prefix-cls} {
+    height: @nav-header-height;
+    padding: 0 16px;
+    // background: #141414;
+    z-index: 2;
 
-  // .colorWeak {
-  //   filter: invert(80%);
-  // }
+    // only show in light mode
+    &-light {
+      background: @layout-sider-background-light;
+      box-shadow: @header-box-shadow;
+    }
+  }
+
+  // defaults:
 
   html,
   body,
