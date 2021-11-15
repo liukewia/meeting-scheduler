@@ -9,7 +9,7 @@ type ThemeTypes = 'light' | 'dark';
 function normRawTheme(rawStr: string) {
   return (['light', 'dark'].includes(rawStr) ? rawStr : 'light') as ThemeTypes;
 }
-
+// https://beta-pro.ant.design/docs/simple-model-cn
 export default () => {
   const [appTheme, setAppTheme] = useLocalStorageState<ThemeTypes>(
     'app-theme',

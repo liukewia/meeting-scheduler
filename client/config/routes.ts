@@ -49,7 +49,7 @@ export default [
       {
         path: '/timetable',
         exact: true,
-        component: './Timetable',
+        component: './MyTimetable',
       },
       {
         path: '/newmeeting',

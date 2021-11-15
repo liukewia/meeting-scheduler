@@ -2,6 +2,7 @@ import { Button, Card, Col, Form, PageHeader, Row, Select } from 'antd';
 import { useModel } from 'umi';
 import ColorPicker from '@/components/ColorPicker';
 import { SpacedContainer } from '@/components/SpacedContainer';
+import moment from 'moment';
 
 const Option = Select.Option;
 
@@ -66,11 +67,16 @@ export default function SiteSettings() {
       </Col>
     </Row>
   );
+//   appointmentData:
+//       endDate: Wed Jun 27 2018 00:00:00 GMT+0800 (China Standard Time) {}
+//       id: 34
+//       location: "Room 1"
+//       startDate: Tue Jun 26 2018 00:00:00 GMT+0800 (China Standard Time) {}
+//       title: "Book Flights to San Fran for Sales Trip"
 
   const colorPickers = colorPickerOptions.map((varName) =>
     getColorPicker(varName),
   );
-
   return (
     <>
       <PageHeader ghost={false} title="Site Settings" />
