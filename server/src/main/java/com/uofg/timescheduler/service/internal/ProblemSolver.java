@@ -1,8 +1,8 @@
 package com.uofg.timescheduler.service.internal;
 
-import com.uofg.timescheduler.utils.AlgorithmUtil;
-import com.uofg.timescheduler.utils.FileUtil;
-import com.uofg.timescheduler.utils.TimeUtil;
+import com.uofg.timescheduler.util.AlgorithmUtil;
+import com.uofg.timescheduler.util.FileUtil;
+import com.uofg.timescheduler.util.TimeUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

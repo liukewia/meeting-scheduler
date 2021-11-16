@@ -2,7 +2,9 @@ export const PREFIX_CLS = 'ant';
 export const LOGIN_PATH = '/user/login';
 export const SIGN_UP_PATH = '/user/signup';
 
-export const UN_AUTH_PATHS = [LOGIN_PATH, SIGN_UP_PATH];
+export const UN_AUTH_PATHS = ['/user/login', '/user/signup'];
+
+export const UN_AUTH_API_PATHS = ['/api/user/login', '/api/user/signup'];
 
 export enum SessionStorageItems {
   SiderSelectedKey = 'sider-selected-keys',
@@ -22,3 +24,5 @@ export enum SiderSelectedKey {
 export enum SiderOpenedKey {
   Settings = 'settings',
 }
+
+export const businessTitle = 'Scheduler';

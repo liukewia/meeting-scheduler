@@ -1,7 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
 import cn.hutool.core.collection.BoundedPriorityQueue;
-import com.uofg.timescheduler.utils.TimeUtil;
+import com.uofg.timescheduler.util.TimeUtil;
 import java.util.List;
 import java.util.Queue;
 import lombok.Data;

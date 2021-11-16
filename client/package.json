@@ -21,6 +21,7 @@
     ]
   },
   "dependencies": {
+    "@ant-design/hitu": "^0.0.0-alpha.17",
     "@devexpress/dx-react-core": "^2.7.6",
     "@devexpress/dx-react-scheduler": "2.7.6",
     "@devexpress/dx-react-scheduler-material-ui": "2.7.6",
@@ -32,10 +33,11 @@
     "ahooks": "^3.0.0-alpha.4",
     "antd": "^4.16.13",
     "antd-theme-generator": "^1.2.10",
+    "axios": "^0.24.0",
     "babel-plugin-import": "^1.13.3",
     "classnames": "^2.3.1",
-    "omit.js": "^2.0.2",
     "moment": "^2.29.1",
+    "omit.js": "^2.0.2",
     "react": "17.x",
     "react-color": "^2.19.3",
     "react-dom": "17.x",

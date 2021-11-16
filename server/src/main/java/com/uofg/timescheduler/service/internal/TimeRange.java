@@ -1,7 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
-import static com.uofg.timescheduler.constant.TimeConstant.ONE_DAY_MILLIS;
-import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_DAY_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_HOUR_MILLIS;
 
 import java.util.List;
 import lombok.Data;

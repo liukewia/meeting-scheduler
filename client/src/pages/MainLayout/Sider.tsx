@@ -8,6 +8,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import logoSrc from 'public/logo.svg';
+import { businessTitle } from '@/constants';
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -124,7 +125,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
         <a>
           <img src={logoSrc} alt="scheduler logo" />
         </a>
-        {!isCollapsed && <h1>Scheduler</h1>}
+        {!isCollapsed && <h1>{businessTitle}</h1>}
       </div>
       <Menu
         mode="inline"

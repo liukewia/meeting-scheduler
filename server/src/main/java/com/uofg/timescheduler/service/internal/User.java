@@ -1,10 +1,10 @@
 package com.uofg.timescheduler.service.internal;
 
-import static com.uofg.timescheduler.constant.TimeConstant.ONE_HOUR_MILLIS;
-import static com.uofg.timescheduler.constant.TimeConstant.UTC_LOWER_BOUND;
-import static com.uofg.timescheduler.constant.TimeConstant.UTC_UPPER_BOUND;
+import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConstant.UTC_LOWER_BOUND;
+import static com.uofg.timescheduler.service.constant.TimeConstant.UTC_UPPER_BOUND;
 
-import com.uofg.timescheduler.utils.TimeUtil;
+import com.uofg.timescheduler.util.TimeUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;

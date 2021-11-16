@@ -1,5 +1,5 @@
 import { IRouteComponentProps, useModel, matchPath, Redirect } from 'umi';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, message } from 'antd';
 import enUS from 'antd/lib/locale/en_US';
 import MainLayout from '@/pages/MainLayout';
 import { UN_AUTH_PATHS } from '@/constants';
@@ -21,7 +21,9 @@ const LayoutWrapper = ({
     return <>{children}</>;
   }
   // not un-auth paths, but the user also has not logged in, e.g. an unauth user wants to go to homepage.
+
   if (!isUnAuthPaths && !initialState?.currentUser?.id) {
+    console.error('cannot fetch initial state, fallback to login page');
     // jump to login page
     return <Redirect to="/user/login" />;
   }
