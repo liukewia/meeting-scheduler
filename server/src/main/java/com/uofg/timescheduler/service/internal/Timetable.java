@@ -29,7 +29,8 @@ public class Timetable {
 
             while (next != null
                     && curr.getEndTime() == next.getStartTime()
-                    && curr.getName().equals(next.getName())) {
+                    && curr.getName().equals(next.getName())
+                    && curr.getPriority() == next.getPriority()) {
                 fast++;
                 curr = oldList.get(fast);
                 next = fast + 1 < formerSize ? oldList.get(fast + 1) : null;
@@ -41,7 +42,7 @@ public class Timetable {
             } else {
                 Schedule merged = new Schedule(prev.getStartTime(),
                         curr.getEndTime(),
-                        curr.getName());
+                        curr.getName(), SchedulePriority.NORMAL);
 
                 newList.add(merged);
             }

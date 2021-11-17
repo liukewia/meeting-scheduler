@@ -1,9 +1,11 @@
 package com.uofg.timescheduler.service.internal;
 
+import cn.hutool.core.lang.Assert;
 import com.uofg.timescheduler.util.AlgorithmUtil;
 import com.uofg.timescheduler.util.FileUtil;
 import com.uofg.timescheduler.util.TimeUtil;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -17,8 +19,14 @@ public class ProblemSolver {
         List<Timetable> tts = new ArrayList<>(peopleNum);
         List<List<TimeRange>> atts = new ArrayList<>(peopleNum);
         for (String path : filePaths) {
-            Timetable tn = FileUtil.readTimetableFromExcel(path);
+            Timetable tn = null;
+            try {
+                tn = FileUtil.readTimetableFromExcel(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             tts.add(tn);
+            Assert.notNull(tn, "The timetable is null!");
             List<TimeRange> att = TimeUtil.findAvailableTimeFromTimetable(tn);
             atts.add(att);
         }

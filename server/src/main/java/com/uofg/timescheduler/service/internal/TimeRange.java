@@ -1,8 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
-import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_DAY_MILLIS;
-import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_HOUR_MILLIS;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -18,7 +17,7 @@ public class TimeRange {
      */
     public TimeRange(long startTime, long endTime) {
         if (endTime < startTime) {
-            throw new IllegalArgumentException("The end time is earlier than the start time!");
+            throw new IllegalStateException("The end time is earlier than the start time!");
         }
         this.startTime = startTime;
         this.endTime = endTime;
@@ -44,13 +43,14 @@ public class TimeRange {
     }
 
     @Override public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        java.util.Date startDate = new Date(startTime);
+        String str1 = sdf.format(startDate);
+        java.util.Date endDate = new Date(endTime);
+        String str2 = sdf.format(endDate);
         return "TimeRange{" +
-                "startTime = Day " + ((int) startTime / ONE_DAY_MILLIS + 1) + " @ "
-                + (startTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
-                + (startTime % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60 +
-                "; endTime = Day " + ((int) endTime / ONE_DAY_MILLIS + 1) + " @ "
-                + (endTime % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
-                + (endTime % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60 +
+                "startdate=" + str1 +
+                ", enddate=" + str2 +
                 '}';
     }
 }

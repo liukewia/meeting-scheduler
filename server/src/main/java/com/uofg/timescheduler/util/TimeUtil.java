@@ -1,12 +1,12 @@
 package com.uofg.timescheduler.util;
 
-import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_DAY_MILLIS;
-import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_HOUR_MILLIS;
-import static com.uofg.timescheduler.service.constant.TimeConstant.ONE_MINUTE_MILLIS;
-import static com.uofg.timescheduler.service.constant.TimeConstant.UTC_LOWER_BOUND;
-import static com.uofg.timescheduler.service.constant.TimeConstant.UTC_UPPER_BOUND;
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_DAY_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_HOUR_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_MINUTE_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_LOWER_BOUND;
+import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_UPPER_BOUND;
 
-import com.uofg.timescheduler.service.constant.TimeConstant;
+import com.uofg.timescheduler.service.constant.TimeConsts;
 import com.uofg.timescheduler.service.internal.Schedule;
 import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.Timetable;
@@ -49,7 +49,7 @@ public class TimeUtil {
         Pattern p = Pattern.compile("^UTC(?<sign>[+-])(?<num>\\d+)$", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(value);
         if (!m.matches() || m.groupCount() < 2) {
-            throw new IllegalArgumentException("Invalid time zone format with value [ " + value + " ] !");
+            throw new IllegalStateException("Invalid time zone format with value [ " + value + " ] !");
         }
         float temp = Float.parseFloat(m.group("sign") + m.group("num"));
         if (!TimeUtil.isUTCTimeZoneValid(temp)) {
@@ -76,7 +76,7 @@ public class TimeUtil {
                         "\\W*(?<day>sun|mon|tues|wednes|thurs|fri|satur)(?:day)?\\D*(?<time>(?<hour>\\d{1,2})\\W*(?<minute>\\d{1,2})?\\W*(?<hourSys>[ap]m)?)");
         Matcher m = p.matcher(value.toLowerCase());
         if (!m.matches()) {
-            throw new IllegalArgumentException("Invalid moment format with value [ " + value + " ] !");
+            throw new IllegalStateException("Invalid moment format with value [ " + value + " ] !");
         }
 //        System.out.println("time = '" + m.group("time") + "'");
 //        System.out.println("hour = '" + m.group("hour") + "'");
@@ -86,11 +86,11 @@ public class TimeUtil {
         // resolve day
         String day = m.group("day");
         if (day == null) {
-            throw new IllegalArgumentException("Cannot recognize the day within [ " + value + " ] !");
+            throw new IllegalStateException("Cannot recognize the day within [ " + value + " ] !");
         }
-        Long relativeTime = TimeConstant.dayToTimestampMap.get(day);
+        Long relativeTime = TimeConsts.dayToTimestampMap.get(day);
         if (relativeTime == null) {
-            throw new IllegalArgumentException("Cannot find relative base time by day [ " + day + " ] !");
+            throw new IllegalStateException("Cannot find relative base time by day [ " + day + " ] !");
         }
 //        System.out.println("relativeBaseTime = " + relativeTime);
 

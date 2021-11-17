@@ -3,7 +3,7 @@ package com.uofg.timescheduler.service.constant;
 import java.util.HashMap;
 import java.util.Map;
 
-public interface TimeConstant {
+public interface TimeConsts {
 
     long ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L;
     long TWO_DAY_MILLIS = 2 * ONE_DAY_MILLIS;
