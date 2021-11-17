@@ -1,5 +1,5 @@
 server/HELP.md
-/server/target/
+server/target
 !server/.mvn/wrapper/maven-wrapper.jar
 !server/**/src/main/**/target/
 !server/**/src/test/**/target/
