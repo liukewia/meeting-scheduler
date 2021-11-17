@@ -10,6 +10,11 @@ spring:
   web:
     resources:
       add-mappings: false
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
