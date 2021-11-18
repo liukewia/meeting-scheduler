@@ -1,8 +1,12 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_HOUR_MILLIS;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import lombok.Data;
 
 @Data
@@ -24,12 +28,10 @@ public class TimeRange {
     }
 
     public static void main(String[] args) {
-        System.out.println(new TimeRange(0, 64800000));
+        TimeRange r = new TimeRange(0, 3 * ONE_HOUR_MILLIS);
+        System.out.println(r.getPossibleSlotsBy(1 * ONE_HOUR_MILLIS));
     }
 
-    /**
-     * Utility method: calculate the length of the time span in number.
-     */
     public boolean hasOverlapWith(List<Schedule> schedules) {
         return schedules.stream().anyMatch(schedule -> {
             TimeRange that = schedule.getTimeRange();
@@ -38,12 +40,38 @@ public class TimeRange {
         });
     }
 
+    public boolean hasOverlapWith(TimeRange that) {
+        return !(this.getEndTime() <= that.getStartTime()
+                || this.getStartTime() >= that.getEndTime());
+    }
+
+    public boolean contains(TimeRange that) {
+        return that.getStartTime() >= this.getStartTime()
+                && that.getEndTime() <= this.getEndTime();
+    }
+
+    public List<TimeRange> getPossibleSlotsBy(long duration) {
+        List<TimeRange> res = new ArrayList<>();
+        long start = this.getStartTime();
+        long end = start + duration;
+        while (end <= this.getEndTime()) {
+            res.add(new TimeRange(start, end));
+            start += ONE_HOUR_MILLIS;
+            end += ONE_HOUR_MILLIS;
+        }
+        return res;
+    }
+
+    /**
+     * Utility method: calculate the length of the time span in number.
+     */
     public long getLength() {
         return this.endTime - this.startTime;
     }
 
     @Override public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         java.util.Date startDate = new Date(startTime);
         String str1 = sdf.format(startDate);
         java.util.Date endDate = new Date(endTime);

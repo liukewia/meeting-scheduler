@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class Timetable {
 
+    private TimeRange coverage;
     private List<Schedule> scheduleList;
     private User owner;
 

@@ -35,9 +35,9 @@ public class User {
         this.UTCTimeZone = temp;
     }
 
-    public void updateCorrespondingField(Cell key, Cell value) {
+    public void updateCorrespondingField(String key, Cell value) {
         // prevents errors from users mixing upper and lower cases when setting keys.
-        String lowerCaseKey = key.getStringCellValue().toLowerCase();
+        String lowerCaseKey = key.toLowerCase();
         if (lowerCaseKey.equals("id")) {
             this.setId((int) value.getNumericCellValue());
             return;
@@ -48,14 +48,9 @@ public class User {
             return;
         }
         if (lowerCaseKey.equals("time zone")) {
-            float temp;
-            try {
-                temp = TimeUtil.parseTimeZone(strVal);
-                this.setUTCTimeZone(temp); // The time zone deviation could be decimal numbers, like +10.5, -2.25.
-            } catch (Exception e) {
-                log.error("Cannot set user's time zone!");
-                e.printStackTrace();
-            }
+            float temp = TimeUtil.parseTimeZone(strVal);
+            this.setUTCTimeZone(temp); // The time zone deviation could be decimal numbers, like +10.5, -2.25.
+
             return;
         }
 //        if (Pattern.matches("^preference[0-9]+$", lowerCaseKey)) {

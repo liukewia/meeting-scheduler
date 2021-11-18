@@ -4,5 +4,5 @@ public interface AlgorithmConsts {
 
     int TOP_OUTPUT_NUM = 5;
 
-    int FUZZY_SEARCH_MAX_NUM = 50;
+    int HEURISTIC_SEARCH_MAX_NUM = 50;
 }

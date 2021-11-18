@@ -3,7 +3,6 @@ package com.uofg.timescheduler.util;
 import static com.uofg.timescheduler.service.constant.TimeConsts.DAYS_IN_A_WEEK;
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_HOUR_MILLIS;
-import static com.uofg.timescheduler.service.constant.TimeConsts.SEVEN_DAY_MILLIS;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
@@ -11,12 +10,15 @@ import com.uofg.timescheduler.service.constant.ColorConsts;
 import com.uofg.timescheduler.service.internal.RawSolutionRowData;
 import com.uofg.timescheduler.service.internal.Schedule;
 import com.uofg.timescheduler.service.internal.SchedulePriority;
+import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.TimeRangeEvaluator;
 import com.uofg.timescheduler.service.internal.Timetable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Slf4j
 public class FileUtil {
 
-    public static ArrayList<String> getAllFilesIn(String folderPath) {
+    public static ArrayList<String> getExcelFilesIn(String folderPath) {
         File folder = new File(folderPath);
         // get the folder list
         File[] files = folder.listFiles();
@@ -46,33 +48,78 @@ public class FileUtil {
         for (File file : files) {
             if (file.isFile()) {
                 String path = file.getPath();
-                if (!path.contains("~$")) {
+                if (!path.contains("~$") && path.contains("xls")) {
                     // is temporary file
                     res.add(path);
                 }
             } else if (file.isDirectory()) {
-                getAllFilesIn(file.getPath());
+                getExcelFilesIn(file.getPath());
             }
         }
-        // debug
         res.sort(String::compareTo);
-        // debug
-
         return res;
     }
+
+    public static List<TimeRange> readTimetableCoverage(String path) throws IOException {
+        Timetable timetable = new Timetable();
+        List<TimeRange> cov = new ArrayList<>();
+        FileInputStream fs = new FileInputStream(path);
+        XSSFWorkbook book = new XSSFWorkbook(fs);
+        // get timezone deviation
+        XSSFSheet sheet2 = book.getSheetAt(1);
+
+        Row rowData = sheet2.getRow(2);
+        Cell key = rowData.getCell(0);
+        Cell value = rowData.getCell(1);
+        if (key == null) {
+            throw new IllegalStateException("The value in row " + rowData + ", column 1 in sheet 2 is null.");
+        }
+        if (value == null) {
+            throw new IllegalStateException("The value in row " + rowData + ", column 2 in sheet 2 is null.");
+        }
+        String strVal = value.getStringCellValue();
+        float timeZoneDeviation = TimeUtil.parseTimeZone(strVal);
+
+        XSSFSheet sheet1 = book.getSheetAt(0);
+        Row firstRow = sheet1.getRow(0);
+        int numberOfCells = firstRow.getPhysicalNumberOfCells();
+        List<Date> alignedHeader = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        for (int i = 1; i < numberOfCells + 1; i++) {
+            try {
+                Date d = sdf.parse(firstRow.getCell(i).getStringCellValue());
+                alignedHeader.add(d);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        // aligned header validity check, should be continuous dates
+        for (int i = 1; i < alignedHeader.size(); i++) {
+            if (alignedHeader.get(i).getTime() - alignedHeader.get(i - 1).getTime() != ONE_DAY_MILLIS) {
+                throw new IllegalStateException("The aligned header contains discrete dates.");
+            }
+            long t = alignedHeader.get(i).getTime();
+            cov.add(new TimeRange(t - (long) (timeZoneDeviation * ONE_HOUR_MILLIS),
+                    t + (long) (timeZoneDeviation * ONE_HOUR_MILLIS) + ONE_DAY_MILLIS));
+        }
+
+        return cov;
+    }
+
 
     public static Timetable readTimetableFromExcel(String path) throws IOException {
         Timetable timetable = new Timetable();
 
-        // read sheet 2 first
         FileInputStream fs = new FileInputStream(path);
         XSSFWorkbook book = new XSSFWorkbook(fs);
         XSSFSheet sheet2 = book.getSheetAt(1);
 
+        // read sheet 2 first
         for (int i = 0; i < 3; i++) {
             Row rowData = sheet2.getRow(i);
             if (rowData == null) {
-                throw new IllegalStateException("Row " + rowData + "in sheet 2 is null.");
+                throw new IllegalStateException("Row " + i + "in sheet 2 is null.");
             }
             Cell key = rowData.getCell(0);
             Cell value = rowData.getCell(1);
@@ -82,40 +129,35 @@ public class FileUtil {
             if (value == null) {
                 throw new IllegalStateException("The value in row " + rowData + ", column 2 in sheet 2 is null.");
             }
-            timetable.getOwner().updateCorrespondingField(key, value);
+            timetable.getOwner().updateCorrespondingField(key.getStringCellValue(), value);
         }
+        long timeZoneDeviation = Math.round(timetable.getOwner().getUTCTimeZone() * ONE_HOUR_MILLIS);
 
-//        EasyExcel.read(path, RawPersonalInfoRowData.class, new PageReadListener<RawPersonalInfoRowData>(dataList -> {
-//            for (RawPersonalInfoRowData rowData : dataList) {
-//                log.info("Read personal info data in this row: {}", JSON.toJSONString(rowData));
-//                timetable.getOwner().updateCorrespondingField(rowData.getKey(), rowData.getValue());
-////                log.info("秒数{}", JSON.toJSONString(rowData.getStartTime()));
-//            }
-//        }))
-//                .sheet(1) // read sheet 2, where personal information is saved.
-//                .headRowNumber(0) // the aligned header is set to be 1 row by default, need to change it to 0.
-//                .doRead();
         // read sheet 1
         XSSFSheet sheet1 = book.getSheetAt(0);
         Row firstRow = sheet1.getRow(0);
         int numberOfCells = firstRow.getPhysicalNumberOfCells();
-        List<Date> alignedHeader = new ArrayList<>();
+        List<Long> alignedHeader = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Set<Date> setToCheckRepeat = new TreeSet<>((o1, o2) -> (int) (o1.getTime() - o2.getTime()));
-        // rows can be discrete
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         for (int i = 1; i < numberOfCells + 1; i++) {
             try {
                 Date d = sdf.parse(firstRow.getCell(i).getStringCellValue());
-                alignedHeader.add(d);
-                setToCheckRepeat.add(d);
+                long startTime = d.getTime() - timeZoneDeviation;
+                alignedHeader.add(startTime);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-        // aligned header validity check
-        if (alignedHeader.size() > setToCheckRepeat.size()) {
-            throw new IllegalStateException("The aligned header in sheet 1 has repeated dates, which is not allowed");
+        // aligned header validity check, should be continuous dates
+        for (int i = 1; i < alignedHeader.size(); i++) {
+            if (alignedHeader.get(i) - alignedHeader.get(i - 1) != ONE_DAY_MILLIS) {
+                throw new IllegalStateException("The aligned header contains discrete dates.");
+            }
         }
+        timetable.setCoverage(
+                new TimeRange(alignedHeader.get(0),
+                        alignedHeader.get(alignedHeader.size() - 1) + ONE_DAY_MILLIS));
         int rows = sheet1.getPhysicalNumberOfRows();
         // collect vertical header
         List<Long> verticalHeader = new ArrayList<>();
@@ -129,25 +171,20 @@ public class FileUtil {
             verticalHeader.add(startTimeInLong);
         }
 
-        long timeZoneDeviation = Math.round(timetable.getOwner().getUTCTimeZone() * ONE_HOUR_MILLIS);
-
-//        AtomicLong lastStartTime = new AtomicLong();
-//        AtomicLong currStartTime = new AtomicLong();
         List<List<Schedule>> tmpWeekList = new ArrayList<>(DAYS_IN_A_WEEK);
         for (int i = 0; i < DAYS_IN_A_WEEK; i++) {
             tmpWeekList.add(new ArrayList<>());
         }
-//        Map<Integer, String> rowDataMap = new HashMap<>();
 
         /**
          * there is a time gap in the beginning of the timetable, since the timetable only provides information in
          * one week, the program will treat it as a worst case, i.e., fill it with nonce schedule to prevent possible
          * available time intersection, or say to prevent side effect of jet lag.
          */
-        if (timeZoneDeviation < 0) {
-            tmpWeekList.get(0).add(new Schedule(timeZoneDeviation, 0, "nonce-for-early-timezone",
-                    SchedulePriority.MAX));
-        }
+//        if (timeZoneDeviation < 0) {
+//            tmpWeekList.get(0).add(new Schedule(timeZoneDeviation, 0, "nonce-for-early-timezone",
+//                    SchedulePriority.MAX));
+//        }
 
         int cols = sheet1.getRow(0).getPhysicalNumberOfCells() + 1; // 8
         // collect schedules per day
@@ -176,89 +213,25 @@ public class FileUtil {
             }
         }
 
-//        EasyExcel.read(path, RawTimetableRowData.class, new PageReadListener<RawTimetableRowData>(dataList -> {
-//            for (RawTimetableRowData rowData : dataList) {
-//                // handle data in the previous row
-//                LocalDateTime currStartDate = rowData.getStartTime();
-//                currStartTime.set((currStartDate.getHour() * 60 + currStartDate.getMinute()) * ONE_MINUTE_MILLIS);
-//                for (Entry<Integer, String> entry : rowDataMap.entrySet()) {
-//                    int dayNo = entry.getKey();
-//                    String scheduleName = entry.getValue();
-//                    if (scheduleName != null) {
-//                        Schedule schedule = new Schedule(
-//                                lastStartTime.longValue() - timeZoneDeviation,
-//                                currStartTime.longValue() - timeZoneDeviation,
-//                                scheduleName);
-//                        tmpWeekList.get(dayNo).add(schedule);
-//                    }
-//                }
-//
-//                log.info("Read schedule data in this row: {}", JSON.toJSONString(rowData));
-//                lastStartTime.set(currStartTime.longValue());
-//                rowDataMap.put(0, rowData.getMondaySchedule());
-//                rowDataMap.put(1, rowData.getTuesdaySchedule());
-//                rowDataMap.put(2, rowData.getWednesdaySchedule());
-//                rowDataMap.put(3, rowData.getThursdaySchedule());
-//                rowDataMap.put(4, rowData.getFridaySchedule());
-//                rowDataMap.put(5, rowData.getSaturdaySchedule());
-//                rowDataMap.put(6, rowData.getSundaySchedule());
-//            }
-//        }))
-//                .sheet(0)
-//                .headRowNumber(1)
-//                .doRead();
-//
-//        // handle last row schedule
-//        currStartTime.set(ONE_DAY_MILLIS);
-//
-//        for (Entry<Integer, String> entry : rowDataMap.entrySet()) {
-//            int dayNo = entry.getKey();
-//            String scheduleName = entry.getValue();
-//            if (scheduleName != null) {
-//                Schedule schedule = new Schedule(
-//                        lastStartTime.longValue() - timeZoneDeviation,
-//                        currStartTime.longValue() - timeZoneDeviation,
-//                        scheduleName);
-//                tmpWeekList.get(dayNo).add(schedule);
-//            }
+//        if (timeZoneDeviation > 0) {
+//            tmpWeekList.get(DAYS_IN_A_WEEK - 1)
+//                    .add(new Schedule(SEVEN_DAY_MILLIS - timeZoneDeviation,
+//                            SEVEN_DAY_MILLIS,
+//                            "nonce-for-late-timezone", SchedulePriority.MAX));
 //        }
-
-        if (timeZoneDeviation > 0) {
-            tmpWeekList.get(DAYS_IN_A_WEEK - 1)
-                    .add(new Schedule(SEVEN_DAY_MILLIS - timeZoneDeviation,
-                            SEVEN_DAY_MILLIS,
-                            "nonce-for-late-timezone", SchedulePriority.MAX));
-        }
-//        timetable.setScheduleList(tmpWeekList.stream().reduce(timetable.getScheduleList(), dayList -> {
-//            dayList.stream().reduce()
-//            return
-//        }));
 
         List<Schedule> flatList = timetable.getScheduleList();
-//        for (List<Schedule> dayList : tmpWeekList) {
-//            for (Schedule s : dayList) {
-//                flatList.add(new Schedule(s.getStartTime()));
-//            }
-//        }
         for (int i = 0; i < tmpWeekList.size(); i++) {
             List<Schedule> dayList = tmpWeekList.get(i);
-            long baseTime = alignedHeader.get(i).getTime();
+            long baseTime = alignedHeader.get(i);
             for (Schedule s : dayList) {
                 flatList.add(new Schedule(s.getStartTime() + baseTime,
                         s.getEndTime() + baseTime,
-                        s.getName(), s.getPriority()));
+                        s.getName(),
+                        s.getPriority()));
             }
         }
         timetable.mergeSegmentedSchedules();
-//
-//        // validity check: filter out time preferences that is not in one person's available time.
-//        User owner = timetable.getOwner();
-//        owner.setPreferences(owner.getPreferences()
-//                .stream()
-//                .filter(p -> timetable.getScheduleList()
-//                        .stream()
-//                        .noneMatch(s -> p >= s.getStartTime() && p < s.getEndTime()))
-//                .collect(Collectors.toList()));
         return timetable;
     }
 
@@ -309,7 +282,7 @@ public class FileUtil {
 //            e.printStackTrace();
 //        }
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         Set<Date> set = new TreeSet<>((o1, o2) -> (int) (o1.getTime() - o2.getTime()));
         set.add(sdf.parse("11/11/2021"));
         set.add(sdf.parse("12/11/2021"));
@@ -339,6 +312,25 @@ public class FileUtil {
             list.add(row);
         }
         return list;
+    }
+
+    public static String readFileAsString(String inputPath) {
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(inputPath, "r");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        StringBuilder str = new StringBuilder();
+        try {
+            byte[] buf = new byte[1024 * 1024];
+            while (raf.read(buf) != -1) {
+                str.append(buf[buf.length - 1] == 0 ? (new String(buf)).trim() : new String(buf));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return str.toString();
     }
 
     private static List<List<String>> head() {

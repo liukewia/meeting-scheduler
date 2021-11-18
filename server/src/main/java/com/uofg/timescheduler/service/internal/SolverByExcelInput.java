@@ -1,6 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
 import cn.hutool.core.lang.Assert;
+import com.uofg.timescheduler.service.constant.AlgorithmConsts;
 import com.uofg.timescheduler.util.AlgorithmUtil;
 import com.uofg.timescheduler.util.FileUtil;
 import com.uofg.timescheduler.util.TimeUtil;
@@ -11,14 +12,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-public class ProblemSolver {
+public class SolverByExcelInput {
 
-    public static List<TimeRangeEvaluator> solveWithExcelAsInput(String folderPath, int solutionNum) {
-        ArrayList<String> filePaths = FileUtil.getAllFilesIn(folderPath);
-        int peopleNum = filePaths.size();
+    public static List<TimeRangeEvaluator> solveWithExcelAsInput(ArrayList<String> sheetPaths) {
+        int peopleNum = sheetPaths.size();
         List<Timetable> tts = new ArrayList<>(peopleNum);
         List<List<TimeRange>> atts = new ArrayList<>(peopleNum);
-        for (String path : filePaths) {
+        for (String path : sheetPaths) {
             Timetable tn = null;
             try {
                 tn = FileUtil.readTimetableFromExcel(path);
@@ -52,7 +52,7 @@ public class ProblemSolver {
         } while (intersections.stream().allMatch(List::isEmpty)
                 && peopleNum - peopleExcluded > 1);
 
-        // Output the top {solutionNum} preferred schemes in order from high to low according to the score
+        // Output the top {TOP_OUTPUT_NUM} preferred schemes in order from high to low according to the score
         // if the number of solutions is larger than a given value n, filter the top n ones.
 
         List<List<Long>> preferences = tts.stream()
@@ -60,7 +60,7 @@ public class ProblemSolver {
                 .collect(Collectors.toList());
 
         Queue<TimeRangeEvaluator> mostPreferredSlots = TimeRangeEvaluator
-                .getTopPreferredSlots(intersections, preferences, solutionNum);
+                .getTopPreferredSlots(intersections, preferences, AlgorithmConsts.TOP_OUTPUT_NUM);
 
         if (peopleExcluded > 1) {
             // Slots are not convenient for some people, add notes to illustrate this situation.
@@ -86,7 +86,8 @@ public class ProblemSolver {
 
     public static void main(String[] args) {
         String folderPath = FileUtil.getPath() + File.separator + "inputs";
-        List<TimeRangeEvaluator> trs = solveWithExcelAsInput(folderPath, 5);
+        ArrayList<String> sheetPaths = FileUtil.getExcelFilesIn(folderPath);
+        List<TimeRangeEvaluator> trs = solveWithExcelAsInput(sheetPaths);
         FileUtil.writeResultToExcel(trs);
     }
 

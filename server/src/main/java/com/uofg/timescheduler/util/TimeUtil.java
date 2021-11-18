@@ -45,6 +45,19 @@ public class TimeUtil {
         return availableTimeList;
     }
 
+    public static List<TimeRange> findAbsoluteAvailableTimeFromTimetable(Timetable t) {
+        List<TimeRange> availableTimeList = new ArrayList<>();
+        long leftGap = t.getCoverage().getStartTime();
+        for (Schedule s : t.getScheduleList()) {
+            long scheduleStart = s.getStartTime();
+            if (leftGap < scheduleStart) {
+                availableTimeList.add(new TimeRange(leftGap, scheduleStart));
+            }
+            leftGap = s.getEndTime();
+        }
+        return availableTimeList;
+    }
+
     public static float parseTimeZone(String value) {
         Pattern p = Pattern.compile("^UTC(?<sign>[+-])(?<num>\\d+)$", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(value);
@@ -176,6 +189,7 @@ public class TimeUtil {
 //        String input = "Sun 0";
 //        System.out.println("input: " + input);
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy E h:mm a");
+//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 //        System.out.println(sdf.parse("2001 fri 01:10 pm"));
         long m = parseMoment("fri 01:10 pm");
         System.out.println("startTime= Day " + ((int) m / ONE_DAY_MILLIS + 1) + " @ "
