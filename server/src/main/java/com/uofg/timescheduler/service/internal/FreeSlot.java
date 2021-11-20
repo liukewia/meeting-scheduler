@@ -1,5 +1,9 @@
 package com.uofg.timescheduler.service.internal;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 public class FreeSlot extends TimeRange {
 
     /**
@@ -8,5 +12,18 @@ public class FreeSlot extends TimeRange {
      */
     public FreeSlot(long startTime, long endTime) {
         super(startTime, endTime);
+    }
+
+    @Override public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        java.util.Date startDate = new Date(super.startTime);
+        String str1 = sdf.format(startDate);
+        java.util.Date endDate = new Date(super.endTime);
+        String str2 = sdf.format(endDate);
+        return "FreeSlot {" +
+                "startdate=" + str1 +
+                ", enddate=" + str2 +
+                '}';
     }
 }

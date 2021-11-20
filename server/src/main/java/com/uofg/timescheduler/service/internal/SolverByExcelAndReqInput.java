@@ -2,11 +2,11 @@ package com.uofg.timescheduler.service.internal;
 
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_DAY_MILLIS;
 
-import cn.hutool.core.collection.BoundedPriorityQueue;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.uofg.timescheduler.service.constant.AlgorithmConsts;
 import com.uofg.timescheduler.service.constant.TimeConsts;
+import com.uofg.timescheduler.util.AlgorithmUtil;
 import com.uofg.timescheduler.util.FileUtil;
 import com.uofg.timescheduler.util.TimeUtil;
 import java.io.File;
@@ -16,13 +16,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class SolverByExcelAndReqInput {
 
     public static List<TimeRange> solve(String inputFolderPath) {
@@ -99,35 +98,82 @@ public class SolverByExcelAndReqInput {
             throw new IllegalStateException("All users' timetable coverages produce no intersection.");
         }
 
+        List<TimeRange> datesRequired = covIntersect.getOverlapsWith(potentialDates)
+                .stream()
+                .filter(i -> i.getLength() >= durationMillis)
+                .collect(Collectors.toList());
+        if (datesRequired.size() == 0) {
+            log.error(
+                    "There are no coverage intersections falling into the demanded meeting dates, returning empty list...");
+            return new ArrayList<>();
+        }
         // generate random population num, each is a slot strictly inside the covIntersect
         // define rating function
         // find the availability of each participant using binary search, calculating score
         // add up the score to be the total score of that slot.
-        int iterationNum = 0;
-        Queue<TimeRange> population = new BoundedPriorityQueue<>(
-                AlgorithmConsts.POPULATION_NUM,
-                (e1, e2) -> Double.compare(
-                        allTimeTables.stream().map(timetable -> TimeUtil.rate(e2, timetable)).reduce(Double::sum)
-                                .orElse(0.0),
-                        allTimeTables.stream().map(timetable -> TimeUtil.rate(e1, timetable)).reduce(Double::sum)
-                                .orElse(0.0)));
+        int currInteration = 0;
 
-        while (iterationNum++ < AlgorithmConsts.ITERATION_NUM) {
-            for (int i = 0; i < AlgorithmConsts.MUTATION_NUM; i++) {
-                population.offer(TimeUtil.generateRandomSlotWithin(covIntersect, durationMillis));
+        // init
+        List<RatedTimeRange> population = new ArrayList<>(AlgorithmConsts.POPULATION_NUM);
+        for (int i = 0; i < AlgorithmConsts.POPULATION_NUM; i++) {
+            TimeRange randedRange = TimeUtil.generateRandomSlotWithin(datesRequired, durationMillis);
+            population.add(new RatedTimeRange(randedRange, allTimeTables));
+        }
+        // sort by descending scores
+        population.sort((o1, o2) -> Double.compare(o2.getScore(), o1.getScore()));
+
+        while (currInteration < AlgorithmConsts.ITERATION_TIMES) {
+            // crossover
+            List<RatedTimeRange> crossover = new ArrayList<>();
+            for (int i = 0; i < AlgorithmConsts.CROSSOVER_NUM / 2; i++) {
+                crossover.addAll(AlgorithmUtil.getSlotAdjacentTo(population.get(i)
+                        .getTimeRange())
+                        .stream()
+                        .map(timeRange -> new RatedTimeRange(timeRange, allTimeTables))
+                        .collect(Collectors.toList()));
             }
+            population.addAll(crossover);
+
+            // mutation
+            List<RatedTimeRange> mutated = new ArrayList<>();
+            for (int i = 0; i < AlgorithmConsts.MUTATION_NUM; i++) {
+                TimeRange randedRange = TimeUtil.generateRandomSlotWithin(datesRequired, durationMillis);
+                mutated.add(new RatedTimeRange(randedRange, allTimeTables));
+            }
+            population.addAll(mutated);
+
+            // sort by descending scores
+            population.sort((o1, o2) -> Double.compare(o2.getScore(), o1.getScore()));
+            // not deduplicate by hashcode for now
+            population = population.subList(0, AlgorithmConsts.POPULATION_NUM);
+            // first iteration done, do next iteration and mutate the best n ones to expect a better solution,
+            currInteration++;
+            // do next iteration
         }
-        // for debug
-        Map<TimeRange, Double> tmpMap = new HashMap<>();
-        for (TimeRange range : population) {
-            tmpMap.put(range,
-                    allTimeTables.stream().map(timetable -> TimeUtil.rate(range, timetable)).reduce(Double::sum)
-                            .orElse(0.0));
+
+        // ************************* for debug *************************
+//        Map<RatedTimeRange, Double> debugMap = new HashMap<>();
+//        for (RatedTimeRange range : population) {
+//            debugMap.put(range, range.getScore());
+//        }
+        // ************************* for debug *************************
+
+        List<RatedTimeRange> output = new ArrayList<>();
+        while (population.size() > 0
+                && output.size() <= AlgorithmConsts.TOP_OUTPUT_NUM
+        ) {
+            RatedTimeRange removed = population.remove(0);
+            if (output.contains(removed)) {
+                continue;
+            }
+            output.add(removed);
         }
-        // first iteration done, do next iteration and mutate the best n ones to expect a better solution,
-        // do all iterations
-        // select top x num ones to output, using heap.
-        return intersections;
+        return output.stream()
+                .filter(ratedTimeRange -> ratedTimeRange.getScore() >= TimeConsts.PRIORITY_TO_RATING_MAP
+                        .get(SchedulePriority.INF))
+                .map(RatedTimeRange::getTimeRange)
+                .limit(AlgorithmConsts.TOP_OUTPUT_NUM)
+                .collect(Collectors.toList());
     }
 
 
@@ -172,21 +218,9 @@ public class SolverByExcelAndReqInput {
         return list;
     }
 
-//    private static List<List<TimeRange>> getAllTimetablesCoverage(ArrayList<String> sheetPaths) {
-//        List<List<TimeRange>> covs = new ArrayList<>();
-//        for (String path : sheetPaths) {
-//            try {
-//                covs.add(FileUtil.readTimetableCoverage(path));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return covs;
-//    }
-
     public static void main(String[] args) {
         String folderPath = FileUtil.getPath() + File.separator + "inputs";
         List<TimeRange> intersections = solve(folderPath);
-//        writeResultToExcel(intersections);
+        writeResultToExcel(intersections);
     }
 }

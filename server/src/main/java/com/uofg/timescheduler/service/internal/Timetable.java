@@ -13,18 +13,17 @@ public class Timetable {
     private User owner;
 
     public Timetable() {
-        this.scheduleList = new ArrayList<>();
         this.owner = new User();
+        this.scheduleList = null;
     }
 
     public void mergeSegmentedSchedules() {
-
         List<Schedule> oldList = this.scheduleList;
-        int formerSize = oldList.size();
-        List<Schedule> newList = new ArrayList<>(formerSize);
+        int oldSize = oldList.size();
+        List<Schedule> newList = new ArrayList<>(oldSize);
         int slow = 0;
         int fast = 0;
-        while (fast < formerSize - 1) {
+        while (fast < oldSize - 1) {
             Schedule curr = oldList.get(slow);
             Schedule next = oldList.get(fast + 1);
 
@@ -34,7 +33,7 @@ public class Timetable {
                     && curr.getPriority() == next.getPriority()) {
                 fast++;
                 curr = oldList.get(fast);
-                next = fast + 1 < formerSize ? oldList.get(fast + 1) : null;
+                next = fast + 1 < oldSize ? oldList.get(fast + 1) : null;
             }
 
             Schedule prev = oldList.get(slow);
@@ -43,7 +42,8 @@ public class Timetable {
             } else {
                 Schedule merged = new Schedule(prev.getStartTime(),
                         curr.getEndTime(),
-                        curr.getName(), SchedulePriority.NORMAL);
+                        curr.getName(),
+                        prev.getPriority());
 
                 newList.add(merged);
             }

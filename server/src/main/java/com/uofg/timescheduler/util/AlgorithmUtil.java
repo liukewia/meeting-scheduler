@@ -77,4 +77,12 @@ public class AlgorithmUtil {
         return ans;
     }
 
+    public static List<TimeRange> getSlotAdjacentTo(TimeRange source) {
+        List<TimeRange> res = new ArrayList<>(2);
+        long durationMillis = source.getLength();
+        res.add(new TimeRange(source.getStartTime() - durationMillis, source.getStartTime()));
+        res.add(new TimeRange(source.getEndTime(), source.getEndTime() + durationMillis));
+        return res;
+    }
+
 }

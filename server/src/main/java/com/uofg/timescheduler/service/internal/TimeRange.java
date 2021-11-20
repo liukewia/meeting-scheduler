@@ -6,14 +6,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import lombok.Data;
 
 @Data
 public class TimeRange {
 
-    private long startTime;
-    private long endTime;
+    protected long startTime;
+    protected long endTime;
 
     /**
      * @param startTime
@@ -65,6 +66,15 @@ public class TimeRange {
         }
     }
 
+    public List<TimeRange> getOverlapsWith(List<TimeRange> those) {
+        // prerequisite: those has no overlaps
+        List<TimeRange> res = new ArrayList<>();
+        for (TimeRange that : those) {
+            res.add(this.getOverlapWith(that));
+        }
+        return res;
+    }
+
     public List<TimeRange> getPossibleSlotsBy(long duration) {
         List<TimeRange> res = new ArrayList<>();
         long start = this.getStartTime();
@@ -82,6 +92,24 @@ public class TimeRange {
      */
     public long getLength() {
         return this.endTime - this.startTime;
+    }
+
+    // https://cloud.tencent.com/developer/article/1680014
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TimeRange that = (TimeRange) o;
+        return startTime == that.getStartTime() && endTime == that.getEndTime();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startTime, endTime);
     }
 
     @Override public String toString() {

@@ -22,6 +22,7 @@ import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -220,17 +221,19 @@ public class FileUtil {
 //                            "nonce-for-late-timezone", SchedulePriority.MAX));
 //        }
 
-        List<Schedule> flatList = timetable.getScheduleList();
+        List<Schedule> flatList = new ArrayList<>();
         for (int i = 0; i < tmpWeekList.size(); i++) {
             List<Schedule> dayList = tmpWeekList.get(i);
             long baseTime = alignedHeader.get(i);
             for (Schedule s : dayList) {
+                // the flat list reference is appended and a timetable's schedule list is changed accordingly.
                 flatList.add(new Schedule(s.getStartTime() + baseTime,
                         s.getEndTime() + baseTime,
                         s.getName(),
                         s.getPriority()));
             }
         }
+        timetable.setScheduleList(Collections.unmodifiableList(flatList));
         timetable.mergeSegmentedSchedules();
         return timetable;
     }

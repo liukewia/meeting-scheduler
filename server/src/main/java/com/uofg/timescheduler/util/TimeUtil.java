@@ -3,6 +3,7 @@ package com.uofg.timescheduler.util;
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_DAY_MILLIS;
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_HOUR_MILLIS;
 import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_MINUTE_MILLIS;
+import static com.uofg.timescheduler.service.constant.TimeConsts.PRIORITY_TO_RATING_MAP;
 import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_UPPER_BOUND;
 
@@ -19,9 +20,12 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
@@ -227,16 +231,43 @@ public class TimeUtil {
         return moment >= range.getStartTime() && moment <= range.getEndTime();
     }
 
-    public static TimeRange generateRandomSlotWithin(TimeRange coverage, long durationMillis) {
-        long totalLength = coverage.getLength();
+    public static TimeRange generateRandomSlotWithin(List<TimeRange> ranges, long durationMillis) {
+        long totalLength = ranges.stream()
+                .map(range -> range.getLength() - durationMillis)
+                .reduce(Long::sum)
+                .orElse(0L);
+        int rangeNum = ranges.size();
+        Map<Double, Integer> randToRangeIdxMap = new HashMap<>();
+        double accumulatedPercentage = 0.0;
+        for (int i = 0; i < rangeNum; i++) {
+            long possibleStartLength = ranges.get(i).getLength() - durationMillis;
+            accumulatedPercentage = accumulatedPercentage + ((double) possibleStartLength) / ((double) totalLength);
+            randToRangeIdxMap.put(accumulatedPercentage, i);
+        }
+        double rand = Math.random();
+        List<Double> sortedKeyList = new ArrayList<>(randToRangeIdxMap.keySet()).stream()
+                .sorted(Double::compare)
+                .collect(Collectors.toList());
+        double endFellInto = sortedKeyList.stream()
+                .filter(percentage -> percentage >= rand)
+                .findFirst()
+                .orElse(1.0);
+
+        int randedIdx = randToRangeIdxMap.get(endFellInto);
+        TimeRange randedRange = ranges.get(randedIdx);
+
         long startTime =
-                coverage.getStartTime() + Math.round(Math.random() * (totalLength - durationMillis));
+                randedRange.getStartTime() + Math
+                        .round((rand - (randedIdx <= 0 ? 0.0 : sortedKeyList.get(randedIdx - 1))) * (totalLength
+                                - durationMillis));
+
         // round each slot to the nearest whole minute
         long remainder = startTime % ONE_MINUTE_MILLIS;
         long roundedStartTime = remainder >= ONE_MINUTE_MILLIS / 2
                 ? startTime - remainder + ONE_MINUTE_MILLIS
                 : startTime - remainder;
-        return new TimeRange(roundedStartTime, roundedStartTime + durationMillis);
+        TimeRange res = new TimeRange(roundedStartTime, roundedStartTime + durationMillis);
+        return res;
     }
 
     // define rating function
@@ -248,22 +279,35 @@ public class TimeUtil {
         // traverse each schedule from the start, and end at the schedule where the start time > target.start time
         if (!timetable.getCoverage().hasOverlapWith(target)) {
             // punishment
-            return -Double.MAX_VALUE;
+            return PRIORITY_TO_RATING_MAP.get(SchedulePriority.INF);
         }
         // here we assume that the schedules has been combined so that no schedules in the timetable has overlap
         // after combination, the calculation's difficulty is reduced
         List<Object> fullList = new ArrayList<>();
         List<Schedule> scheduleList = timetable.getScheduleList();
-        fullList.add(new FreeSlot(timetable.getCoverage().getStartTime(), scheduleList.get(0).getStartTime()));
+        long covStartTime = timetable.getCoverage().getStartTime();
+        long schedule1StartTime = scheduleList.get(0).getStartTime();
+        if (covStartTime < schedule1StartTime) {
+            fullList.add(new FreeSlot(covStartTime, schedule1StartTime));
+        }
+
         fullList.add(scheduleList.get(0));
         int i;
         for (i = 1; i < scheduleList.size(); i++) {
-            fullList.add(new FreeSlot(scheduleList.get(i - 1).getEndTime(), scheduleList.get(i).getStartTime()));
+            long lastScheduleEndTime = scheduleList.get(i - 1).getEndTime();
+            long nextScheduleStartTime = scheduleList.get(i).getStartTime();
+            if (lastScheduleEndTime < nextScheduleStartTime) {
+                fullList.add(new FreeSlot(lastScheduleEndTime, nextScheduleStartTime));
+            }
             fullList.add(scheduleList.get(i));
         }
-        fullList.add(new FreeSlot(scheduleList.get(i - 1).getStartTime(), timetable.getCoverage().getEndTime()));
+        long lastScheduleEndTime = scheduleList.get(i - 1).getEndTime();
+        long covEndTime = timetable.getCoverage().getEndTime();
+        if (lastScheduleEndTime < covEndTime) {
+            fullList.add(new FreeSlot(lastScheduleEndTime, covEndTime));
+        }
 
-        return fullList.stream()
+        double score = fullList.stream()
                 .map(slot -> {
                     if (slot.getClass() == FreeSlot.class) {
                         TimeRange overlap = ((FreeSlot) slot).getOverlapWith(target);
@@ -282,7 +326,9 @@ public class TimeUtil {
                                 .get(((Schedule) slot).getPriority());
                     }
                 })
-                .reduce(Double::sum).orElse(0.0);
+                .reduce(Double::sum)
+                .orElse(0.0);
+        return score;
     }
 
 }
