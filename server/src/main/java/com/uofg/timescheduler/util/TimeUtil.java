@@ -7,7 +7,9 @@ import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_LOWER_BOUND
 import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_UPPER_BOUND;
 
 import com.uofg.timescheduler.service.constant.TimeConsts;
+import com.uofg.timescheduler.service.internal.FreeSlot;
 import com.uofg.timescheduler.service.internal.Schedule;
+import com.uofg.timescheduler.service.internal.SchedulePriority;
 import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.Timetable;
 import java.time.Instant;
@@ -101,7 +103,7 @@ public class TimeUtil {
         if (day == null) {
             throw new IllegalStateException("Cannot recognize the day within [ " + value + " ] !");
         }
-        Long relativeTime = TimeConsts.dayToTimestampMap.get(day);
+        Long relativeTime = TimeConsts.DAY_TO_TIMESTAMP_MAP.get(day);
         if (relativeTime == null) {
             throw new IllegalStateException("Cannot find relative base time by day [ " + day + " ] !");
         }
@@ -223,6 +225,64 @@ public class TimeUtil {
 
     public static boolean isMomentInRange(long moment, TimeRange range) {
         return moment >= range.getStartTime() && moment <= range.getEndTime();
+    }
+
+    public static TimeRange generateRandomSlotWithin(TimeRange coverage, long durationMillis) {
+        long totalLength = coverage.getLength();
+        long startTime =
+                coverage.getStartTime() + Math.round(Math.random() * (totalLength - durationMillis));
+        // round each slot to the nearest whole minute
+        long remainder = startTime % ONE_MINUTE_MILLIS;
+        long roundedStartTime = remainder >= ONE_MINUTE_MILLIS / 2
+                ? startTime - remainder + ONE_MINUTE_MILLIS
+                : startTime - remainder;
+        return new TimeRange(roundedStartTime, roundedStartTime + durationMillis);
+    }
+
+    // define rating function
+    // find the availability of each participant using binary search, calculating score
+    // add up the score to be the total score of that slot.
+    public static double rate(TimeRange target, Timetable timetable) {
+        long duration = target.getLength();
+        // the target has been strictly limited inside the coverage
+        // traverse each schedule from the start, and end at the schedule where the start time > target.start time
+        if (!timetable.getCoverage().hasOverlapWith(target)) {
+            // punishment
+            return -Double.MAX_VALUE;
+        }
+        // here we assume that the schedules has been combined so that no schedules in the timetable has overlap
+        // after combination, the calculation's difficulty is reduced
+        List<Object> fullList = new ArrayList<>();
+        List<Schedule> scheduleList = timetable.getScheduleList();
+        fullList.add(new FreeSlot(timetable.getCoverage().getStartTime(), scheduleList.get(0).getStartTime()));
+        fullList.add(scheduleList.get(0));
+        int i;
+        for (i = 1; i < scheduleList.size(); i++) {
+            fullList.add(new FreeSlot(scheduleList.get(i - 1).getEndTime(), scheduleList.get(i).getStartTime()));
+            fullList.add(scheduleList.get(i));
+        }
+        fullList.add(new FreeSlot(scheduleList.get(i - 1).getStartTime(), timetable.getCoverage().getEndTime()));
+
+        return fullList.stream()
+                .map(slot -> {
+                    if (slot.getClass() == FreeSlot.class) {
+                        TimeRange overlap = ((FreeSlot) slot).getOverlapWith(target);
+                        if (overlap == null) {
+                            return 0.0;
+                        }
+                        return overlap.getLength() / duration * TimeConsts.PRIORITY_TO_RATING_MAP
+                                .get(SchedulePriority.NONE);
+                    } else {
+                        // overlap with a schedule
+                        TimeRange overlap = ((Schedule) slot).getTimeRange().getOverlapWith(target);
+                        if (overlap == null) {
+                            return 0.0;
+                        }
+                        return overlap.getLength() / duration * TimeConsts.PRIORITY_TO_RATING_MAP
+                                .get(((Schedule) slot).getPriority());
+                    }
+                })
+                .reduce(Double::sum).orElse(0.0);
     }
 
 }

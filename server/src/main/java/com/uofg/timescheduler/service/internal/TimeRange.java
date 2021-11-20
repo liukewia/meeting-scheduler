@@ -45,9 +45,24 @@ public class TimeRange {
                 || this.getStartTime() >= that.getEndTime());
     }
 
+    public boolean hasStrictOverlapWith(TimeRange that) {
+        return !(this.getEndTime() < that.getStartTime()
+                || this.getStartTime() > that.getEndTime());
+    }
+
     public boolean contains(TimeRange that) {
         return that.getStartTime() >= this.getStartTime()
                 && that.getEndTime() <= this.getEndTime();
+    }
+
+    public TimeRange getOverlapWith(TimeRange that) {
+        long lower = Math.max(this.getStartTime(), that.getStartTime());
+        long upper = Math.min(this.getEndTime(), that.getEndTime());
+        if (lower < upper) {
+            return new TimeRange(lower, upper);
+        } else {
+            return null;
+        }
     }
 
     public List<TimeRange> getPossibleSlotsBy(long duration) {
