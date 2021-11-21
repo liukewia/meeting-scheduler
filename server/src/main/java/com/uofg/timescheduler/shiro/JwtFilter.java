@@ -57,7 +57,6 @@ public class JwtFilter extends AuthenticatingFilter {
             // 判断是否已过期
             Claims claim = jwtUtils.getClaimByToken(token);
             if (claim == null || jwtUtils.isTokenExpired(claim.getExpiration())) {
-                // https://www.yisu.com/zixun/541100.html
                 throw new ExpiredCredentialsException("The token has expired, please log in again!");
             }
         }

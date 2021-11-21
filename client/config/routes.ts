@@ -64,13 +64,29 @@ export default [
             exact: true,
             component: './settings/SiteSettings',
           },
+          // {
+          //   path: '/settings/account',
+          //   exact: true,
+          //   component: './settings/AccountSettings',
+          // },
+          // {
+          //   redirect: '/home',
+          // },
+        ],
+      },
+      {
+        path: '/account',
+        routes: [
           {
-            path: '/settings/account',
-            exact: true,
-            component: './settings/AccountSettings',
+            path: '/account/center',
+            component: './Account/Center',
           },
           {
-            redirect: '/home',
+            path: '/account/settings',
+            component: './Account/Setting',
+          },
+          {
+            component: '@/components/Exceptions/404',
           },
         ],
       },

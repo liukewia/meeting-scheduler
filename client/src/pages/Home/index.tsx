@@ -18,7 +18,7 @@ export default function index() {
   return (
     <>
       <PageHeader ghost={false} title="Home">
-        This application manages one person's timetable and can find common
+        This application manages one person's timetable and can find commonly
         available times for people to meet.
         {/* <div>{JSON.stringify(data)}</div> */}
       </PageHeader>

@@ -60,4 +60,5 @@ public class AccountRealm extends AuthorizingRealm {
 
         return new SimpleAuthenticationInfo(profile, jwt.getCredentials(), getName());
     }
+
 }

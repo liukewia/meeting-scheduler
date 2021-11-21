@@ -42,11 +42,11 @@ export const siderItems = [
         path: '/settings/site',
         label: 'Site Settings',
       },
-      {
-        key: 'settings-account',
-        path: '/settings/account',
-        label: 'Account Settings',
-      },
+      // {
+      //   key: 'settings-account',
+      //   path: '/settings/account',
+      //   label: 'Account Settings',
+      // },
     ],
   },
 ];

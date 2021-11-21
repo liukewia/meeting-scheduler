@@ -1,28 +1,16 @@
 import { AccordionSummaryTypeMap } from '@material-ui/core';
 import request from './axiosSetting';
 
-/** getuserinfo GET /api/currentUser */
-export async function queryCurrentUser(options?: { [key: string]: any }) {
-  // will throw 404 error if not logged in,
-
-  return {
-    success: false,
-    data: {},
-  };
-
-  // return {
-  //   success: true,
-  //   data: {
-  //     name: 'finn',
-  //     id: '0001',
-  //     role: 'admin',
-  //   },
-  // };
-
-  // return request('/api/user/current/', {
-  //   method: 'GET',
-  //   ...(options || {}),
-  // });
+/** get currentUser GET /api/user/currentUser */
+/** log out POST /api/user/currentUser */
+export async function queryCurrentUser(options?: {
+  [key: string]: any;
+}): Promise<any> {
+  const res = await request('/user/currentUser', {
+    method: 'GET',
+    ...(options || {}),
+  });
+  return res;
 }
 
 /** log in POST /api/user/login */
@@ -34,6 +22,15 @@ export async function login(
   const res = await request('/user/login', {
     method: 'POST',
     data: body,
+    ...(options || {}),
+  });
+  return res;
+}
+
+/** log out POST /api/user/logout */
+export async function logout(options?: { [key: string]: any }): Promise<any> {
+  const res = await request('/user/logout', {
+    method: 'POST',
     ...(options || {}),
   });
   return res;

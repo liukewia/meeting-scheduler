@@ -2,7 +2,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Space, message, Tabs, Form } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Link, history, useModel } from 'umi';
-import { login } from '@/services/user';
+import { login, queryCurrentUser } from '@/services/user';
 import logoSrc from 'public/logo.svg';
 import './index.less';
 import { businessTitle } from '@/constants';
@@ -10,12 +10,13 @@ import { Input, Button, Checkbox } from 'antd';
 import Background from '@/components/Background';
 import { useRequest } from 'ahooks';
 import Omit from 'omit.js';
+import { getJwt } from '@/utils/jwtUtil';
 
 const Login: React.FC = (props) => {
   const { initialState, setInitialState } = useModel('@@initialState');
 
   // on success, store the jwt according to autoLogin, and jump to redirected url or home
-  const { run: runLogin } = useRequest(login, {
+  const { loading, run: runLogin } = useRequest(login, {
     // defaultParams: [
     //   {
     //     username: 'finn',
@@ -35,18 +36,42 @@ const Login: React.FC = (props) => {
         redirect: string;
       };
       history.push(redirect || '/');
+      return;
     },
   });
 
-  // TODO go to the redirect url if already logged in
-  useEffect(() => {
-    // const jwt = localStorage.getItem('jwt');
-    // if (!initialState?.currentUser && jwt) {
+  const { run: query } = useRequest(queryCurrentUser, {
+    manual: true,
+    onSuccess: async (userInfo, params) => {
+      console.log('params: ', params);
+      if (userInfo) {
+        await setInitialState((s) => ({ ...s, currentUser: userInfo }));
+      }
+      console.log('userInfo: ', userInfo);
+      if (!history) return;
+      const { query } = history.location;
+      const { redirect } = query as {
+        redirect: string;
+      };
+      history.push(redirect || '/');
+      return;
+    },
+  });
 
+  // go to the redirect url if already logged in
+  useEffect(() => {
+    // const jwt = getJwt();
+    // if (!initialState?.currentUser?.id && !jwt) {
+    //   return;
+    // }
+    // if (!initialState?.currentUser?.id && jwt) {
+    //   message.info('Automatically logging in...');
+    //   query();
+    //   return;
     // }
     if (
-      initialState?.currentUser?.access === 'admin' ||
-      initialState?.currentUser?.access === 'user'
+      initialState?.currentUser?.access &&
+      initialState?.currentUser?.access !== 'guest'
     ) {
       message.info('You have already logged in.');
       history.push((history?.location?.query?.redirect as string) || '/');
@@ -124,6 +149,7 @@ const Login: React.FC = (props) => {
                 type="primary"
                 htmlType="submit"
                 className="login-form-button"
+                loading={loading}
               >
                 Log in
               </Button>

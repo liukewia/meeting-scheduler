@@ -23,7 +23,7 @@ const LayoutWrapper = ({
   // not un-auth paths, but the user also has not logged in, e.g. an unauth user wants to go to homepage.
 
   if (!isUnAuthPaths && !initialState?.currentUser?.id) {
-    console.error('cannot fetch initial state, fallback to login page');
+    console.log('cannot fetch initial state, fallback to login page');
     // jump to login page
     return <Redirect to="/user/login" />;
   }

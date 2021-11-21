@@ -1,5 +1,6 @@
 package com.uofg.timescheduler.service.internal;
 
+import cn.hutool.crypto.SecureUtil;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -12,6 +13,10 @@ public class FreeSlot extends TimeRange {
      */
     public FreeSlot(long startTime, long endTime) {
         super(startTime, endTime);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(SecureUtil.md5("222222"));
     }
 
     @Override public String toString() {

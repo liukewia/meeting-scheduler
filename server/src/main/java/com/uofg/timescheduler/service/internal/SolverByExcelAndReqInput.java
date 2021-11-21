@@ -119,13 +119,13 @@ public class SolverByExcelAndReqInput {
             TimeRange randedRange = TimeUtil.generateRandomSlotWithin(datesRequired, durationMillis);
             population.add(new RatedTimeRange(randedRange, allTimeTables));
         }
-        // sort by descending scores
+        // sort by scores in descending order
         population.sort((o1, o2) -> Double.compare(o2.getScore(), o1.getScore()));
 
         while (currInteration < AlgorithmConsts.ITERATION_TIMES) {
             // crossover
             List<RatedTimeRange> crossover = new ArrayList<>();
-            for (int i = 0; i < AlgorithmConsts.CROSSOVER_NUM / 2; i++) {
+            for (int i = 0; i < AlgorithmConsts.CROSSOVER_TIMES / 2; i++) {
                 crossover.addAll(AlgorithmUtil.getSlotAdjacentTo(population.get(i)
                         .getTimeRange())
                         .stream()
@@ -136,7 +136,7 @@ public class SolverByExcelAndReqInput {
 
             // mutation
             List<RatedTimeRange> mutated = new ArrayList<>();
-            for (int i = 0; i < AlgorithmConsts.MUTATION_NUM; i++) {
+            for (int i = 0; i < AlgorithmConsts.MUTATION_TIMES; i++) {
                 TimeRange randedRange = TimeUtil.generateRandomSlotWithin(datesRequired, durationMillis);
                 mutated.add(new RatedTimeRange(randedRange, allTimeTables));
             }
@@ -163,6 +163,7 @@ public class SolverByExcelAndReqInput {
                 && output.size() <= AlgorithmConsts.TOP_OUTPUT_NUM
         ) {
             RatedTimeRange removed = population.remove(0);
+            // deduplicate by hashcode
             if (output.contains(removed)) {
                 continue;
             }

@@ -13,7 +13,6 @@ import org.apache.poi.ss.usermodel.Cell;
 
 @Data
 @Log4j2
-//@Entity
 public class User {
 
 

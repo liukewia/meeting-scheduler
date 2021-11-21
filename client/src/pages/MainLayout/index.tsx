@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Layout } from 'antd';
+import { Layout, Space } from 'antd';
 import { useModel } from 'umi';
 
 import classNames from 'classnames';
@@ -8,6 +8,7 @@ import CenteredSpinner from '@/components/CenteredSpinner';
 // import 'antd/dist/antd.css';
 import './index.less';
 import Sider from './Sider';
+import AvatarDropdown from '@/components/AvatarDropdown';
 
 const { Header, Content } = Layout;
 
@@ -29,7 +30,11 @@ export default (props) => {
             [`${PREFIX_CLS}-layout-header`]: true,
             [`${PREFIX_CLS}-layout-header-light`]: isLightTheme,
           })}
-        />
+        >
+          <Space className="header-right">
+            <AvatarDropdown />
+          </Space>
+        </Header>
         <Content>
           <Suspense fallback={<CenteredSpinner tip="loading" />}>
             {props.children}

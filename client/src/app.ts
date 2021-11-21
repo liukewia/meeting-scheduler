@@ -1,6 +1,8 @@
 import { history, matchPath } from 'umi';
 import { queryCurrentUser } from '@/services/user';
 import { LOGIN_PATH, UN_AUTH_PATHS } from '@/constants';
+import { getJwt } from './utils/jwtUtil';
+import { message } from 'antd';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -12,8 +14,9 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser();
-      return msg.data;
+      const res = await queryCurrentUser();
+      console.log('res: ', res);
+      return res;
     } catch (error) {
       console.error('fetchUserInfo error: ', error);
       history.push(LOGIN_PATH);
@@ -22,11 +25,27 @@ export async function getInitialState(): Promise<{
   };
 
   // https://v5.reactrouter.com/web/api/matchPath
-  if (
-    !matchPath(history.location.pathname, {
-      path: UN_AUTH_PATHS,
-    })
-  ) {
+  const isInUnauthRoutes = matchPath(history.location.pathname, {
+    path: UN_AUTH_PATHS,
+  });
+  if (isInUnauthRoutes && getJwt()) {
+    // has jwt, need auto login now
+    const currentUser = await fetchUserInfo();
+    console.log('initialState: ', {
+      fetchUserInfo,
+      currentUser,
+      settings: {},
+    });
+    if (currentUser?.id !== undefined) {
+      history.push('/');
+    }
+    return {
+      fetchUserInfo,
+      currentUser,
+      settings: {},
+    };
+  }
+  if (!isInUnauthRoutes) {
     const currentUser = await fetchUserInfo();
     console.log('initialState: ', {
       fetchUserInfo,

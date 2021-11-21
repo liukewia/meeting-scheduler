@@ -1,0 +1,27 @@
+{
+  "message": "Network Error",
+  "name": "Error",
+  "stack": "Error: Network Error\n    at createError (http://localhost:8000/mf-dep_vendors-node_modules_axios_index_js.9bb3623a.async.js:757:15)\n    at XMLHttpRequest.handleError (http://localhost:8000/mf-dep_vendors-node_modules_axios_index_js.9bb3623a.async.js:136:14)",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "transformRequest": [null],
+    "transformResponse": [null],
+    "timeout": 30000,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjM3NTI1OTc3LCJleHAiOjE2MzgxMzA3Nzd9.yRXtbOLdFK7JwYett73PJJL4luibABom_mdcaO1cHocB946VXF98T-_Zv5rLRXjsjzdTyRDOQ8TOCvJzLY38YA"
+    },
+    "baseURL": "http://localhost:8081/api",
+    "method": "get",
+    "url": "/user/currentUser"
+  },
+  "status": null
+}
