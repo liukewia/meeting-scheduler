@@ -16,8 +16,10 @@ const LayoutWrapper = ({
   const isUnAuthPaths = matchPath(pathname, {
     path: UN_AUTH_PATHS,
   });
+  console.log('in layout wrapper');
   // if is login / signup page, go to them directly.
   if (isUnAuthPaths) {
+    // the dark theme has not been adapted in unauthed pages, fallback to light theme
     return <>{children}</>;
   }
   // not un-auth paths, but the user also has not logged in, e.g. an unauth user wants to go to homepage.

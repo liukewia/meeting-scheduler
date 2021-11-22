@@ -68,15 +68,14 @@ function createAxiosInstance() {
       // cannot get response from backend
       console.log(JSON.stringify(error));
       console.log(JSON.stringify(error.response));
-      const { response } = error;
       notification.error({
         // expose the potential error explicitly
-        message: `${response?.config?.method || error.config?.method} ${
-          response?.config?.url || error.config?.url
+        message: `${error.response?.config?.method || error.config?.method} ${
+          error.response?.config?.url || error.config?.url
         } Failed.`,
-        description: response?.data?.msg || error.message,
+        description: error.response?.data?.msg || error.message,
       });
-      // the rejected error returned tells userequest to go into onEror callback
+      // the rejected error returned will be caught by useRequest and goes into onError callback
       return Promise.reject(error);
     },
   );

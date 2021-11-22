@@ -4,7 +4,7 @@
 <!-- 搭建Pagecontainer
 搬settings -->
 
-header右侧填充 avatardropdown
+<!-- header右侧填充 avatardropdown -->
 
 
 <!-- 全局初始数据
@@ -29,5 +29,6 @@ https://github.com/DevExpress/devextreme-reactive/blob/21f6b999d94ed9da47b254373
 https://codesandbox.io/s/pedantic-dhawan-rhoy0?file=/demo.js -->
 
 
-priority consideration, could use genetic algorithm, choosing one slot having certain duration & evaluate it.
+<!-- priority consideration, could use genetic algorithm, choosing one slot having certain duration & evaluate it. -->
 
+signup api

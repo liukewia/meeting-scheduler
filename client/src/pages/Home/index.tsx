@@ -5,15 +5,6 @@ import { userIndex } from '@/services/user';
 import { useEffect } from 'react';
 
 export default function index() {
-  // const { data, run } = useRequest(userIndex, {
-  //   manual: true,
-  // });
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     run();
-  //   }, 3000);
-  // }, []);
 
   return (
     <>

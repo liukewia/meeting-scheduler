@@ -36,7 +36,8 @@ export async function getInitialState(): Promise<{
       currentUser,
       settings: {},
     });
-    if (currentUser?.id !== undefined) {
+    // prevent jumping when id is 0
+    if (currentUser?.id === undefined) {
       history.push('/');
     }
     return {

@@ -113,8 +113,9 @@ public class UserController {
     @PostMapping("/logout")
     public Result logout() {
         // https://segmentfault.com/q/1010000010043871/a-1020000040644951
-        SecurityUtils.getSubject().logout();
-        return Result.succ(MapUtil.builder().map());
+        // since using jwt, the logout behavior is null, need not redis environment installed anymore
+//        SecurityUtils.getSubject().logout();
+        return Result.succ(null);
     }
 
 
