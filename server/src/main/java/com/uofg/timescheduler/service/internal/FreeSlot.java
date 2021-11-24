@@ -1,7 +1,7 @@
 package com.uofg.timescheduler.service.internal;
 
-import cn.hutool.crypto.SecureUtil;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -16,7 +16,7 @@ public class FreeSlot extends TimeRange {
     }
 
     public static void main(String[] args) {
-        System.out.println(SecureUtil.md5("222222"));
+        System.out.println(LocalDateTime.now());
     }
 
     @Override public String toString() {

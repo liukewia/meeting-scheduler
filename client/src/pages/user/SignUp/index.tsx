@@ -1,11 +1,12 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
-import { Form, Button, Input, Popover, Progress, message } from 'antd';
+import { Form, Button, Input, Popover, Progress, message, Select } from 'antd';
 import { Link, history } from 'umi';
 
 import styles from './style.less';
 import { useRequest } from 'ahooks';
 import { signup } from '@/services/user';
+import { getTimezoneSelectOptions } from '@/utils/timezoneUtil';
 
 const FormItem = Form.Item;
 
@@ -65,22 +66,25 @@ const Register: FC = (props) => {
   };
 
   const { loading: submitting, run: runRegister } = useRequest(signup, {
-    // defaultParams: [values],
     manual: true,
-    onSuccess: (data, [body, params]) => {
-      console.log('data: ', data);
-      // if (data.status === 'ok') {
-      //   message.success('Successfully signed up!');
-      //   history.push('/user/login');
-      // }
-      // if (data.status === 'error') {
-      //   message.error('Cannot sign up!');
-      // }
+    onSuccess: () => {
+      message.info('Sign up succeed, please log in.');
+      history.push('/user/login');
+    },
+    onError: () => {
+      message.error('Sign up failed.');
     },
   });
 
   const onFinish = (values: any) => {
-    runRegister(values);
+    const valsToSubmit = {
+      username: values.username,
+      utcOffset:
+        parseFloat(values.timezone.match(/=(\S*)/)[1]) * 60 * 60 * 1000,
+      email: values.email,
+      password: values.password,
+    };
+    runRegister(valsToSubmit);
   };
 
   const checkConfirm = (_: any, value: string) => {
@@ -107,7 +111,7 @@ const Register: FC = (props) => {
       return promise.reject('');
     }
     if (value && confirmDirty) {
-      form.validateFields(['confirm']);
+      form.validateFields(['confirmPwd']);
     }
     return promise.resolve();
   };
@@ -150,6 +154,22 @@ const Register: FC = (props) => {
             ]}
           >
             <Input size="large" placeholder="Username" />
+          </FormItem>
+          <FormItem
+            name="timezone"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Select size="large" placeholder="Time Zone">
+              {getTimezoneSelectOptions().map((item) => (
+                <Select.Option key={item.key} value={item.key}>
+                  {item.label}
+                </Select.Option>
+              ))}
+            </Select>
           </FormItem>
           <FormItem
             name="email"
@@ -201,7 +221,7 @@ const Register: FC = (props) => {
             </FormItem>
           </Popover>
           <FormItem
-            name="confirm"
+            name="confirmPwd"
             rules={[
               {
                 required: true,

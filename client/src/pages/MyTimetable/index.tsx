@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Card, Col, PageHeader, Row } from 'antd';
 import { SpacedContainer } from '@/components/SpacedContainer';
-import Scheduler from './components/Scheduler';
+import Calendar from './components/Calendar';
 import CenteredSpinner from '@/components/CenteredSpinner';
 
 export default () => {
@@ -9,7 +9,7 @@ export default () => {
     <Suspense fallback={<CenteredSpinner tip="loading" />}>
       <PageHeader ghost={false} title="My Timetable"></PageHeader>
       <SpacedContainer>
-        <Scheduler />
+        <Calendar />
       </SpacedContainer>
     </Suspense>
   );

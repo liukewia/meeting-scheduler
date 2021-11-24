@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -32,9 +32,9 @@ public class Schedule implements Serializable {
 
     private String title;
 
-    private LocalDateTime startTime;
+    private Date startTime;
 
-    private LocalDateTime endTime;
+    private Date endTime;
 
     private Long priorityId;
 

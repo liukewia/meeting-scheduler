@@ -33,14 +33,11 @@ const loading = (
 const AvatarDropdown: React.FC = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
   const access = useAccess();
-  const {
-    appTheme,
-    setAppTheme,
-    customColors,
-    setCustomColors,
-    resetAllThemes,
-  } = useModel('theme');
+  const { setAppTheme } = useModel('theme', (model) => ({
+    setAppTheme: model.setAppTheme,
+  }));
   const { run: runLogout } = useRequest(logout, {
+    throttleWait: 1000,
     manual: true,
     onSuccess: async () => {
       localStorage.removeItem('jwt');
@@ -61,7 +58,7 @@ const AvatarDropdown: React.FC = () => {
         }) &&
         !redirect
       ) {
-        setAppTheme('light'); // rollback default theme, but not colors
+        setAppTheme('light'); // rollback to default theme, but not colors
         history.replace({
           pathname: '/user/login',
           search: stringify({

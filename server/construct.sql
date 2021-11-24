@@ -38,6 +38,10 @@ VALUES ('2', 'david', 'e3ceb5881a0a1fdaad01296d7554868d',
         'https://gw.alipayobjects.com/zos/rmsportal/cnrhVkzwxjPwAaCfPbdc.png',
         'david@live.com', '3600000', '0', '2021-11-20 10:48:02', NULL);
 
+# mary 333333
+# martin 444444
+# frank 555555
+
 
 CREATE TABLE role
 (

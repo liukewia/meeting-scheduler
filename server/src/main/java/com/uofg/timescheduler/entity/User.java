@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import lombok.Data;
@@ -45,9 +45,9 @@ public class User implements Serializable {
 
     private Integer status;
 
-    private LocalDateTime created;
+    private Date created;
 
-    private LocalDateTime lastLogin;
+    private Date lastLogin;
 
 
 }

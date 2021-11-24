@@ -1,11 +1,7 @@
 import { Card, Col, PageHeader, Row } from 'antd';
 import { SpacedContainer } from '@/components/SpacedContainer';
-import { useRequest } from 'ahooks';
-import { userIndex } from '@/services/user';
-import { useEffect } from 'react';
 
 export default function index() {
-
   return (
     <>
       <PageHeader ghost={false} title="Home">
