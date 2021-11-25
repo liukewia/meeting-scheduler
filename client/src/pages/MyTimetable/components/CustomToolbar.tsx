@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Views, Navigate } from 'react-big-calendar';
 import { Button, Typography, Row, Space, Select, Tooltip } from 'antd';
 import {
@@ -13,88 +13,77 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 const { Title } = Typography;
 const { Option } = Select;
 
-class CustomToolbar extends React.Component {
-  constructor(props: any) {
-    super(props);
-  }
+const CustomToolbar: React.FC = (props: any) => {
+  // console.log('props: ', props);
+  const { label, showCreateForm } = props;
 
-  navigate = (action) => {
-    this.props.onNavigate(action);
+  const navigate = (action) => {
+    props.onNavigate(action);
   };
 
-  handleChangeView = (view) => {
-    this.props.onView(view);
+  const handleChangeView = (view) => {
+    props.onView(view);
   };
 
-  render() {
-    const { label, showCreateModalProp } = this.props;
-    return (
-      <>
-        <Row justify="space-between" align="middle">
-          <Row justify="space-around" align="middle">
-            <Button
-              type="text"
-              shape="circle"
-              icon={<CalendarOutlined />}
-              size="large"
-              onClick={this.navigate.bind(null, Navigate.TODAY)}
-            >
-              TODAY
-            </Button>
-            <Button
-              type="text"
-              shape="circle"
-              icon={<LeftOutlined />}
-              size="large"
-              onClick={this.navigate.bind(null, Navigate.PREVIOUS)}
-            />
-            <Button
-              type="text"
-              shape="circle"
-              icon={<RightOutlined />}
-              size="large"
-              onClick={this.navigate.bind(null, Navigate.NEXT)}
-            />
-          </Row>
-          <Row justify="space-around" align="middle">
-            <Title level={5}>{label}</Title>
-          </Row>
-          <Row justify="space-around" align="middle">
-            <Space size={10}>
+  return (
+    <>
+      <Row justify="space-between" align="middle">
+        <Row justify="space-around" align="middle">
+          <Space>
+          <Tooltip title="Go To Today">
+            <Button onClick={() => navigate(Navigate.TODAY)}>TODAY</Button>
+            </Tooltip>
+            <Tooltip title="Previous">
+              <Button
+                type="text"
+                shape="circle"
+                icon={<LeftOutlined />}
+                onClick={() => navigate(Navigate.PREVIOUS)}
+              />
+            </Tooltip>
+            <Tooltip title="Next">
+              <Button
+                type="text"
+                shape="circle"
+                icon={<RightOutlined />}
+                onClick={() => navigate(Navigate.NEXT)}
+              />
+            </Tooltip>
+          </Space>
+        </Row>
+        <Row justify="space-around" align="middle">
+          <Title level={5}>{label}</Title>
+        </Row>
+        <Row justify="space-around" align="middle">
+          <Space size={10}>
+            <Tooltip title="Create New Event">
               <Button
                 type="default"
-                size="large"
-                // icon={
-                //   <PlusCircleTwoTone
-                //     style={{
-                //       display: 'inline-block',
-                //       verticalAlign: 'initial',
-                //     }}
-                //   />
-                // }
-                onClick={showCreateModalProp}
+                // size="large"
+                onClick={showCreateForm}
               >
                 Create
               </Button>
+            </Tooltip>
+            <Tooltip title="Select View">
               <Select
                 defaultValue={Views.WEEK}
-                size="large"
                 style={{ width: 100 }}
-                bordered={true}
-                onChange={this.handleChangeView}
+                value={props.view}
+                onChange={handleChangeView}
               >
-                <Option value={Views.MONTH}>MONTH</Option>
-                <Option value={Views.WEEK}>WEEK</Option>
-                <Option value={Views.DAY}>DAY</Option>
-                <Option value={Views.AGENDA}>AGENDA</Option>
+                <Option value={Views.MONTH}>Month</Option>
+                <Option value={Views.WEEK}>Week</Option>
+                <Option value={Views.DAY}>Day</Option>
+                <Option value={Views.AGENDA}>Agenda</Option>
               </Select>
-            </Space>
-          </Row>
+            </Tooltip>
+          </Space>
         </Row>
-        <br />
-      </>
-    );
-  }
-}
+      </Row>
+      <br />
+    </>
+  );
+};
 
 export default CustomToolbar;

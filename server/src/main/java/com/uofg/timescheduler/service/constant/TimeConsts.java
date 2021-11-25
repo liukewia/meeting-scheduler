@@ -6,26 +6,28 @@ import java.util.Map;
 
 public class TimeConsts {
 
-    public static long ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L;
-    public static long TWO_DAY_MILLIS = 2 * ONE_DAY_MILLIS;
-    public static long THREE_DAY_MILLIS = 3 * ONE_DAY_MILLIS;
-    public static long FOUR_DAY_MILLIS = 4 * ONE_DAY_MILLIS;
-    public static long FIVE_DAY_MILLIS = 5 * ONE_DAY_MILLIS;
-    public static long SIX_DAY_MILLIS = 6 * ONE_DAY_MILLIS;
-    public static long SEVEN_DAY_MILLIS = 7 * ONE_DAY_MILLIS;
+    public final static long ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L;
+    public final static long TWO_DAY_MILLIS = 2 * ONE_DAY_MILLIS;
+    public final static long THREE_DAY_MILLIS = 3 * ONE_DAY_MILLIS;
+    public final static long FOUR_DAY_MILLIS = 4 * ONE_DAY_MILLIS;
+    public final static long FIVE_DAY_MILLIS = 5 * ONE_DAY_MILLIS;
+    public final static long SIX_DAY_MILLIS = 6 * ONE_DAY_MILLIS;
+    public final static long SEVEN_DAY_MILLIS = 7 * ONE_DAY_MILLIS;
 
-    public static long ONE_HOUR_MILLIS = 60 * 60 * 1000L;
-    public static long ONE_MINUTE_MILLIS = 60 * 1000L;
-    public static long ONE_SECOND_MILLIS = 1000L;
+    public final static long ONE_HOUR_MILLIS = 60 * 60 * 1000L;
+    public final static long ONE_MINUTE_MILLIS = 60 * 1000L;
+    public final static long ONE_SECOND_MILLIS = 1000L;
 
 
-    public static int DAYS_IN_A_WEEK = 7;
+    public final static int DAYS_IN_A_WEEK = 7;
 
-    public static int UTC_LOWER_BOUND = -12;
-    public static int UTC_UPPER_BOUND = 14;
-    public static Map<String, Long> DAY_TO_TIMESTAMP_MAP = new HashMap<>();
-    public static Map<Long, String> TIMESTAMP_TO_DAY_MAP = new HashMap<>();
-    public static HashMap<SchedulePriority, Double> PRIORITY_TO_RATING_MAP = new HashMap<>();
+    public final static int UTC_LOWER_BOUND = -12;
+    public final static int UTC_UPPER_BOUND = 14;
+    public final static Map<String, Long> DAY_TO_TIMESTAMP_MAP = new HashMap<>();
+    public final static Map<Long, String> TIMESTAMP_TO_DAY_MAP = new HashMap<>();
+    public final static HashMap<SchedulePriority, Double> PRIORITY_TO_RATING_MAP = new HashMap<>();
+
+    public final static long MAX_TIME_MILLIS = 2147454847000L;
 
     static {
         DAY_TO_TIMESTAMP_MAP.put("mon", 0L);

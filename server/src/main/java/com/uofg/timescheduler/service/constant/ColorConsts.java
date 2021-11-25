@@ -3,13 +3,13 @@ package com.uofg.timescheduler.service.constant;
 import com.uofg.timescheduler.service.internal.SchedulePriority;
 import java.util.HashMap;
 
-public class ColorConsts {
+public final class ColorConsts {
 
-    public static String LIGHT_GREEN = "FF92D050";
-    public static String ORANGE = "FFFFC000";
-    public static String YELLOW = "FFFFFF00";
-    public static String DARK_RED = "FFC00000";
-    public static HashMap<String, SchedulePriority> COLOR_TO_PRIORITY_MAP = new HashMap<>();
+    public final static String LIGHT_GREEN = "FF92D050";
+    public final static String ORANGE = "FFFFC000";
+    public final static String YELLOW = "FFFFFF00";
+    public final static String DARK_RED = "FFC00000";
+    public final static HashMap<String, SchedulePriority> COLOR_TO_PRIORITY_MAP = new HashMap<>();
 
     static {
         COLOR_TO_PRIORITY_MAP.put(LIGHT_GREEN, SchedulePriority.LOW);

@@ -32,13 +32,13 @@ public class Schedule implements Serializable {
 
     private String title;
 
+    private String location;
+
     private Date startTime;
 
     private Date endTime;
 
     private Long priorityId;
-
-    private String location;
 
     private String note;
 

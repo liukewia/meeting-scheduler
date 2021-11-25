@@ -4,12 +4,10 @@ import { message, notification } from 'antd';
 import axios from 'axios';
 import { matchPath, history } from 'umi';
 
-const request = createAxiosInstance();
-
 function createAxiosInstance() {
   const instance = axios.create({
     baseURL: 'http://localhost:8081/api',
-    timeout: 30000,
+    timeout: 3000000000000,
     // withCredentials: true,
     // headers: { 'Content-Type': 'application/json' },
   });
@@ -82,5 +80,7 @@ function createAxiosInstance() {
 
   return instance;
 }
+
+const request = createAxiosInstance();
 
 export default request;

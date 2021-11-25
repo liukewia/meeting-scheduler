@@ -7,3 +7,19 @@ export function disabledDate(current) {
       current > moment('2038-01-19 03:14 +0000', 'YYYY-MM-DD HH:mm Z'))
   );
 }
+
+// https://github.com/dmfilipenko/timezones.json
+import TIME_ZONES from './timezone.min.json';
+
+export interface Timezone {
+  key: string;
+  label: string;
+  value: number;
+}
+
+export const getTimezoneSelectOptions = () => {
+  return TIME_ZONES.map((timeZone) => ({
+    key: timeZone.key,
+    label: timeZone.text,
+  }));
+};

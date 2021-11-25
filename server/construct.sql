@@ -24,23 +24,27 @@ CREATE TABLE user
   default charset = utf8mb4
   collate = utf8mb4_0900_ai_ci;
 
-# pwd 111111
+# finn 111111 +0
 INSERT INTO scheduler.user (id, username, `password`, avatar, email, utc_offset,
                             `status`, created, last_login)
 VALUES ('1', 'finn', '96e79218965eb72c92a549dd5a330112',
         'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
         'liukewia@gmail.com', '0', '0', '2021-11-20 10:44:01', NULL);
 
-# pwd 222222
+# david 222222 +1
 INSERT INTO scheduler.user (id, username, `password`, avatar, email, utc_offset,
                             `status`, created, last_login)
 VALUES ('2', 'david', 'e3ceb5881a0a1fdaad01296d7554868d',
         'https://gw.alipayobjects.com/zos/rmsportal/cnrhVkzwxjPwAaCfPbdc.png',
         'david@live.com', '3600000', '0', '2021-11-20 10:48:02', NULL);
 
-# mary 333333
-# martin 444444
-# frank 555555
+
+
+# finn 111111 +0
+# david 222222 +1
+# mary 333333 +0
+# martin 444444 +0
+# frank 555555 +10
 
 
 CREATE TABLE role

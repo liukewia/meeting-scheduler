@@ -7,7 +7,9 @@ import CenteredSpinner from '@/components/CenteredSpinner';
 export default () => {
   return (
     <Suspense fallback={<CenteredSpinner tip="loading" />}>
-      <PageHeader ghost={false} title="My Timetable"></PageHeader>
+      <PageHeader ghost={false} title="My Timetable">
+        A user can create an event either by clicking the create button in the top right, or selecting a slot by dragging and dropping inside the timetable. A user can edit an event by double clicking an event.
+      </PageHeader>
       <SpacedContainer>
         <Calendar />
       </SpacedContainer>

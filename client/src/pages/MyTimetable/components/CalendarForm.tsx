@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Modal,
   Form,
@@ -6,250 +6,189 @@ import {
   DatePicker,
   message,
   Button,
-  AutoComplete,
-} from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import DataContext from "../../context/data-context";
-import { setCita, updateCita } from "../../firebase/firebase";
-import "../../style/calendar.css";
-import { formRules, mapCalendarPacientes } from "./CalendarConfig";
+  Radio,
+  Slider,
+} from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { formRules } from './formConfig';
+import { parseEventInForm } from '@/utils/scheduleUtil';
+import moment from 'moment';
+import { useRequest } from 'ahooks';
+import { addSchdule, updateSchdule } from '@/services/schedule';
 
 const { RangePicker } = DatePicker;
 
+const marks = {
+  0: 'None',
+  25: 'Low',
+  50: 'Normal',
+  75: 'High',
+  100: 'Inf',
+};
+
 const CalendarForm = ({
   visible,
-  title,
   isEdit,
-  onCreate,
-  onCancel,
   selectedEvent,
-  editMode,
+  onCommitChanges,
+  onCancel,
 }) => {
   const [form] = Form.useForm();
-  const { citas, expedientes } = useContext(DataContext);
-
-  const [mappedExpedientes, setMappedExpedientes] = useState([]);
-  const [userObj, setUserObj] = useState({});
 
   useEffect(() => {
-    console.log("在表格中运行side effect");
-    if (visible) form.resetFields();
-    if (expedientes && expedientes.length !== 0)
-      setMappedExpedientes(mapCalendarPacientes(expedientes));
-  }, [expedientes, selectedEvent, visible, form]);
+    if (visible) {
+      console.log('setFieldsValue');
+      console.log('selectedEvent: ', selectedEvent);
+      form.resetFields();
+      form.setFieldsValue(parseEventInForm(selectedEvent));
+    }
+  }, [selectedEvent, visible, form]);
 
-  const onSubmitForm = (originalEvent) => {
-    console.warn("我进入onSubmitForm，它是编辑模式?", isEdit);
-    console.log("Data original (OnClick): ", originalEvent);
-    form
-      .validateFields()
-      .then(async (values) => {
-        // 保存预约信息
-        try {
-          let cita = {
-            active: true,
-            titulo: values.eventTitle,
-            startDate: values.eventTime[0].toDate(),
-            endDate: values.eventTime[1].toDate(),
-            paciente: userObj.nombre || originalEvent.userObj.nombre,
-            pacienteCorreo: userObj.correo || originalEvent.userObj.correo,
-            detalles: values.eventDetails || "",
-            idDoc: AuthCTX.currentUser.uid,
-          };
-          console.log("保存在 BD 中的事件:", cita);
-          if (!isEdit) {
-            await setCita(cita);
-            message.success("约会创建成功");
-          } else {
-            await updateCita(cita, originalEvent.id);
-            message.success("约会更新成功");
-          }
-          onCancel();
-        } catch (e) {
-          console.error(e);
-          !isEdit
-            ? message.error("创建约会时出错")
-            : message.error("更新约会时出错");
-        }
+  const { loading: addLoading, run: runAddSchedule } = useRequest(addSchdule, {
+    manual: true,
+    onError: () => {
+      message.error('Unable to add schedule.');
+    },
+  });
+  const { loading: uodateLoading, run: runUpdateSchedule } = useRequest(
+    updateSchdule,
+    {
+      manual: true,
+      onError: () => {
+        message.error('Unable to update schedule.');
+      },
+    },
+  );
 
-        form.resetFields();
-        onCreate({
-          ...values,
-          correoPaciente: userObj.correo || originalEvent.userObj.correo,
-          nombrePaciente: userObj.nombre || originalEvent.userObj.nombre,
-          nombreDoctor: AuthCTX.currentUser.displayName,
-        });
-      })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
+  const onSubmitForm = (schedule: any) => {
+    // add or update
+
+    console.log('schedule: ', schedule);
+
+    // console.warn('我进入onSubmitForm，它是编辑模式?', isEdit);
+    // console.log('Data original (OnClick): ', originalEvent);
+    // form
+    //   .validateFields()
+    //   .then(async (values) => {
+    //     // 保存预约信息
+    //     try {
+    //       let cita = {
+    //         active: true,
+    //         titulo: values.eventTitle,
+    //         startDate: values.eventTime[0].toDate(),
+    //         endDate: values.eventTime[1].toDate(),
+    //         paciente: userObj.nombre || originalEvent.userObj.nombre,
+    //         pacienteCorreo: userObj.correo || originalEvent.userObj.correo,
+    //         detalles: values.eventDetails || '',
+    //         idDoc: AuthCTX.currentUser.uid,
+    //       };
+    //       console.log('保存在 BD 中的事件:', cita);
+    //       if (!isEdit) {
+    //         await setCita(cita);
+    //         message.success('约会创建成功');
+    //       } else {
+    //         await updateCita(cita, originalEvent.id);
+    //         message.success('约会更新成功');
+    //       }
+    //       onCancel();
+    //     } catch (e) {
+    //       console.error(e);
+    //       !isEdit
+    //         ? message.error('创建约会时出错')
+    //         : message.error('更新约会时出错');
+    //     }
+
+    //     form.resetFields();
+    //     onCommitChanges({
+    //       ...values,
+    //       correoPaciente: userObj.correo || originalEvent.userObj.correo,
+    //       nombrePaciente: userObj.nombre || originalEvent.userObj.nombre,
+    //       nombreDoctor: AuthCTX.currentUser.displayName,
+    //     });
+    //   })
+    //   .catch((info) => {
+    //     console.log('Validate Failed:', info);
+    //   });
   };
 
   const onDeleteEvent = ({ id }) => {
     console.log(id);
     swal
       .fire({
-        title: "您确定要删除报价吗?",
+        title: '您确定要删除报价吗?',
         showDenyButton: true,
         showCancelButton: true,
         showConfirmButton: false,
-        denyButtonText: "SI",
-        cancelButtonText: "NO",
+        denyButtonText: 'SI',
+        cancelButtonText: 'NO',
       })
       .then(async (result) => {
         if (result.isDenied) {
           try {
             await setCita({ active: false }, id);
-            message.success("报价已成功删除");
+            message.success('报价已成功删除');
           } catch (error) {
             console.log(error);
-            message.error("删除约会失败");
+            message.error('删除约会失败');
           }
           onCancel();
         }
       });
   };
 
-  // TODO: 如果正在编辑事件，请忽略此引用
-  const overlapRule = {
-    validator: async (_, eventTime) => {
-      if (eventTime && citas !== [] && citas[0]) {
-        const initialDay = eventTime[0].toDate();
-        const endDay = eventTime[1].toDate();
-        initialDay.setSeconds(0);
-        endDay.setSeconds(0);
-        const citasDiaInicio = citas.filter((cita) => {
-          return cita.start.toDateString() === initialDay.toDateString()
-            ? true
-            : false;
-        });
-        for (let cita of citasDiaInicio) {
-          // * 要安排的约会时间与另一个现有约会的时间不同
-          if (initialDay.toTimeString() === cita.start.toTimeString()) {
-            return Promise.reject(new Error("开始时间与另一个约会相同。"));
-          }
-          // * 要安排的约会时间不在另一个现有约会的范围内
-          else if (
-            cita.start.toTimeString() < initialDay.toTimeString() &&
-            cita.end.toTimeString() > initialDay.toTimeString()
-          ) {
-            return Promise.reject(new Error("开始时间与另一个约会冲突"));
-          }
-          // * 要安排的约会时间不在两次约会之间的间隙
-          else if (
-            initialDay.toTimeString() < cita.start.toTimeString() &&
-            endDay.toTimeString() > cita.start.toTimeString()
-          ) {
-            return Promise.reject(new Error("结束时间与另一个日期冲突"));
-          }
-        }
-      }
-    },
-  };
-
-  const createFooter = [
-    <Button key="back" onClick={onCancel}>
-      返回
-    </Button>,
-    <Button
-      key="submit"
-      type="primary"
-      onClick={() => onSubmitForm(selectedEvent)}
-    >
-      保持
-    </Button>,
-  ];
-
-  const deleteButton = (
-    <Button
-      key="delete"
-      type="danger"
-      onClick={() => onDeleteEvent(selectedEvent)}
-    >
-      删除约会
-    </Button>
-  );
-
   return (
     <Modal
       centered
+      forceRender
       visible={visible}
-      title={title}
+      title={isEdit ? 'Edit Event' : 'New Event'}
       onCancel={onCancel}
-      footer={isEdit ? [...createFooter, deleteButton] : createFooter}
+      footer={[
+        isEdit ? (
+          <Button
+            key="delete"
+            danger
+            onClick={() => onDeleteEvent(selectedEvent)}
+          >
+            Delete
+          </Button>
+        ) : null,
+        <Button key="submit" type="primary" onClick={form.submit}>
+          Save
+        </Button>,
+      ]}
     >
-      <Form
-        name="event"
-        form={form}
-        layout="vertical"
-        initialValues={selectedEvent}
-      >
-        <Form.Item
-          name="pacienteDetails"
-          label="患者姓名"
-          required
-          tooltip="此字段是必需的"
-          rules={formRules.patientNameRules}
-        >
-          <AutoComplete
-            options={mappedExpedientes}
-            placeholder="Paciente"
-            filterOption={(inputValue, option) =>
-              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !==
-              -1
-            }
-            onSelect={(value, { pacienteObj }) => {
-              setUserObj(pacienteObj);
-            }}
-            bordered={editMode}
-            disabled={!editMode}
-          />
+      <Form form={form} layout="vertical" onFinish={onSubmitForm}>
+        <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+          <Input allowClear />
         </Form.Item>
-
         <Form.Item
-          name="eventTitle"
-          label="资质"
-          required
-          tooltip="此字段是必需的"
-          rules={formRules.titleRules}
+          name="location"
+          label="location"
+          // rules={[{ required: true }]}
         >
-          <Input placeholder="职称" bordered={editMode} disabled={!editMode} />
+          <Input allowClear />
         </Form.Item>
-
-        <Form.Item
-          name="eventTime"
-          label="约会的开始和预期结束"
-          required
-          tooltip="此字段是必需的"
-          rules={
-            !isEdit
-              ? [...formRules.eventTimeRules, overlapRule]
-              : formRules.eventTimeRules
-          }
-        >
+        <Form.Item name="time" label="time" rules={[{ required: true }]}>
           <RangePicker
-            locale={locale}
-            showTime={{ format: "hh:mm a" }}
-            format="DD/MM/YYYY hh:mm a"
-            placeholder={["Inicio", "Fin"]}
-            bordered={editMode}
-            disabled={!editMode}
+            showTime={{ format: 'HH:mm' }}
+            format="DD/MM/YYYY HH:mm"
+            ranges={{
+              Now: [moment(), moment()],
+            }}
+            placeholder={['Start Time', 'End Time']}
+            style={{ width: '100%' }}
           />
         </Form.Item>
-
         <Form.Item
-          name="eventDetails"
-          label="额外细节"
-          tooltip={{
-            title: "这是个可选的选项",
-            icon: <InfoCircleOutlined />,
-          }}
+          name="priority"
+          label="Priority"
+          rules={[{ required: true, message: 'Please pick an item!' }]}
         >
-          <Input.TextArea
-            placeholder="其他预约信息"
-            bordered={editMode}
-            disabled={!editMode}
-          />
+          <Slider marks={marks} step={null} tooltipVisible={false} />
+        </Form.Item>
+        <Form.Item name="note" label="note">
+          <Input.TextArea allowClear />
         </Form.Item>
       </Form>
     </Modal>

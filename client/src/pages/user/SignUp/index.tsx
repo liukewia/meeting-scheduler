@@ -6,7 +6,7 @@ import { Link, history } from 'umi';
 import styles from './style.less';
 import { useRequest } from 'ahooks';
 import { signup } from '@/services/user';
-import { getTimezoneSelectOptions } from '@/utils/timezoneUtil';
+import { getTimezoneSelectOptions } from '@/utils/timeUtil';
 
 const FormItem = Form.Item;
 

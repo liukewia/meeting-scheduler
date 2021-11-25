@@ -57,13 +57,6 @@ public class UserController {
 
     @Autowired RoleService roleService;
 
-    @RequiresAuthentication
-    @GetMapping("/index")
-    public Result index() {
-        User user = userService.getById(1L);
-        return Result.succ(user);
-    }
-
     @PostMapping("/login")
     public Result login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response) {
 
@@ -84,7 +77,9 @@ public class UserController {
         UserRole userRole = userRoleService.getOne(new QueryWrapper<UserRole>().eq("user_id", userId));
         Role role = roleService.getById(userRole.getRoleId());
 
-        // TODO update last login time
+        // update last login time
+        user.setLastLogin(new Date());
+        userService.updateById(user);
 
         response.setHeader("Authorization", jwt);
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization");

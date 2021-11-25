@@ -1,5 +1,6 @@
 package com.uofg.timescheduler;
 
+import java.util.Date;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
@@ -14,8 +15,9 @@ public class TimeSchedulerApplication {
     }
 
     @PostConstruct
-    void started() {
+    public void init() {
+        // Setting Spring Boot SetTimeZone
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        System.out.println("Date in UTC: " + new Date().toString());
     }
-
 }
