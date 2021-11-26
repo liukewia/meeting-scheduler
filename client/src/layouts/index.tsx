@@ -1,6 +1,6 @@
 import { IRouteComponentProps, useModel, matchPath, Redirect } from 'umi';
 import { ConfigProvider, message } from 'antd';
-import enUS from 'antd/lib/locale/en_US';
+import en_GB from 'antd/lib/locale/en_US';
 import MainLayout from '@/pages/MainLayout';
 import { UN_AUTH_PATHS } from '@/constants';
 
@@ -36,7 +36,7 @@ const LayoutWrapper = ({
 
 export default (props: any) => {
   return (
-    <ConfigProvider locale={enUS}>
+    <ConfigProvider locale={en_GB}>
       <LayoutWrapper {...props} />
     </ConfigProvider>
   );

@@ -19,7 +19,7 @@ export default function index() {
               <h3>Good morning, Finn. You have 0 scheduled meetings today.</h3>
               {utcOffset !== undefined && (
                 <h3>
-                  Your registered time zone is UTC&nbsp;
+                  The time zone you are in is UTC&nbsp;
                   {utcOffset > 0 ? '+' : null}
                   {utcOffset / ONE_HOUR_MILLIS}.
                 </h3>

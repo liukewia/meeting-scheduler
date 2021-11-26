@@ -13,9 +13,11 @@ import {
   mapPercentageToPriorityId,
   parseEventInForm,
 } from '@/utils/scheduleUtil';
-import moment from 'moment';
-import { useRequest } from 'ahooks';
+import moment, { Moment } from 'moment';
+import { useLatest, useRequest } from 'ahooks';
 import { addSchdule, deleteSchdule, updateSchdule } from '@/services/schedule';
+import { useModel } from 'umi';
+import type { RangeValue } from 'rc-picker/lib/interface.d';
 
 const { RangePicker } = DatePicker;
 
@@ -29,15 +31,20 @@ const marks = {
 
 const CalendarForm = ({
   visible,
-  isEdit,
+  isEditRef,
   selectedEvent,
   onCancel,
-  manualFetch,
+  fetchEventsInRange,
+  updateLoading,
+  runUpdateSchedule,
 }) => {
   const [form] = Form.useForm();
+  const { initialState } = useModel('@@initialState');
+  const utcOffset = initialState?.currentUser?.utcOffset || 0;
 
   useEffect(() => {
     if (visible) {
+      // setFieldsValue won't set fields that is not included in the object arg, so need to clean all fields manually in the first place
       form.resetFields();
       form.setFieldsValue(parseEventInForm(selectedEvent));
     }
@@ -47,26 +54,12 @@ const CalendarForm = ({
     manual: true,
     onSuccess: () => {
       onCancel();
-      manualFetch();
+      fetchEventsInRange();
     },
     onError: () => {
       message.error('Unable to add schedule.');
     },
   });
-
-  const { loading: updateLoading, run: runUpdateSchedule } = useRequest(
-    updateSchdule,
-    {
-      manual: true,
-      onSuccess: () => {
-        onCancel();
-        manualFetch();
-      },
-      onError: () => {
-        message.error('Unable to update schedule.');
-      },
-    },
-  );
 
   const { loading: deleteLoading, run: runDeleteSchedule } = useRequest(
     deleteSchdule,
@@ -74,7 +67,7 @@ const CalendarForm = ({
       manual: true,
       onSuccess: () => {
         onCancel();
-        manualFetch();
+        fetchEventsInRange();
       },
       onError: () => {
         message.error('Unable to delete schedule.');
@@ -96,17 +89,13 @@ const CalendarForm = ({
     };
 
     console.log('schedule: ', schedule);
-    if (schedule.id === undefined) {
-      runAddSchedule(schedule);
-    } else {
-      runUpdateSchedule(schedule);
-    }
+    schedule.id === undefined
+      ? runAddSchedule(schedule)
+      : runUpdateSchedule(schedule);
   };
 
   const onDeleteEvent = ({ id }) => {
-    runDeleteSchedule({
-      id,
-    });
+    runDeleteSchedule({ id });
   };
 
   return (
@@ -114,10 +103,10 @@ const CalendarForm = ({
       centered
       forceRender
       visible={visible}
-      title={isEdit ? 'Edit Event' : 'New Event'}
+      title={isEditRef.current ? 'Edit Event' : 'New Event'}
       onCancel={onCancel}
       footer={[
-        isEdit ? (
+        isEditRef.current ? (
           <Button
             key="delete"
             danger
@@ -143,17 +132,28 @@ const CalendarForm = ({
         </Form.Item>
         <Form.Item
           name="location"
-          label="location"
+          label="Location"
           // rules={[{ required: true }]}
         >
           <Input allowClear />
         </Form.Item>
-        <Form.Item name="time" label="time" rules={[{ required: true }]}>
+        <Form.Item name="time" label="Time" rules={[{ required: true }]}>
           <RangePicker
             showTime={{ format: 'HH:mm' }}
             format="DD/MM/YYYY HH:mm"
             ranges={{
-              Now: [moment(), moment()],
+              '1h': [
+                moment().startOf('minute').add(utcOffset, 'ms'),
+                moment().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
+              ],
+              '2h': [
+                moment().startOf('minute').add(utcOffset, 'ms'),
+                moment().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
+              ],
+              '3h': [
+                moment().startOf('minute').add(utcOffset, 'ms'),
+                moment().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
+              ],
             }}
             placeholder={['Start Time', 'End Time']}
             style={{ width: '100%' }}
@@ -166,7 +166,7 @@ const CalendarForm = ({
         >
           <Slider marks={marks} step={null} tooltipVisible={false} />
         </Form.Item>
-        <Form.Item name="note" label="note">
+        <Form.Item name="note" label="Note">
           <Input.TextArea allowClear />
         </Form.Item>
       </Form>

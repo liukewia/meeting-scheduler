@@ -10,7 +10,7 @@ import {
   message,
 } from 'antd';
 import moment from 'moment';
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { disabledDate } from '@/utils/timeUtil';
 import { useModel } from 'umi';
 import demo_events from './events';
@@ -24,13 +24,24 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import CustomToolbar from './CustomToolbar';
 import CalendarForm from './CalendarForm';
-import { useRequest } from 'ahooks';
+import {
+  useDeepCompareEffect,
+  useMemoizedFn,
+  useMount,
+  useReactive,
+  useRequest,
+  useWhyDidYouUpdate,
+} from 'ahooks';
 import { ONE_DAY_MILLIS, ONE_HOUR_MILLIS } from '@/constants';
 import { searchSchdule } from '@/services/schedule';
 import { mapPriorityIdToPercentage } from '@/utils/scheduleUtil';
-import 'moment-timezone';
+// import 'moment-timezone';
+import { addSchdule, deleteSchdule, updateSchdule } from '@/services/schedule';
 
-moment.tz.setDefault('Europe/London');
+// Is there a way to change your timezone in Chrome devtools?
+// https://stackoverflow.com/a/60008052/14756060
+
+// moment.tz.setDefault('Europe/London');
 moment.locale('en-gb', {
   week: {
     dow: 1,
@@ -43,40 +54,50 @@ const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(BigCalendar);
 
 const Calendar: React.FC = (props) => {
-  const [midDate, _] = useState(new Date()); // used to do initial req
-  const [events, setEvents] = useState([]);
-  const [visibleRange, setVisibleRange] = useState({
+  const { initialState } = useModel('@@initialState');
+  const utcOffset = initialState?.currentUser?.utcOffset || 0;
+  // console.log('utcOffset: ', utcOffset);
+  const visibleRange = useReactive({
+    midTime: new Date().getTime() + utcOffset,
     startTime: 0,
     endTime: 0,
   });
-  const [isFormVisible, setFormVisible] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  // const [isFormVisible, setFormVisible] = useState(false);
+  const isFormVisibleRef = useRef(false);
+  const isEditRef = useRef(false);
+  // const [isEditRef, setIsEdit] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState({});
-  // console.log('midDate: ', midDate);
-  console.log('events: ', events);
-
-  const { initialState, setInitialState } = useModel('@@initialState');
+  // console.log('visibleRange.midTime: ', visibleRange.midTime);
+  // console.log('events: ', events);
+  useWhyDidYouUpdate('calendar', {
+    ...props,
+    visibleRange,
+    isFormVisibleRef,
+    isEditRef,
+    selectedEvent,
+  });
 
   const {
-    data,
+    data: eventData,
     loading: fetchLoading,
     run: runFetch,
   } = useRequest(searchSchdule, {
     manual: true,
     onSuccess: () => {
-      if (data && data.schedules && Object.keys(data.schedules).length > 0) {
-        setEvents(
-          data.schedules.map((schedule: any) => ({
-            id: schedule.id,
-            title: schedule.title,
-            location: schedule.location,
-            start: new Date(schedule.startTime),
-            end: new Date(schedule.endTime),
-            priority: mapPriorityIdToPercentage(schedule.priorityId),
-            note: schedule.note,
-          })),
-        );
-      }
+      // console.log('eventData.schedules: ', eventData.schedules);
+      // if (eventData && eventData.schedules && Object.keys(eventData.schedules).length > 0) {
+      //   setEvents(
+      //     eventData.schedules.map((schedule: any) => ({
+      //       id: schedule.id,
+      //       title: schedule.title,
+      //       location: schedule.location,
+      //       start: new Date(schedule.startTime),
+      //       end: new Date(schedule.endTime),
+      //       priority: mapPriorityIdToPercentage(schedule.priorityId),
+      //       note: schedule.note,
+      //     })),
+      //   );
+      // }
       // message.info('Successfully fetch schedules.');
     },
     onError: () => {
@@ -84,15 +105,54 @@ const Calendar: React.FC = (props) => {
     },
   });
 
+  const { loading: updateLoading, run: runUpdateSchedule } = useRequest(
+    updateSchdule,
+    {
+      manual: true,
+      onSuccess: () => {
+        handleCancel();
+        fetchEventsInRange();
+      },
+      onError: () => {
+        message.error('Unable to update schedule.');
+      },
+    },
+  );
+
+  // useMount(() => {
+  //   console.log('useMounted');
+  //   runFetch({
+  //     midTime: visibleRange.midTime.getTime(),
+  //   });
+  // });
+
+  const fetchEventsInRange = useCallback(() => {
+    const { midTime, startTime, endTime } = visibleRange;
+    runFetch(
+      startTime && endTime
+        ? {
+            startTime,
+            endTime,
+          }
+        : {
+            midTime,
+          },
+    );
+  }, [visibleRange.midTime, visibleRange.startTime, visibleRange.endTime]);
+
   useEffect(() => {
-    runFetch({
-      midTime: midDate.getTime(),
-    });
-  }, []);
+    // console.log('run effect');
+
+    // const { midTime, startTime, endTime } = visibleRange;
+    // console.log('visibleRange: ', visibleRange);
+    // console.log('midTime: ', midTime);
+    fetchEventsInRange();
+  }, [visibleRange.midTime, visibleRange.startTime, visibleRange.endTime]);
 
   const onRangeChange = (dates: any, view: string | undefined) => {
-    // console.log('dates: ', dates);
-    // console.log('view: ', view);
+    console.log('on range change');
+    console.log('dates: ', dates);
+    console.log('view: ', view);
     let startTime = 0;
     let endTime = 0;
     if (Array.isArray(dates)) {
@@ -110,54 +170,58 @@ const Calendar: React.FC = (props) => {
       startTime = dates.start?.getTime();
       endTime = dates.end?.getTime();
     }
-    runFetch({
-      startTime,
-      endTime,
-    });
-    setVisibleRange({
-      startTime,
-      endTime,
-    });
+    // runFetch({
+    //   startTime,
+    //   endTime,
+    // });
+    visibleRange.startTime = startTime;
+    visibleRange.endTime = endTime;
   };
+  // console.log('rerendered@@@');
 
-  const manualFetch = useCallback(() => {
-    runFetch(visibleRange);
-  }, [visibleRange]);
+  // console.log('visibleRange: ', {
+  //   midTime: new Date(visibleRange.midTime),
+  //   startTime: new Date(visibleRange.startTime),
+  //   endTime: new Date(visibleRange.endTime),
+  // });
 
   const showCreateForm = () => {
-    setIsEdit(false);
-    const utcOffset = initialState?.currentUser?.utcOffset || 0;
-    console.log('utcOffset: ', utcOffset);
-    let now = moment();
-    now =
-      utcOffset >= 0 ? now.add(utcOffset, 'ms') : now.subtract(utcOffset, 'ms');
-
+    // setIsEdit(false);
+    isEditRef.current = false;
+    // console.log('utcOffset: ', utcOffset);
+    // Round up to the nearest minute
+    let now = moment().startOf('minute').add(utcOffset, 'ms');
+    console.log('now: ', now);
     setSelectedEvent({
       start: now.toDate(),
       end: now.add(1, 'h').toDate(),
       priority: 50,
     });
-    setFormVisible(true);
+    isFormVisibleRef.current = true;
   };
 
-  const moveEvent = ({ event, start, end, isAllDay: droppedOnAllDaySlot }) => {
-    let allDay = event.allDay;
+  const onEventDrop = ({ event, start, end }) => {
+    console.log('event: ', event);
+    console.log('start: ', start.getTime());
+    console.log('end: ', end);
+    // console.log('droppedOnAllDaySlot: ', droppedOnAllDaySlot);
+    // let allDay = event.allDay;
 
-    if (!event.allDay && droppedOnAllDaySlot) {
-      allDay = true;
-    } else if (event.allDay && !droppedOnAllDaySlot) {
-      allDay = false;
-    }
+    // if (!event.allDay && droppedOnAllDaySlot) {
+    //   allDay = true;
+    // } else if (event.allDay && !droppedOnAllDaySlot) {
+    //   allDay = false;
+    // }
 
-    const updatedEvent = events.map((existingEvent) => {
-      return existingEvent.id == event.id
-        ? { ...existingEvent, start, end, allDay }
-        : existingEvent;
-    });
+    // const updatedEvent = events.map((existingEvent) => {
+    //   return existingEvent.id == event.id
+    //     ? { ...existingEvent, start, end, allDay }
+    //     : existingEvent;
+    // });
 
-    setEvents(updatedEvent);
+    // setEvents(updatedEvent);
 
-    console.log(`[${event.title}] was dropped onto [${start}]`);
+    // console.log(`[${event.title}] was dropped onto [${start}]`);
   };
 
   const resizeEvent = ({ event, start, end }) => {
@@ -172,32 +236,48 @@ const Calendar: React.FC = (props) => {
     console.log(`${event.title} was resized to {${start}}-{${end}}`);
   };
 
-  const onDoubleClickSlot = (_event) => {
-    console.log('_event: ', _event);
-    if (_event.action === 'select') {
-      setIsEdit(false);
+  const onDoubleClickSlot = (event) => {
+    // console.log('event: ', event);
+    if (event.action === 'select') {
+      // setIsEdit(false);
+      isEditRef.current = false;
       setSelectedEvent({
-        start: _event.start,
-        end: _event.end,
+        start: event.start,
+        end: event.end,
         priority: 50,
       });
-      setFormVisible(true);
+      isFormVisibleRef.current = true;
     }
   };
 
   const handleCancel = () => {
-    setFormVisible(false);
+    isFormVisibleRef.current = false;
     setSelectedEvent({
       priority: 50,
     });
   };
 
+  const events = eventData?.schedules
+    ? eventData.schedules.map((schedule: any) => ({
+        id: schedule.id,
+        title: schedule.title,
+        location: schedule.location,
+        start: new Date(schedule.startTime),
+        end: new Date(schedule.endTime),
+        priority: mapPriorityIdToPercentage(schedule.priorityId),
+        note: schedule.note,
+      }))
+    : [];
+
+  const currentDate = new Date(visibleRange.midTime) || new Date() + utcOffset;
+  console.log('isFormVisibleRef.current: ', isFormVisibleRef.current);
   return (
     <Card>
       <Spin size="large" spinning={fetchLoading}>
         <DragAndDropCalendar
           popup
-          defaultDate={midDate}
+          defaultDate={currentDate}
+          getNow={() => currentDate}
           onRangeChange={onRangeChange}
           localizer={localizer}
           events={events}
@@ -216,21 +296,24 @@ const Calendar: React.FC = (props) => {
           selectable
           onSelectSlot={onDoubleClickSlot}
           onDoubleClickEvent={(event) => {
-            console.log('event: ', event);
-            setIsEdit(true);
+            // console.log('event: ', event);
+            // setIsEdit(true);
+            isEditRef.current = true;
             setSelectedEvent(event);
-            setFormVisible(true);
+            isFormVisibleRef.current = true;
           }}
           onEventResize={resizeEvent}
-          onEventDrop={moveEvent}
+          onEventDrop={onEventDrop}
           style={{ minHeight: 800 }}
         />
         <CalendarForm
-          visible={isFormVisible}
-          isEdit={isEdit}
+          visible={isFormVisibleRef.current}
+          isEditRef={isEditRef}
           selectedEvent={selectedEvent}
           onCancel={handleCancel}
-          manualFetch={manualFetch}
+          fetchEventsInRange={fetchEventsInRange}
+          updateLoading={updateLoading}
+          runUpdateSchedule={runUpdateSchedule}
         />
       </Spin>
     </Card>

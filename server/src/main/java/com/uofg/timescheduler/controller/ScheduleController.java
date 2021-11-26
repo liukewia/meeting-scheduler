@@ -81,7 +81,7 @@ public class ScheduleController {
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
         List<Schedule> scheduleList = new ArrayList<>();
-        if (midTimeStr != null) {
+        if (midTimeStr != null && startTimeStr == null && endTimeStr == null) {
             // query by a mid date, need to show a range from 30th day before to 30th day after.
             long midTime = Long.parseLong(midTimeStr);
             scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
@@ -91,9 +91,7 @@ public class ScheduleController {
                     .gt("end_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .le("end_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
-        }
-
-        if (startTimeStr != null && endTimeStr != null) {
+        } else if (midTimeStr == null && startTimeStr != null && endTimeStr != null) {
             long startTime = Long.parseLong(startTimeStr);
             Date startDate = DateUtil.date(startTime - utcOffset).toJdkDate();
             long endTime = Long.parseLong(endTimeStr);
@@ -104,6 +102,8 @@ public class ScheduleController {
                     .gt("end_time", startDate)
                     .orderByAsc("id")
                     .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
+        } else {
+            return Result.fail("Illegal param combination.");
         }
 
         // distribute time with offset registered
