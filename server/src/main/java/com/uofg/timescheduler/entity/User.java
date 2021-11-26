@@ -37,7 +37,6 @@ public class User implements Serializable {
 
     private String avatar;
 
-    @NotBlank(message = "Email cannot be blank.")
     @Email(message = "The email format is not correct.")
     private String email;
 

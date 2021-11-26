@@ -29,12 +29,26 @@ export async function addSchdule(
   });
   return res;
 }
+
 /** update Schdule POST /api/schedule/update */
 export async function updateSchdule(
   body: any,
   options?: { [key: string]: any },
 ): Promise<any> {
   const res = await axiosReq('/schedule/update', {
+    method: 'POST',
+    data: body,
+    ...(options || {}),
+  });
+  return res;
+}
+
+/** delete Schdule POST /api/schedule/delete */
+export async function deleteSchdule(
+  body: any,
+  options?: { [key: string]: any },
+): Promise<any> {
+  const res = await axiosReq('/schedule/delete', {
     method: 'POST',
     data: body,
     ...(options || {}),

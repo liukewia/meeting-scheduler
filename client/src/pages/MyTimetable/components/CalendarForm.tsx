@@ -9,12 +9,13 @@ import {
   Radio,
   Slider,
 } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { formRules } from './formConfig';
-import { parseEventInForm } from '@/utils/scheduleUtil';
+import {
+  mapPercentageToPriorityId,
+  parseEventInForm,
+} from '@/utils/scheduleUtil';
 import moment from 'moment';
 import { useRequest } from 'ahooks';
-import { addSchdule, updateSchdule } from '@/services/schedule';
+import { addSchdule, deleteSchdule, updateSchdule } from '@/services/schedule';
 
 const { RangePicker } = DatePicker;
 
@@ -30,15 +31,13 @@ const CalendarForm = ({
   visible,
   isEdit,
   selectedEvent,
-  onCommitChanges,
   onCancel,
+  manualFetch,
 }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (visible) {
-      console.log('setFieldsValue');
-      console.log('selectedEvent: ', selectedEvent);
       form.resetFields();
       form.setFieldsValue(parseEventInForm(selectedEvent));
     }
@@ -46,94 +45,68 @@ const CalendarForm = ({
 
   const { loading: addLoading, run: runAddSchedule } = useRequest(addSchdule, {
     manual: true,
+    onSuccess: () => {
+      onCancel();
+      manualFetch();
+    },
     onError: () => {
       message.error('Unable to add schedule.');
     },
   });
-  const { loading: uodateLoading, run: runUpdateSchedule } = useRequest(
+
+  const { loading: updateLoading, run: runUpdateSchedule } = useRequest(
     updateSchdule,
     {
       manual: true,
+      onSuccess: () => {
+        onCancel();
+        manualFetch();
+      },
       onError: () => {
         message.error('Unable to update schedule.');
       },
     },
   );
 
-  const onSubmitForm = (schedule: any) => {
+  const { loading: deleteLoading, run: runDeleteSchedule } = useRequest(
+    deleteSchdule,
+    {
+      manual: true,
+      onSuccess: () => {
+        onCancel();
+        manualFetch();
+      },
+      onError: () => {
+        message.error('Unable to delete schedule.');
+      },
+    },
+  );
+
+  const onSubmitForm = (values: any) => {
+    console.log('values: ', values);
     // add or update
+    const schedule = {
+      id: selectedEvent.id,
+      title: values.title,
+      location: values.location,
+      startTime: values.time[0].valueOf(),
+      endTime: values.time[1].valueOf(),
+      priority: mapPercentageToPriorityId(values.priority),
+      note: values.note,
+    };
 
     console.log('schedule: ', schedule);
-
-    // console.warn('我进入onSubmitForm，它是编辑模式?', isEdit);
-    // console.log('Data original (OnClick): ', originalEvent);
-    // form
-    //   .validateFields()
-    //   .then(async (values) => {
-    //     // 保存预约信息
-    //     try {
-    //       let cita = {
-    //         active: true,
-    //         titulo: values.eventTitle,
-    //         startDate: values.eventTime[0].toDate(),
-    //         endDate: values.eventTime[1].toDate(),
-    //         paciente: userObj.nombre || originalEvent.userObj.nombre,
-    //         pacienteCorreo: userObj.correo || originalEvent.userObj.correo,
-    //         detalles: values.eventDetails || '',
-    //         idDoc: AuthCTX.currentUser.uid,
-    //       };
-    //       console.log('保存在 BD 中的事件:', cita);
-    //       if (!isEdit) {
-    //         await setCita(cita);
-    //         message.success('约会创建成功');
-    //       } else {
-    //         await updateCita(cita, originalEvent.id);
-    //         message.success('约会更新成功');
-    //       }
-    //       onCancel();
-    //     } catch (e) {
-    //       console.error(e);
-    //       !isEdit
-    //         ? message.error('创建约会时出错')
-    //         : message.error('更新约会时出错');
-    //     }
-
-    //     form.resetFields();
-    //     onCommitChanges({
-    //       ...values,
-    //       correoPaciente: userObj.correo || originalEvent.userObj.correo,
-    //       nombrePaciente: userObj.nombre || originalEvent.userObj.nombre,
-    //       nombreDoctor: AuthCTX.currentUser.displayName,
-    //     });
-    //   })
-    //   .catch((info) => {
-    //     console.log('Validate Failed:', info);
-    //   });
+    if (schedule.id === undefined) {
+      runAddSchedule(schedule);
+    } else {
+      runUpdateSchedule(schedule);
+    }
   };
 
   const onDeleteEvent = ({ id }) => {
-    console.log(id);
-    swal
-      .fire({
-        title: '您确定要删除报价吗?',
-        showDenyButton: true,
-        showCancelButton: true,
-        showConfirmButton: false,
-        denyButtonText: 'SI',
-        cancelButtonText: 'NO',
-      })
-      .then(async (result) => {
-        if (result.isDenied) {
-          try {
-            await setCita({ active: false }, id);
-            message.success('报价已成功删除');
-          } catch (error) {
-            console.log(error);
-            message.error('删除约会失败');
-          }
-          onCancel();
-        }
-      });
+    runDeleteSchedule({
+      id,
+    });
   };
 
   return (
@@ -149,11 +122,17 @@ const CalendarForm = ({
             key="delete"
             danger
             onClick={() => onDeleteEvent(selectedEvent)}
+            loading={deleteLoading}
           >
             Delete
           </Button>
         ) : null,
-        <Button key="submit" type="primary" onClick={form.submit}>
+        <Button
+          key="submit"
+          type="primary"
+          onClick={form.submit}
+          loading={addLoading || updateLoading}
+        >
           Save
         </Button>,
       ]}

@@ -7,6 +7,7 @@ import styles from './style.less';
 import { useRequest } from 'ahooks';
 import { signup } from '@/services/user';
 import { getTimezoneSelectOptions } from '@/utils/timeUtil';
+import { ONE_HOUR_MILLIS } from '@/constants';
 
 const FormItem = Form.Item;
 
@@ -80,7 +81,7 @@ const Register: FC = (props) => {
     const valsToSubmit = {
       username: values.username,
       utcOffset:
-        parseFloat(values.timezone.match(/=(\S*)/)[1]) * 60 * 60 * 1000,
+        parseFloat(values.timezone.match(/=(\S*)/)[1]) * ONE_HOUR_MILLIS,
       email: values.email,
       password: values.password,
     };

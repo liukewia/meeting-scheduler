@@ -9,6 +9,8 @@ import org.hibernate.validator.constraints.Range;
 @Data
 public class ScheduleDto implements Serializable {
 
+    private Long id;
+
     @NotBlank(message = "Title cannot be blank.")
     private String title;
 

@@ -1,6 +1,7 @@
 import { Card, Col, PageHeader, Row } from 'antd';
 import { SpacedContainer } from '@/components/SpacedContainer';
 import { useModel } from 'umi';
+import { ONE_HOUR_MILLIS } from '@/constants';
 
 export default function index() {
   const { initialState, setInitialState } = useModel('@@initialState');
@@ -20,7 +21,7 @@ export default function index() {
                 <h3>
                   Your registered time zone is UTC&nbsp;
                   {utcOffset > 0 ? '+' : null}
-                  {utcOffset / (1000 * 60 * 60)}.
+                  {utcOffset / ONE_HOUR_MILLIS}.
                 </h3>
               )}
             </Col>

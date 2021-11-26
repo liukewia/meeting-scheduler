@@ -25,7 +25,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import CustomToolbar from './CustomToolbar';
 import CalendarForm from './CalendarForm';
 import { useRequest } from 'ahooks';
-import { ONE_DAY_MILLIS } from '@/constants';
+import { ONE_DAY_MILLIS, ONE_HOUR_MILLIS } from '@/constants';
 import { searchSchdule } from '@/services/schedule';
 import { mapPriorityIdToPercentage } from '@/utils/scheduleUtil';
 import 'moment-timezone';
@@ -45,10 +45,18 @@ const DragAndDropCalendar = withDragAndDrop(BigCalendar);
 const Calendar: React.FC = (props) => {
   const [midDate, _] = useState(new Date()); // used to do initial req
   const [events, setEvents] = useState([]);
+  const [visibleRange, setVisibleRange] = useState({
+    startTime: 0,
+    endTime: 0,
+  });
   const [isFormVisible, setFormVisible] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState({});
-  // console.log('midDate: ', midDate.getTime());
+  // console.log('midDate: ', midDate);
+  console.log('events: ', events);
+
+  const { initialState, setInitialState } = useModel('@@initialState');
+
   const {
     data,
     loading: fetchLoading,
@@ -77,16 +85,14 @@ const Calendar: React.FC = (props) => {
   });
 
   useEffect(() => {
-    // console.log('do effect');
     runFetch({
       midTime: midDate.getTime(),
     });
   }, []);
-  // console.log('events: ', events);
 
   const onRangeChange = (dates: any, view: string | undefined) => {
-    console.log('dates: ', dates);
-    console.log('view: ', view);
+    // console.log('dates: ', dates);
+    // console.log('view: ', view);
     let startTime = 0;
     let endTime = 0;
     if (Array.isArray(dates)) {
@@ -103,19 +109,34 @@ const Calendar: React.FC = (props) => {
       // is month or agenda view
       startTime = dates.start?.getTime();
       endTime = dates.end?.getTime();
-      console.log('startTime: ', startTime);
-      console.log('endTime: ', endTime);
     }
-
     runFetch({
+      startTime,
+      endTime,
+    });
+    setVisibleRange({
       startTime,
       endTime,
     });
   };
 
+  const manualFetch = useCallback(() => {
+    runFetch(visibleRange);
+  }, [visibleRange]);
+
   const showCreateForm = () => {
     setIsEdit(false);
-    setSelectedEvent({});
+    const utcOffset = initialState?.currentUser?.utcOffset || 0;
+    console.log('utcOffset: ', utcOffset);
+    let now = moment();
+    now =
+      utcOffset >= 0 ? now.add(utcOffset, 'ms') : now.subtract(utcOffset, 'ms');
+
+    setSelectedEvent({
+      start: now.toDate(),
+      end: now.add(1, 'h').toDate(),
+      priority: 50,
+    });
     setFormVisible(true);
   };
 
@@ -151,10 +172,6 @@ const Calendar: React.FC = (props) => {
     console.log(`${event.title} was resized to {${start}}-{${end}}`);
   };
 
-  const commitChanges = async (values) => {
-    console.log('values: ', values);
-  };
-
   const onDoubleClickSlot = (_event) => {
     console.log('_event: ', _event);
     if (_event.action === 'select') {
@@ -162,15 +179,17 @@ const Calendar: React.FC = (props) => {
       setSelectedEvent({
         start: _event.start,
         end: _event.end,
+        priority: 50,
       });
       setFormVisible(true);
     }
   };
 
   const handleCancel = () => {
-    console.log('handleCancel');
     setFormVisible(false);
-    setSelectedEvent({});
+    setSelectedEvent({
+      priority: 50,
+    });
   };
 
   return (
@@ -179,11 +198,6 @@ const Calendar: React.FC = (props) => {
         <DragAndDropCalendar
           popup
           defaultDate={midDate}
-          // onNavigate={(newDate: Date, view, action) => {
-          //   console.log('newDate: ', newDate);
-          //   console.log('view: ', view);
-          //   console.log('action: ', action);
-          // }}
           onRangeChange={onRangeChange}
           localizer={localizer}
           events={events}
@@ -209,15 +223,14 @@ const Calendar: React.FC = (props) => {
           }}
           onEventResize={resizeEvent}
           onEventDrop={moveEvent}
-          defaultDate={new Date()}
           style={{ minHeight: 800 }}
         />
         <CalendarForm
           visible={isFormVisible}
           isEdit={isEdit}
           selectedEvent={selectedEvent}
-          onCommitChanges={commitChanges}
           onCancel={handleCancel}
+          manualFetch={manualFetch}
         />
       </Spin>
     </Card>

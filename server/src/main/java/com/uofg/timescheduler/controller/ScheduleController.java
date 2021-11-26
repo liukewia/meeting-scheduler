@@ -54,40 +54,16 @@ public class ScheduleController {
     @Autowired PriorityService priorityService;
 
 
-    // sending the time with offset back to the front end
-    @RequiresAuthentication
-    @PostMapping("/add")
-    public Result add(@Validated @RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
-
-        Schedule schedule = new Schedule();
-
-        BeanUtil.copyProperties(scheduleDto, schedule, "id", "userId", "startTime", "endTime", "priority");
-
-        // userid
-        AccountProfile user = ShiroUtil.getProfile();
-        Long userId = user.getId();
-        schedule.setUserId(userId);
-
-        // eliminate utc offset
-        Long utcOffset = user.getUtcOffset();
-        schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
-        schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
-
-        Long priorityId = scheduleDto.getPriority();
-        Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
-        if (pri == null) {
-            return Result.fail("Illegal priority id!");
-        }
-        schedule.setPriorityId(priorityId);
-
-        scheduleService.save(schedule);
-
-        return Result.succ(null);
-    }
-
-    //查找接口
-    // 如果没说start end 就按照middate给前后三十天内事件
-    // 如果说了就按和start end有everlap的查找
+    /**
+     * Search schedules by a range
+     * If start and end are not specified, while a middate is specified in the request body, it will search schedules in
+     * the last 30 days and in the next 30 days.
+     * If start and end are specified, find all schedules that overlap with this time range.
+     *
+     * @param request
+     * @param response
+     * @return
+     */
     @RequiresAuthentication
     @GetMapping("/search")
     public Result search(HttpServletRequest request, HttpServletResponse response) {
@@ -143,5 +119,104 @@ public class ScheduleController {
                 .map()
         );
 
+    }
+
+
+    // sending the time with offset back to the front end
+    @RequiresAuthentication
+    @PostMapping("/add")
+    public Result add(@Validated @RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
+
+        Schedule schedule = new Schedule();
+
+        BeanUtil.copyProperties(scheduleDto, schedule, "id", "userId", "startTime", "endTime", "priority");
+
+        // userid
+        AccountProfile user = ShiroUtil.getProfile();
+        Long userId = user.getId();
+        schedule.setUserId(userId);
+
+        // eliminate utc offset
+        Long utcOffset = user.getUtcOffset();
+        schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
+        schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
+
+        Long priorityId = scheduleDto.getPriority();
+        Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
+        if (pri == null) {
+            return Result.fail("Illegal priority id!");
+        }
+        schedule.setPriorityId(priorityId);
+
+        scheduleService.save(schedule);
+
+        return Result.succ(null);
+    }
+
+    @RequiresAuthentication
+    @PostMapping("/update")
+    public Result update(@Validated @RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
+
+        Schedule schedule = new Schedule();
+
+        BeanUtil.copyProperties(scheduleDto, schedule, "userId", "startTime", "endTime", "priority");
+
+        // userid
+        AccountProfile user = ShiroUtil.getProfile();
+        Long userId = user.getId();
+        schedule.setUserId(userId);
+
+        // check that if the schedule exists and belongs to the user
+        Schedule scheduleInDatabase = scheduleService.getOne(new QueryWrapper<Schedule>()
+                .eq("user_id", userId)
+                .eq("id", schedule.getId())
+        );
+        if (scheduleInDatabase == null) {
+            return Result.fail("No such schedule, update failed.");
+        }
+
+        Long priorityId = scheduleDto.getPriority();
+        Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
+        if (pri == null) {
+            return Result.fail("Illegal priority id.");
+        }
+        schedule.setPriorityId(priorityId);
+
+        // eliminate utc offset
+        Long utcOffset = user.getUtcOffset();
+        schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
+        schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
+
+        scheduleService.updateById(schedule);
+
+        return Result.succ(null);
+    }
+
+    @RequiresAuthentication
+    @PostMapping("/delete")
+    public Result delete(@RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
+
+        Schedule schedule = new Schedule();
+
+        BeanUtil.copyProperties(scheduleDto, schedule, "title", "location", "startTime", "endTime", "priority", "note");
+
+        if (schedule.getId() == null) {
+            return Result.fail("Schedule ID is required for this operation.");
+        }
+
+        Long userId = ShiroUtil.getProfile().getId();
+
+        // check that if the schedule exists and belongs to the user
+        Schedule scheduleInDatabase = scheduleService.getOne(new QueryWrapper<Schedule>()
+                .eq("user_id", userId)
+                .eq("id", schedule.getId())
+        );
+        if (scheduleInDatabase == null) {
+            return Result.fail("No such schedule, delete failed.");
+        }
+
+        scheduleService.removeById(schedule.getId());
+
+        return Result.succ(null);
     }
 }

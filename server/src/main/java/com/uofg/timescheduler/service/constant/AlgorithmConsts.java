@@ -3,9 +3,9 @@ package com.uofg.timescheduler.service.constant;
 public interface AlgorithmConsts {
 
     int TOP_OUTPUT_NUM = 5;
-    int POPULATION_NUM = 20;
+    int POPULATION_NUM = 50;
     int ITERATION_TIMES = 10;
-    int CROSSOVER_TIMES = 10;
-    int MUTATION_TIMES = 4;
+    double CROSSOVER_PROB = 0.8;
+    double MUTATION_PROB = 0.2;
 
 }
