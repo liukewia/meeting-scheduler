@@ -1,6 +1,8 @@
 package com.uofg.timescheduler.controller;
 
 
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_MINUTE_MILLIS;
+
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
@@ -143,8 +145,13 @@ public class ScheduleController {
 
         // eliminate utc offset
         Long utcOffset = user.getUtcOffset();
-        schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
-        schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
+        long newStartTime = scheduleDto.getStartTime() - utcOffset;
+        schedule.setStartTime(new Date(newStartTime));
+        long newEndTime = scheduleDto.getEndTime() - utcOffset;
+        if (newEndTime <= newStartTime) {
+            newEndTime = newStartTime + ONE_MINUTE_MILLIS;
+        }
+        schedule.setEndTime(new Date(newEndTime));
 
         Long priorityId = scheduleDto.getPriorityId();
         Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
@@ -190,8 +197,13 @@ public class ScheduleController {
 
         // eliminate utc offset
         Long utcOffset = user.getUtcOffset();
-        schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
-        schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
+        long newStartTime = scheduleDto.getStartTime() - utcOffset;
+        schedule.setStartTime(new Date(newStartTime));
+        long newEndTime = scheduleDto.getEndTime() - utcOffset;
+        if (newEndTime <= newStartTime) {
+            newEndTime = newStartTime + ONE_MINUTE_MILLIS;
+        }
+        schedule.setEndTime(new Date(newEndTime));
 
         scheduleService.updateById(schedule);
 

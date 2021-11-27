@@ -56,6 +56,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
 
   const { loading: addLoading, run: runAddSchedule } = useRequest(addSchdule, {
     manual: true,
+    debounceWait: 100,
     onSuccess: () => {
       onCancel();
       fetchEventsInRange();
@@ -63,7 +64,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
     },
     onError: () => {
       fetchEventsInRange();
-      message.error('Unable to add schedule.');
+      message.error('Add schedule failed.');
     },
   });
 
@@ -71,6 +72,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
     deleteSchdule,
     {
       manual: true,
+      debounceWait: 100,
       onSuccess: () => {
         onCancel();
         fetchEventsInRange();
@@ -78,7 +80,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
       },
       onError: () => {
         fetchEventsInRange();
-        message.error('Unable to delete schedule.');
+        message.error('Delete schedule failed.');
       },
     },
   );

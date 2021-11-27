@@ -27,6 +27,7 @@ export enum SiderOpenedKey {
 
 export const businessTitle = 'Scheduler';
 
-export const ONE_HOUR_MILLIS = 60 * 60 * 1000;
+export const ONE_MINUTE_MILLIS = 60 * 1000;
+export const ONE_HOUR_MILLIS = 60 * ONE_MINUTE_MILLIS;
 export const ONE_DAY_MILLIS = 24 * ONE_HOUR_MILLIS;
 export const ONE_WEEK_MILLIS = 7 * ONE_DAY_MILLIS;

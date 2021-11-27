@@ -13,7 +13,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import CustomToolbar from './CustomToolbar';
 import CalendarForm from './CalendarForm';
 import { useReactive, useRequest } from 'ahooks';
-import { ONE_DAY_MILLIS } from '@/constants';
+import { ONE_DAY_MILLIS, ONE_MINUTE_MILLIS } from '@/constants';
 import { isString } from 'lodash';
 import { searchSchdule } from '@/services/schedule';
 import {
@@ -63,8 +63,13 @@ const Calendar: React.FC = (props) => {
   const isEditRef = useRef(false);
   const selectedEventRef = useRef<Partial<CalendarEvent>>({});
 
-  const { data: eventData, run: runFetch } = useRequest(searchSchdule, {
+  const {
+    data: eventData,
+    loading: fetchLoading,
+    run: runFetch,
+  } = useRequest(searchSchdule, {
     manual: true,
+    debounceWait: 100,
     onSuccess: () => {
       if (
         eventData &&
@@ -86,8 +91,7 @@ const Calendar: React.FC = (props) => {
       // message.success('Successfully fetch schedules.');
     },
     onError: () => {
-      fetchEventsInRange();
-      message.error('Unable to fetch schedules.');
+      message.error('Fetch schedules failed.');
     },
   });
 
@@ -95,6 +99,7 @@ const Calendar: React.FC = (props) => {
     updateSchdule,
     {
       manual: true,
+      debounceWait: 100,
       onSuccess: () => {
         handleCancel();
         fetchEventsInRange();
@@ -102,7 +107,7 @@ const Calendar: React.FC = (props) => {
       },
       onError: () => {
         fetchEventsInRange();
-        message.error('Unable to update schedule.');
+        message.error('Update schedule failed.');
       },
     },
   );
@@ -170,14 +175,46 @@ const Calendar: React.FC = (props) => {
     end: stringOrDate;
     isAllDay: boolean;
   }) => {
-    console.log('event: ', event);
-    console.log('start: ', start);
-    console.log('end: ', end);
-    console.log('isAllDay: ', isAllDay);
     const _event = event as CalendarEvent;
+
+    const formerStartTime = (
+      isString(_event.start) ? new Date(_event.start) : _event.start
+    ).getTime();
+    const formerEndTime = (
+      isString(_event.end) ? new Date(_event.end) : _event.end
+    ).getTime();
+    let latterStartDate = isString(start) ? new Date(start) : start;
+    let latterStartTime = latterStartDate.getTime();
+    let latterEndDate = isString(end) ? new Date(end) : end;
+    let latterEndTime = latterEndDate.getTime();
+
+    if (
+      formerStartTime === latterStartTime &&
+      formerEndTime === latterEndTime &&
+      !isAllDay
+    ) {
+      return;
+    }
+
+    if (isAllDay) {
+      latterStartDate = moment(latterStartDate).startOf('day').toDate();
+      latterStartTime = latterStartDate.getTime();
+      latterEndDate = moment(latterEndDate).endOf('day').toDate();
+      latterEndTime = latterEndDate.getTime();
+    }
+
+    if (latterStartTime >= latterEndTime) {
+      latterEndTime = latterStartTime + ONE_MINUTE_MILLIS;
+      latterEndDate = new Date(latterEndTime);
+    }
+
+    // console.log('formerStartDate: ', new Date(formerStartTime));
+    // console.log('formerEndTime: ', new Date(formerEndTime));
+    // console.log('latterStartDate: ', latterStartDate);
+    // console.log('latterEndDate: ', latterEndDate);
     const updatedEvent = events.map((existingEvent) => {
       return existingEvent.id == _event.id
-        ? { ...existingEvent, start, end }
+        ? { ...existingEvent, start: latterStartDate, end: latterEndDate }
         : existingEvent;
     });
     setEvents(updatedEvent);
@@ -185,8 +222,8 @@ const Calendar: React.FC = (props) => {
       id: _event.id,
       title: _event.title,
       location: _event.location,
-      startTime: (isString(start) ? new Date(start) : start).getTime(),
-      endTime: (isString(end) ? new Date(end) : end).getTime(),
+      startTime: latterStartTime,
+      endTime: latterEndTime,
       priorityId: mapPercentageToPriorityId(_event.priority),
       note: _event.note,
     });
@@ -215,40 +252,42 @@ const Calendar: React.FC = (props) => {
 
   return (
     <Card>
-      <DragAndDropCalendar
-        popup
-        defaultDate={currentDate}
-        getNow={() => currentDate}
-        onRangeChange={onRangeChange}
-        localizer={localizer}
-        events={events}
-        components={{
-          toolbar: (props) => (
-            <CustomToolbar {...props} showCreateForm={showCreateForm} />
-          ),
-        }}
-        defaultView={Views.MONTH}
-        resizable
-        selectable
-        onSelectSlot={onDoubleClickSlot}
-        onDoubleClickEvent={(event) => {
-          isEditRef.current = true;
-          selectedEventRef.current = event;
-          setFormVisible(true);
-        }}
-        onEventResize={updateEventOnResizeOrDrop}
-        onEventDrop={updateEventOnResizeOrDrop}
-        style={{ minHeight: 800 }}
-      />
-      <CalendarForm
-        visible={isFormVisible}
-        isEditRef={isEditRef}
-        selectedEventRef={selectedEventRef}
-        onCancel={handleCancel}
-        fetchEventsInRange={fetchEventsInRange}
-        updateLoading={updateLoading}
-        runUpdateSchedule={runUpdateSchedule}
-      />
+      <Spin size="large" spinning={fetchLoading} delay={100}>
+        <DragAndDropCalendar
+          popup
+          defaultDate={currentDate}
+          getNow={() => currentDate}
+          onRangeChange={onRangeChange}
+          localizer={localizer}
+          events={events}
+          components={{
+            toolbar: (props) => (
+              <CustomToolbar {...props} showCreateForm={showCreateForm} />
+            ),
+          }}
+          defaultView={Views.MONTH}
+          resizable
+          selectable
+          onSelectSlot={onDoubleClickSlot}
+          onDoubleClickEvent={(event) => {
+            isEditRef.current = true;
+            selectedEventRef.current = event;
+            setFormVisible(true);
+          }}
+          onEventResize={updateEventOnResizeOrDrop}
+          onEventDrop={updateEventOnResizeOrDrop}
+          style={{ minHeight: 800 }}
+        />
+        <CalendarForm
+          visible={isFormVisible}
+          isEditRef={isEditRef}
+          selectedEventRef={selectedEventRef}
+          onCancel={handleCancel}
+          fetchEventsInRange={fetchEventsInRange}
+          updateLoading={updateLoading}
+          runUpdateSchedule={runUpdateSchedule}
+        />
+      </Spin>
     </Card>
   );
 };

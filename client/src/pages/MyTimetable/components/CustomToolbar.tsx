@@ -54,7 +54,7 @@ const CustomToolbar: React.FC<ToolbarProps & CustomToolbarProp> = (props) => {
           <Title level={5}>{label}</Title>
         </Row>
         <Row justify="space-around" align="middle">
-          <Space size={10}>
+          <Space size={20}>
             <Tooltip title="Create New Event">
               <Button
                 type="default"

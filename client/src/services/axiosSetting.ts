@@ -68,7 +68,7 @@ function createAxiosInstance() {
       console.log(JSON.stringify(error.response));
       notification.error({
         // expose the potential error explicitly
-        message: `${error.response?.config?.method || error.config?.method} ${
+        message: `DEV: ${error.response?.config?.method || error.config?.method} ${
           error.response?.config?.url || error.config?.url
         } Failed.`,
         description: error.response?.data?.msg || error.message,
