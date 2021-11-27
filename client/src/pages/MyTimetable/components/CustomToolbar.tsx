@@ -7,13 +7,18 @@ import {
   CalendarOutlined,
   PlusCircleTwoTone,
 } from '@ant-design/icons';
+import type { ToolbarProps } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const CustomToolbar: React.FC = (props: any) => {
+interface CustomToolbarProp {
+  showCreateForm: () => void;
+}
+
+const CustomToolbar: React.FC<ToolbarProps & CustomToolbarProp> = (props) => {
   // console.log('props: ', props);
   const { label, showCreateForm } = props;
 
@@ -30,8 +35,8 @@ const CustomToolbar: React.FC = (props: any) => {
       <Row justify="space-between" align="middle">
         <Row justify="space-around" align="middle">
           <Space>
-          <Tooltip title="Go To Today">
-            <Button onClick={() => navigate(Navigate.TODAY)}>TODAY</Button>
+            <Tooltip title="Go To Today">
+              <Button onClick={() => navigate(Navigate.TODAY)}>TODAY</Button>
             </Tooltip>
             <Tooltip title="Previous">
               <Button

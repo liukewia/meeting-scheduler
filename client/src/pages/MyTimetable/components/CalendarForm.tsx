@@ -32,7 +32,7 @@ const marks = {
 const CalendarForm = ({
   visible,
   isEditRef,
-  selectedEvent,
+  selectedEventRef,
   onCancel,
   fetchEventsInRange,
   updateLoading,
@@ -46,9 +46,9 @@ const CalendarForm = ({
     if (visible) {
       // setFieldsValue won't set fields that is not included in the object arg, so need to clean all fields manually in the first place
       form.resetFields();
-      form.setFieldsValue(parseEventInForm(selectedEvent));
+      form.setFieldsValue(parseEventInForm(selectedEventRef.current));
     }
-  }, [selectedEvent, visible, form]);
+  }, [selectedEventRef.current, visible, form]);
 
   const { loading: addLoading, run: runAddSchedule } = useRequest(addSchdule, {
     manual: true,
@@ -79,12 +79,12 @@ const CalendarForm = ({
     console.log('values: ', values);
     // add or update
     const schedule = {
-      id: selectedEvent.id,
+      id: selectedEventRef.current.id,
       title: values.title,
       location: values.location,
       startTime: values.time[0].valueOf(),
       endTime: values.time[1].valueOf(),
-      priority: mapPercentageToPriorityId(values.priority),
+      priorityId: mapPercentageToPriorityId(values.priority),
       note: values.note,
     };
 
@@ -110,7 +110,7 @@ const CalendarForm = ({
           <Button
             key="delete"
             danger
-            onClick={() => onDeleteEvent(selectedEvent)}
+            onClick={() => onDeleteEvent(selectedEventRef.current)}
             loading={deleteLoading}
           >
             Delete

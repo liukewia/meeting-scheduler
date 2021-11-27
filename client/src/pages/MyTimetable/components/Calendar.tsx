@@ -34,7 +34,10 @@ import {
 } from 'ahooks';
 import { ONE_DAY_MILLIS, ONE_HOUR_MILLIS } from '@/constants';
 import { searchSchdule } from '@/services/schedule';
-import { mapPriorityIdToPercentage } from '@/utils/scheduleUtil';
+import {
+  mapPercentageToPriorityId,
+  mapPriorityIdToPercentage,
+} from '@/utils/scheduleUtil';
 // import 'moment-timezone';
 import { addSchdule, deleteSchdule, updateSchdule } from '@/services/schedule';
 
@@ -62,19 +65,20 @@ const Calendar: React.FC = (props) => {
     startTime: 0,
     endTime: 0,
   });
-  // const [isFormVisible, setFormVisible] = useState(false);
-  const isFormVisibleRef = useRef(false);
+  const [isFormVisible, setFormVisible] = useState(false);
+  // const isFormVisibleRef = useRef(false);
   const isEditRef = useRef(false);
   // const [isEditRef, setIsEdit] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState({});
+  // const [selectedEvent, setSelectedEvent] = useState({});
+  const selectedEventRef = useRef({});
   // console.log('visibleRange.midTime: ', visibleRange.midTime);
   // console.log('events: ', events);
   useWhyDidYouUpdate('calendar', {
     ...props,
     visibleRange,
-    isFormVisibleRef,
+    isFormVisible,
     isEditRef,
-    selectedEvent,
+    selectedEventRef,
   });
 
   const {
@@ -192,69 +196,56 @@ const Calendar: React.FC = (props) => {
     // Round up to the nearest minute
     let now = moment().startOf('minute').add(utcOffset, 'ms');
     console.log('now: ', now);
-    setSelectedEvent({
+    selectedEventRef.current = {
       start: now.toDate(),
       end: now.add(1, 'h').toDate(),
       priority: 50,
-    });
-    isFormVisibleRef.current = true;
+    };
+    setFormVisible(true);
   };
 
   const onEventDrop = ({ event, start, end }) => {
-    console.log('event: ', event);
-    console.log('start: ', start.getTime());
-    console.log('end: ', end);
-    // console.log('droppedOnAllDaySlot: ', droppedOnAllDaySlot);
-    // let allDay = event.allDay;
-
-    // if (!event.allDay && droppedOnAllDaySlot) {
-    //   allDay = true;
-    // } else if (event.allDay && !droppedOnAllDaySlot) {
-    //   allDay = false;
-    // }
-
-    // const updatedEvent = events.map((existingEvent) => {
-    //   return existingEvent.id == event.id
-    //     ? { ...existingEvent, start, end, allDay }
-    //     : existingEvent;
-    // });
-
-    // setEvents(updatedEvent);
-
-    // console.log(`[${event.title}] was dropped onto [${start}]`);
+    runUpdateSchedule({
+      id: event.id,
+      title: event.title,
+      location: event.location,
+      startTime: start.getTime(),
+      endTime: end.getTime(),
+      priorityId: mapPercentageToPriorityId(event.priority),
+      note: event.note,
+    });
   };
 
   const resizeEvent = ({ event, start, end }) => {
-    const nextEvents = events.map((existingEvent) => {
-      return existingEvent.id == event.id
-        ? { ...existingEvent, start, end }
-        : existingEvent;
+    runUpdateSchedule({
+      id: event.id,
+      title: event.title,
+      location: event.location,
+      startTime: start.getTime(),
+      endTime: end.getTime(),
+      priorityId: mapPercentageToPriorityId(event.priority),
+      note: event.note,
     });
-
-    setEvents(nextEvents);
-
-    console.log(`${event.title} was resized to {${start}}-{${end}}`);
   };
 
-  const onDoubleClickSlot = (event) => {
-    // console.log('event: ', event);
+  const onDoubleClickSlot = (event: any) => {
     if (event.action === 'select') {
       // setIsEdit(false);
       isEditRef.current = false;
-      setSelectedEvent({
+      selectedEventRef.current = {
         start: event.start,
         end: event.end,
         priority: 50,
-      });
-      isFormVisibleRef.current = true;
+      };
+      setFormVisible(true);
     }
   };
 
   const handleCancel = () => {
-    isFormVisibleRef.current = false;
-    setSelectedEvent({
+    setFormVisible(false);
+    selectedEventRef.current = {
       priority: 50,
-    });
+    };
   };
 
   const events = eventData?.schedules
@@ -270,7 +261,7 @@ const Calendar: React.FC = (props) => {
     : [];
 
   const currentDate = new Date(visibleRange.midTime) || new Date() + utcOffset;
-  console.log('isFormVisibleRef.current: ', isFormVisibleRef.current);
+
   return (
     <Card>
       <Spin size="large" spinning={fetchLoading}>
@@ -283,11 +274,7 @@ const Calendar: React.FC = (props) => {
           events={events}
           components={{
             toolbar: (props) => (
-              <CustomToolbar
-                {...props}
-                // @ts-ignore
-                showCreateForm={showCreateForm}
-              />
+              <CustomToolbar {...props} showCreateForm={showCreateForm} />
             ),
           }}
           // timeslots={1}
@@ -299,17 +286,17 @@ const Calendar: React.FC = (props) => {
             // console.log('event: ', event);
             // setIsEdit(true);
             isEditRef.current = true;
-            setSelectedEvent(event);
-            isFormVisibleRef.current = true;
+            setFormVisible(true);
+            selectedEventRef.current = event;
           }}
           onEventResize={resizeEvent}
           onEventDrop={onEventDrop}
           style={{ minHeight: 800 }}
         />
         <CalendarForm
-          visible={isFormVisibleRef.current}
+          visible={isFormVisible}
           isEditRef={isEditRef}
-          selectedEvent={selectedEvent}
+          selectedEventRef={selectedEventRef}
           onCancel={handleCancel}
           fetchEventsInRange={fetchEventsInRange}
           updateLoading={updateLoading}

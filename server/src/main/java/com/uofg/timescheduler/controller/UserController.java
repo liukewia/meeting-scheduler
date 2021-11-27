@@ -16,6 +16,8 @@ import com.uofg.timescheduler.service.UserService;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.JwtUtils;
 import com.uofg.timescheduler.util.ShiroUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("/api/user")
+@Api(tags = "User Controller")
 public class UserController {
 
     @Autowired
@@ -58,6 +61,7 @@ public class UserController {
     @Autowired RoleService roleService;
 
     @PostMapping("/login")
+    @ApiOperation("login")
     public Result login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response) {
 
         User user = userService.getOne(new QueryWrapper<User>().eq("username", loginDto.getUsername()));
@@ -96,6 +100,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
+    @ApiOperation("sign up")
     public Result signup(@Validated @RequestBody SignUpDto signUpDto, HttpServletResponse response) {
         User newUser = null;
         newUser = userService.getOne(new QueryWrapper<User>().eq("username", signUpDto.getUsername()));
@@ -139,6 +144,7 @@ public class UserController {
 
     @RequiresAuthentication // done jwt validation here, including not passing it and passing an illegal one
     @GetMapping("/currentUser")
+    @ApiOperation("fetch current User")
     public Result currentUser() {
         // https://blog.csdn.net/suki_rong/article/details/80445880
         AccountProfile user = ShiroUtil.getProfile();
@@ -157,6 +163,7 @@ public class UserController {
 
     @RequiresAuthentication
     @PostMapping("/logout")
+    @ApiOperation("log out")
     public Result logout() {
         // https://segmentfault.com/q/1010000010043871/a-1020000040644951
         // since using jwt, the logout behavior is null, need not redis environment installed anymore

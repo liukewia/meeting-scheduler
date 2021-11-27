@@ -23,7 +23,7 @@ public class ScheduleDto implements Serializable {
     private Long endTime;
 
     //    @Range(max = 100L, message = "The priority is in illegal range.")
-    private Long priority;
+    private Long priorityId;
 
     private String note;
 

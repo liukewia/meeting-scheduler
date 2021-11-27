@@ -16,6 +16,8 @@ import com.uofg.timescheduler.service.UserService;
 import com.uofg.timescheduler.service.constant.TimeConsts;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.ShiroUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("/api/schedule")
+@Api(tags = "Schedule Controller")
 public class ScheduleController {
 
     @Autowired
@@ -66,6 +69,7 @@ public class ScheduleController {
      */
     @RequiresAuthentication
     @GetMapping("/search")
+    @ApiOperation("search schedules")
     public Result search(HttpServletRequest request, HttpServletResponse response) {
         AccountProfile user = ShiroUtil.getProfile();
 
@@ -125,6 +129,7 @@ public class ScheduleController {
     // sending the time with offset back to the front end
     @RequiresAuthentication
     @PostMapping("/add")
+    @ApiOperation("add schedules")
     public Result add(@Validated @RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
 
         Schedule schedule = new Schedule();
@@ -141,7 +146,7 @@ public class ScheduleController {
         schedule.setStartTime(new Date(scheduleDto.getStartTime() - utcOffset));
         schedule.setEndTime(new Date(scheduleDto.getEndTime() - utcOffset));
 
-        Long priorityId = scheduleDto.getPriority();
+        Long priorityId = scheduleDto.getPriorityId();
         Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
         if (pri == null) {
             return Result.fail("Illegal priority id!");
@@ -155,6 +160,7 @@ public class ScheduleController {
 
     @RequiresAuthentication
     @PostMapping("/update")
+    @ApiOperation("update schedules")
     public Result update(@Validated @RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
 
         Schedule schedule = new Schedule();
@@ -175,7 +181,7 @@ public class ScheduleController {
             return Result.fail("No such schedule, update failed.");
         }
 
-        Long priorityId = scheduleDto.getPriority();
+        Long priorityId = scheduleDto.getPriorityId();
         Priority pri = priorityService.getOne(new QueryWrapper<Priority>().eq("id", priorityId));
         if (pri == null) {
             return Result.fail("Illegal priority id.");
@@ -194,6 +200,7 @@ public class ScheduleController {
 
     @RequiresAuthentication
     @PostMapping("/delete")
+    @ApiOperation("delete schedules")
     public Result delete(@RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
 
         Schedule schedule = new Schedule();
