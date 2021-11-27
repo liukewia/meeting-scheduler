@@ -67,12 +67,12 @@ export default function SiteSettings() {
       </Col>
     </Row>
   );
-//   appointmentData:
-//       endDate: Wed Jun 27 2018 00:00:00 GMT+0800 (China Standard Time) {}
-//       id: 34
-//       location: "Room 1"
-//       startDate: Tue Jun 26 2018 00:00:00 GMT+0800 (China Standard Time) {}
-//       title: "Book Flights to San Fran for Sales Trip"
+  //   appointmentData:
+  //       endDate: Wed Jun 27 2018 00:00:00 GMT+0800 (China Standard Time) {}
+  //       id: 34
+  //       location: "Room 1"
+  //       startDate: Tue Jun 26 2018 00:00:00 GMT+0800 (China Standard Time) {}
+  //       title: "Book Flights to San Fran for Sales Trip"
 
   const colorPickers = colorPickerOptions.map((varName) =>
     getColorPicker(varName),
@@ -106,48 +106,6 @@ export default function SiteSettings() {
               Reset Theme
             </Button>
           </Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
-          <Row>a</Row>
         </Card>
       </SpacedContainer>
     </>

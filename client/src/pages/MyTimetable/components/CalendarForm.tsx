@@ -1,23 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  Modal,
-  Form,
-  Input,
-  DatePicker,
-  message,
-  Button,
-  Radio,
-  Slider,
-} from 'antd';
+import React, { useEffect } from 'react';
+import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
 import {
   mapPercentageToPriorityId,
   parseEventInForm,
 } from '@/utils/scheduleUtil';
-import moment, { Moment } from 'moment';
-import { useLatest, useRequest } from 'ahooks';
-import { addSchdule, deleteSchdule, updateSchdule } from '@/services/schedule';
+import moment from 'moment';
+import { useRequest } from 'ahooks';
+import { addSchdule, deleteSchdule } from '@/services/schedule';
 import { useModel } from 'umi';
-import type { RangeValue } from 'rc-picker/lib/interface.d';
+import { CalendarEvent } from './Calendar';
 
 const { RangePicker } = DatePicker;
 
@@ -29,7 +20,20 @@ const marks = {
   100: 'Inf',
 };
 
-const CalendarForm = ({
+interface CalendarFormProp {
+  visible: boolean;
+  isEditRef: React.MutableRefObject<boolean>;
+  selectedEventRef: React.MutableRefObject<Partial<CalendarEvent>>;
+  onCancel: () => void;
+  fetchEventsInRange: () => void;
+  updateLoading: boolean;
+  runUpdateSchedule: (
+    body: any,
+    options?: { [key: string]: any } | undefined,
+  ) => void;
+}
+
+const CalendarForm: React.FC<CalendarFormProp> = ({
   visible,
   isEditRef,
   selectedEventRef,
@@ -55,8 +59,10 @@ const CalendarForm = ({
     onSuccess: () => {
       onCancel();
       fetchEventsInRange();
+      message.success('Successfully delete schedule.');
     },
     onError: () => {
+      fetchEventsInRange();
       message.error('Unable to add schedule.');
     },
   });
@@ -68,15 +74,16 @@ const CalendarForm = ({
       onSuccess: () => {
         onCancel();
         fetchEventsInRange();
+        message.success('Successfully delete schedule.');
       },
       onError: () => {
+        fetchEventsInRange();
         message.error('Unable to delete schedule.');
       },
     },
   );
 
   const onSubmitForm = (values: any) => {
-    console.log('values: ', values);
     // add or update
     const schedule = {
       id: selectedEventRef.current.id,
@@ -88,14 +95,17 @@ const CalendarForm = ({
       note: values.note,
     };
 
-    console.log('schedule: ', schedule);
     schedule.id === undefined
       ? runAddSchedule(schedule)
       : runUpdateSchedule(schedule);
   };
 
-  const onDeleteEvent = ({ id }) => {
-    runDeleteSchedule({ id });
+  const onDeleteEvent = (event: Partial<CalendarEvent>) => {
+    if (event.id === undefined) {
+      console.error('The event id is undefined');
+      return;
+    }
+    runDeleteSchedule({ id: event.id });
   };
 
   return (
@@ -130,11 +140,7 @@ const CalendarForm = ({
         <Form.Item name="title" label="Title" rules={[{ required: true }]}>
           <Input allowClear />
         </Form.Item>
-        <Form.Item
-          name="location"
-          label="Location"
-          // rules={[{ required: true }]}
-        >
+        <Form.Item name="location" label="Location">
           <Input allowClear />
         </Form.Item>
         <Form.Item name="time" label="Time" rules={[{ required: true }]}>

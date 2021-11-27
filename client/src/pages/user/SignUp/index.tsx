@@ -69,7 +69,7 @@ const Register: FC = (props) => {
   const { loading: submitting, run: runRegister } = useRequest(signup, {
     manual: true,
     onSuccess: () => {
-      message.info('Sign up succeed, please log in.');
+      message.success('Sign up succeed, please log in.');
       history.push('/user/login');
     },
     onError: () => {

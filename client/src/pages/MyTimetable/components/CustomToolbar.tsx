@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Views, Navigate } from 'react-big-calendar';
 import { Button, Typography, Row, Space, Select, Tooltip } from 'antd';
-import {
-  LeftOutlined,
-  RightOutlined,
-  CalendarOutlined,
-  PlusCircleTwoTone,
-} from '@ant-design/icons';
-import type { ToolbarProps } from 'react-big-calendar';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import type { ToolbarProps, NavigateAction, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
@@ -19,14 +14,13 @@ interface CustomToolbarProp {
 }
 
 const CustomToolbar: React.FC<ToolbarProps & CustomToolbarProp> = (props) => {
-  // console.log('props: ', props);
   const { label, showCreateForm } = props;
 
-  const navigate = (action) => {
+  const navigate = (action: NavigateAction) => {
     props.onNavigate(action);
   };
 
-  const handleChangeView = (view) => {
+  const handleChangeView = (view: View) => {
     props.onView(view);
   };
 
@@ -64,7 +58,6 @@ const CustomToolbar: React.FC<ToolbarProps & CustomToolbarProp> = (props) => {
             <Tooltip title="Create New Event">
               <Button
                 type="default"
-                // size="large"
                 onClick={showCreateForm}
               >
                 Create

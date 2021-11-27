@@ -1,6 +1,7 @@
+import { CalendarEvent } from '@/pages/MyTimetable/components/Calendar';
 import moment from 'moment';
 
-export function parseEventInForm(event) {
+export function parseEventInForm(event: Partial<CalendarEvent>) {
   return {
     ...event,
     time: [moment(event.start), moment(event.end)],
@@ -8,7 +9,7 @@ export function parseEventInForm(event) {
 }
 
 export function mapPriorityIdToPercentage(id: number) {
-  const map = {
+  const map: { [key: string]: number } = {
     0: 0, // none
     1: 25, // low
     2: 50, // normal
@@ -22,7 +23,7 @@ export function mapPriorityIdToPercentage(id: number) {
 }
 
 export function mapPercentageToPriorityId(percentage: number) {
-  const map = {
+  const map: { [key: string]: number } = {
     0: 0, // none
     25: 1, // low
     50: 2, // normal
