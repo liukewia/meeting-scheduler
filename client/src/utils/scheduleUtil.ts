@@ -8,7 +8,7 @@ export function parseEventInForm(event: Partial<CalendarEvent>) {
   };
 }
 
-export function mapPriorityIdToPercentage(id: number) {
+export function mapPriorityIdToPercent(id: number) {
   const map: { [key: string]: number } = {
     0: 0, // none
     1: 25, // low
@@ -22,7 +22,7 @@ export function mapPriorityIdToPercentage(id: number) {
   return percentage;
 }
 
-export function mapPercentageToPriorityId(percentage: number) {
+export function mapPercentToPriorityId(percentage: number) {
   const map: { [key: string]: number } = {
     0: 0, // none
     25: 1, // low
@@ -34,4 +34,32 @@ export function mapPercentageToPriorityId(percentage: number) {
   const id = map[percentage];
   if (id === undefined) return 2;
   return id;
+}
+
+export function mapPriorityPercentToColor(percentage: number) {
+  const map: { [key: string]: string } = {
+    0: 'lime', // none
+    25: 'magenta', // low LIGHT_GREEN
+    50: 'orange', // normal ORANGE
+    75: 'volcano', // high YELLOW
+    100: 'red', // inf DARK_RED
+  };
+
+  const color = map[percentage];
+  if (color === undefined) return 'orange';
+  return color;
+}
+
+export function mapPriorityPercentToTxt(percentage: number) {
+  const map: { [key: string]: string } = {
+    0: 'None', // none
+    25: 'Low', // low LIGHT_GREEN
+    50: 'Normal', // normal ORANGE
+    75: 'High', // high YELLOW
+    100: 'Inf', // inf DARK_RED
+  };
+
+  const txt = map[percentage];
+  if (txt === undefined) return 'Normal';
+  return txt;
 }

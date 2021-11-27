@@ -175,6 +175,7 @@
         }
       </style>
       <div
+        id="init-spin"
         style="
           display: flex;
           flex-direction: column;
@@ -196,5 +197,10 @@
         </div>
       </div>
     </div>
+    <script>
+      if (localStorage.getItem('app-theme') === 'dark') {
+        document.getElementById('root').style['background-color'] = 'black';
+      }
+    </script>
   </body>
 </html>

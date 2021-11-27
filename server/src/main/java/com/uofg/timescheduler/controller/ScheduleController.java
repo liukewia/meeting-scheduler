@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 前端控制器
+ * ScheduleController
  * </p>
  *
  * @author Finn
@@ -92,6 +92,7 @@ public class ScheduleController {
             long midTime = Long.parseLong(midTimeStr);
             scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
                     .eq("user_id", userId)
+                    // https://baomidou.com/guide/wrapper.html#abstractwrapper
                     .ge("start_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .lt("start_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .gt("end_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())

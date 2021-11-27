@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
 import {
-  mapPercentageToPriorityId,
+  mapPercentToPriorityId,
   parseEventInForm,
 } from '@/utils/scheduleUtil';
 import moment from 'moment';
@@ -93,7 +93,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
       location: values.location,
       startTime: values.time[0].valueOf(),
       endTime: values.time[1].valueOf(),
-      priorityId: mapPercentageToPriorityId(values.priority),
+      priorityId: mapPercentToPriorityId(values.priority),
       note: values.note,
     };
 

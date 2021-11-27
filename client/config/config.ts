@@ -38,7 +38,7 @@ export default defineConfig({
 
   // https://umijs.org/config/#dynamicimport
   dynamicImport: {
-    loading: '@/components/Loading/index',
+    loading: '@/components/CenteredSpinner/index',
   },
   targets: {
     ie: 11,

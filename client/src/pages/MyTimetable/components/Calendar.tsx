@@ -1,4 +1,4 @@
-import { Spin, Card, message } from 'antd';
+import { Spin, Card, message, Tag } from 'antd';
 import moment from 'moment';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useModel } from 'umi';
@@ -17,8 +17,10 @@ import { ONE_DAY_MILLIS, ONE_MINUTE_MILLIS } from '@/constants';
 import { isString } from 'lodash';
 import { searchSchdule } from '@/services/schedule';
 import {
-  mapPercentageToPriorityId,
-  mapPriorityIdToPercentage,
+  mapPercentToPriorityId,
+  mapPriorityIdToPercent,
+  mapPriorityPercentToColor,
+  mapPriorityPercentToTxt,
 } from '@/utils/scheduleUtil';
 import { updateSchdule } from '@/services/schedule';
 import type { stringOrDate } from 'react-big-calendar';
@@ -46,6 +48,20 @@ export interface CalendarEvent {
   end: stringOrDate;
   priority: number;
   note: string;
+}
+
+function EventAgenda({ event }) {
+  return (
+    <span>
+      <a style={{ color: 'magenta' }}>{event.title}</a>
+      <Tag
+        color={mapPriorityPercentToColor(event.priority)}
+        style={{ marginLeft: 10 }}
+      >
+        {mapPriorityPercentToTxt(event.priority)} Priority
+      </Tag>
+    </span>
+  );
 }
 
 const Calendar: React.FC = (props) => {
@@ -83,7 +99,7 @@ const Calendar: React.FC = (props) => {
             location: schedule.location,
             start: new Date(schedule.startTime),
             end: new Date(schedule.endTime),
-            priority: mapPriorityIdToPercentage(schedule.priorityId),
+            priority: mapPriorityIdToPercent(schedule.priorityId),
             note: schedule.note,
           })),
         );
@@ -224,7 +240,7 @@ const Calendar: React.FC = (props) => {
       location: _event.location,
       startTime: latterStartTime,
       endTime: latterEndTime,
-      priorityId: mapPercentageToPriorityId(_event.priority),
+      priorityId: mapPercentToPriorityId(_event.priority),
       note: _event.note,
     });
   };
@@ -252,7 +268,7 @@ const Calendar: React.FC = (props) => {
 
   return (
     <Card>
-      <Spin size="large" spinning={fetchLoading} delay={100}>
+      <Spin tip="Loading..." size="large" spinning={fetchLoading} delay={100}>
         <DragAndDropCalendar
           popup
           defaultDate={currentDate}
@@ -264,6 +280,9 @@ const Calendar: React.FC = (props) => {
             toolbar: (props) => (
               <CustomToolbar {...props} showCreateForm={showCreateForm} />
             ),
+            agenda: {
+              event: EventAgenda,
+            },
           }}
           defaultView={Views.MONTH}
           resizable
