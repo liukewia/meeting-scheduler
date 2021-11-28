@@ -83,7 +83,6 @@ export default function SiteSettings() {
                 wrapperCol={{ span: 8 }}
               >
                 <Select
-                  placeholder="Please select theme"
                   value={appTheme}
                   onSelect={setAppTheme}
                 >

@@ -148,16 +148,16 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
             format="DD/MM/YYYY HH:mm"
             ranges={{
               '1h': [
-                moment().startOf('minute').add(utcOffset, 'ms'),
-                moment().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
               ],
               '2h': [
-                moment().startOf('minute').add(utcOffset, 'ms'),
-                moment().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
               ],
               '3h': [
-                moment().startOf('minute').add(utcOffset, 'ms'),
-                moment().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms'),
+                moment.utc().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
               ],
             }}
             placeholder={['Start Time', 'End Time']}

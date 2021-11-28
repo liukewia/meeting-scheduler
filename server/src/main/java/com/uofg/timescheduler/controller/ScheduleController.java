@@ -20,7 +20,6 @@ import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ public class ScheduleController {
         String midTimeStr = request.getParameter("midTime");
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
-        List<Schedule> scheduleList = new ArrayList<>();
+        List<Schedule> scheduleList;
         if (midTimeStr != null && startTimeStr == null && endTimeStr == null) {
             // query by a mid date, need to show a range from 30th day before to 30th day after.
             long midTime = Long.parseLong(midTimeStr);

@@ -144,7 +144,7 @@ public class UserController {
 
     @RequiresAuthentication // done jwt validation here, including not passing it and passing an illegal one
     @GetMapping("/currentUser")
-    @ApiOperation("fetch current User")
+    @ApiOperation("fetch current user info")
     public Result currentUser() {
         // https://blog.csdn.net/suki_rong/article/details/80445880
         AccountProfile user = ShiroUtil.getProfile();
@@ -157,6 +157,23 @@ public class UserController {
                 .put("email", user.getEmail())
                 .put("utcOffset", user.getUtcOffset())
                 .put("access", role.getName())
+                .map()
+        );
+    }
+
+    @RequiresAuthentication
+    @GetMapping("/allUsers")
+    @ApiOperation("fetch all users' basic info")
+    public Result allUsers() {
+        List<User> users = userService.list(new QueryWrapper<User>().select("id", "username", "avatar", "utc_offset"));
+
+        return Result.succ(MapUtil.builder()
+                .put("users", users.stream().map(user -> MapUtil.builder()
+                        .put("id", user.getId())
+                        .put("username", user.getUsername())
+                        .put("avatar", user.getAvatar())
+                        .put("utcOffset", user.getUtcOffset())
+                        .map()))
                 .map()
         );
     }

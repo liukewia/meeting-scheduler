@@ -45,3 +45,14 @@ export async function signup(
   });
   return res;
 }
+
+/** get all users GET /api/user/allUsers */
+export async function queryAllUsers(options?: {
+  [key: string]: any;
+}): Promise<any> {
+  const res = await axiosReq('/user/allUsers', {
+    method: 'GET',
+    ...(options || {}),
+  });
+  return res;
+}

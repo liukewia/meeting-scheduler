@@ -1,5 +1,6 @@
 import { Spin, Card, message, Tag } from 'antd';
 import moment from 'moment';
+import type { Moment } from 'moment';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useModel } from 'umi';
 import {
@@ -50,6 +51,16 @@ export interface CalendarEvent {
   note: string;
 }
 
+export interface CalendarFormEvent {
+  id?: number;
+  title: string;
+  location: string;
+  start: Moment;
+  end: Moment;
+  priority: number;
+  note: string;
+}
+
 function EventAgenda({ event }) {
   return (
     <span>
@@ -77,7 +88,7 @@ const Calendar: React.FC = (props) => {
   });
 
   const isEditRef = useRef(false);
-  const selectedEventRef = useRef<Partial<CalendarEvent>>({});
+  const selectedEventRef = useRef<Partial<CalendarFormEvent>>({});
 
   const {
     data: eventData,
@@ -171,10 +182,9 @@ const Calendar: React.FC = (props) => {
   const showCreateForm = () => {
     isEditRef.current = false;
     // Round up to the nearest minute
-    let now = moment().startOf('minute').add(utcOffset, 'ms');
     selectedEventRef.current = {
-      start: now.toDate(),
-      end: now.add(1, 'h').toDate(),
+      start: moment.utc().startOf('minute').add(utcOffset, 'ms'),
+      end: moment.utc().startOf('minute').add(utcOffset, 'ms').add(1, 'h'), // dont use shallow copy
       priority: 50,
     };
     setFormVisible(true);

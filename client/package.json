@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@ant-design/hitu": "^0.0.0-alpha.17",
-    "ahooks": "^3.0.0-alpha.9",
+    "ahooks": "^3.0.0-alpha.14",
     "antd": "^4.16.13",
     "antd-theme-generator": "^1.2.10",
     "axios": "^0.24.0",
