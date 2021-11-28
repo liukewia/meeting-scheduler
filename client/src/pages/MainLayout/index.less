@@ -4,22 +4,12 @@
 @ant-header-hover-bg: rgba(0, 0, 0, 0.025);
 
 .@{sider-prefix-cls} {
-  // overflow: auto;
-  // height: 100vh;
-  // position: fixed;
-  // left: 0;
   z-index: 3;
 
   // only show in light mode
   &-light {
     box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
   }
-
-  // &.-collapsed {
-  //   .@{sider-prefix-cls}-logo {
-  //     padding: 16px 8px !important;
-  //   }
-  // }
 
   &-logo {
     position: relative;
@@ -137,34 +127,3 @@
     }
   }
 }
-
-// @global-header-prefix-cls: ~'@{ant-prefix}-layout-header';
-// @nav-header-height: 48px;
-// @header-box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-
-// .@{global-header-prefix-cls} {
-//   height: @nav-header-height !important;
-//   padding: 0 16px !important;
-//   background: @component-background !important;
-
-//   // only show in light mode
-//   &-shadow {
-//     box-shadow: @header-box-shadow;
-//   }
-// }
-
-// .@{ant-prefix}-global-header-shadow {
-//   box-shadow: @header-box-shadow;
-// }
-
-// .logo {
-//   height: 32px;
-//   margin: 16px;
-//   background: rgba(255, 255, 255, 0.3);
-// }
-
-// [data-theme='dark'] .site-layout .site-layout-background {
-//   background: #141414;
-// }
-
-// box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);

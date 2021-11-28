@@ -1,18 +1,16 @@
 import { Suspense } from 'react';
 import { Layout, Space } from 'antd';
 import { useModel } from 'umi';
-
 import classNames from 'classnames';
-import { PREFIX_CLS } from '@/constants';
 import CenteredSpinner from '@/components/CenteredSpinner';
-// import 'antd/dist/antd.css';
-import './index.less';
 import Sider from './Sider';
 import AvatarDropdown from '@/components/AvatarDropdown';
+import { PREFIX_CLS } from '@/constants';
+import './index.less';
 
 const { Header, Content } = Layout;
 
-export default (props) => {
+export default (props: any) => {
   // control the currently selected key to memoize selected sider item after a jump.
   const { isLightTheme } = useModel('theme', (model) => ({
     isLightTheme: model.isLightTheme,

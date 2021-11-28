@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
-import {
-  mapPercentToPriorityId,
-  parseEventInForm,
-} from '@/utils/scheduleUtil';
+import { mapPercentToPriorityId, parseEventInForm } from '@/utils/scheduleUtil';
 import moment from 'moment';
 import { useRequest } from 'ahooks';
 import { addSchdule, deleteSchdule } from '@/services/schedule';

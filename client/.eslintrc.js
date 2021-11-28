@@ -52,8 +52,6 @@ module.exports = {
     ],
     'eol-last': ['error', 'always'],
     'linebreak-style': ['error', 'unix'],
-
-    // 6.1 【推荐】 使用单引号 '' 定义字符串
     quotes: [1, 'single'],
     'no-restricted-syntax': [
       'warn',

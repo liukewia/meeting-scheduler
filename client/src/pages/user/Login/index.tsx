@@ -17,12 +17,6 @@ const Login: React.FC = (props) => {
 
   // on success, store the jwt according to autoLogin, and jump to redirected url or home
   const { loading, run: runLogin } = useRequest(login, {
-    // defaultParams: [
-    //   {
-    //     username: 'finn',
-    //     password: '111111',
-    //   },
-    // ],
     throttleWait: 1000,
     manual: true,
     onSuccess: async (userInfo, params) => {
@@ -41,35 +35,8 @@ const Login: React.FC = (props) => {
     },
   });
 
-  // const { run: query } = useRequest(queryCurrentUser, {
-  //   manual: true,
-  //   onSuccess: async (userInfo, params) => {
-  //     console.log('params: ', params);
-  //     if (userInfo) {
-  //       await setInitialState((s) => ({ ...s, currentUser: userInfo }));
-  //     }
-  //     console.log('userInfo: ', userInfo);
-  //     if (!history) return;
-  //     const { query } = history.location;
-  //     const { redirect } = query as {
-  //       redirect: string;
-  //     };
-  //     history.push(redirect || '/');
-  //     return;
-  //   },
-  // });
-
   // go to the redirect url if already logged in
   useEffect(() => {
-    // const jwt = getJwt();
-    // if (!initialState?.currentUser?.id && !jwt) {
-    //   return;
-    // }
-    // if (!initialState?.currentUser?.id && jwt) {
-    //   message.info('Automatically logging in...');
-    //   query();
-    //   return;
-    // }
     if (
       initialState?.currentUser?.access &&
       initialState?.currentUser?.access !== 'guest'
@@ -78,10 +45,6 @@ const Login: React.FC = (props) => {
       history.push((history?.location?.query?.redirect as string) || '/');
     }
   }, []);
-
-  // const fetchUserInfo = async () => {
-  //   const userInfo = await initialState?.fetchUserInfo?.();
-  // };
 
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);

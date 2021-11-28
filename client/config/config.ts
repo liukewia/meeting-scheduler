@@ -9,33 +9,8 @@ const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   alias: {
     public: '/public',
-    // service: '/src/services',
-    // constant: '/src/constants',
   },
   hash: true,
-  // locale: {
-  //   default: 'en-US',
-  //   antd: true,
-  //   baseNavigator: false,
-  // },
-  // antd: {
-  //   config: {
-  //     locale: 'en-US',
-  //     antd: true,
-  //     baseNavigator: false,
-  //     baseSeparator: '-',
-  //   },
-  // },
-  // dva: {
-  //   hmr: true,
-  // },
-  // layout: {
-  //   // https://umijs.org/zh-CN/plugins/plugin-layout
-  //   // locale: 'en-US',
-  //   siderWidth: 208,
-  //   ...defaultSettings,
-  // },
-
   // https://umijs.org/config/#dynamicimport
   dynamicImport: {
     loading: '@/components/CenteredSpinner/index',
@@ -49,6 +24,7 @@ export default defineConfig({
   // theme: {
   //   'primary-color': defaultSettings.primaryColor,
   // },
+
   // esbuild is father build tools
   // https://umijs.org/plugins/plugin-esbuild
   // esbuild: {},
@@ -84,9 +60,4 @@ export default defineConfig({
   // exportStatic: {},
 
   // publicPath: process.env.NODE_ENV === 'production' ? '/static/' : '/',
-
-  // https://umijs.org/plugins/plugin-request#datafield
-  // request: {
-  //   dataField: '',
-  // },
 });

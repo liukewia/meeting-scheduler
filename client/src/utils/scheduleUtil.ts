@@ -39,10 +39,10 @@ export function mapPercentToPriorityId(percentage: number) {
 export function mapPriorityPercentToColor(percentage: number) {
   const map: { [key: string]: string } = {
     0: 'lime', // none
-    25: 'magenta', // low LIGHT_GREEN
-    50: 'orange', // normal ORANGE
-    75: 'volcano', // high YELLOW
-    100: 'red', // inf DARK_RED
+    25: 'magenta', // low
+    50: 'orange', // normal
+    75: 'volcano', // high
+    100: 'red', // inf
   };
 
   const color = map[percentage];

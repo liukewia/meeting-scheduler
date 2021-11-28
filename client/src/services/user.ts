@@ -16,7 +16,6 @@ export async function login(
   body: API.LoginParams,
   options?: { [key: string]: any },
 ): Promise<any> {
-  // return {};
   const res = await axiosReq('/user/login', {
     method: 'POST',
     data: body,

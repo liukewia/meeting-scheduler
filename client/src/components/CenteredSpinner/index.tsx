@@ -8,12 +8,11 @@ const CenteredSpinner = ({
   size,
   spinning,
   tip,
-  ...rest
 }: {
-  indicator: SpinIndicator;
-  size: SpinSize;
-  spinning: boolean;
-  tip: string;
+  indicator?: SpinIndicator;
+  size?: SpinSize;
+  spinning?: boolean;
+  tip?: string;
 }) => {
   const spinProps = { indicator, size, spinning, tip };
   return (

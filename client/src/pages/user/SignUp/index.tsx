@@ -40,9 +40,7 @@ const passwordProgressMap: {
 };
 
 const Register: FC = (props) => {
-  // const [count, setCount]: [number, any] = useState(0);
   const [visible, setVisible]: [boolean, any] = useState(false);
-  // const [prefix, setPrefix]: [string, any] = useState('86');
   const [popover, setPopover]: [boolean, any] = useState(false);
   const confirmDirty = false;
   let interval: number | undefined;
@@ -116,10 +114,6 @@ const Register: FC = (props) => {
     }
     return promise.resolve();
   };
-
-  // const changePrefix = (value: string) => {
-  //   setPrefix(value);
-  // };
 
   const renderPasswordProgress = () => {
     const value = form.getFieldValue('password');
@@ -239,53 +233,6 @@ const Register: FC = (props) => {
               placeholder="Confirm password"
             />
           </FormItem>
-          {/* <InputGroup compact>
-          <Select size="large" value={prefix} onChange={changePrefix} style={{ width: '20%' }}>
-            <Option value="86">+86</Option>
-            <Option value="87">+87</Option>
-          </Select>
-          <FormItem
-            style={{ width: '80%' }}
-            name="mobile"
-            rules={[
-              {
-                required: true,
-                message: '请输入手机号!',
-              },
-              {
-                pattern: /^\d{11}$/,
-                message: '手机号格式错误!',
-              },
-            ]}
-          >
-            <Input size="large" placeholder="手机号" />
-          </FormItem>
-        </InputGroup>
-        <Row gutter={8}>
-          <Col span={16}>
-            <FormItem
-              name="captcha"
-              rules={[
-                {
-                  required: true,
-                  message: '请输入验证码!',
-                },
-              ]}
-            >
-              <Input size="large" placeholder="验证码" />
-            </FormItem>
-          </Col>
-          <Col span={8}>
-            <Button
-              size="large"
-              disabled={!!count}
-              className={styles.getCaptcha}
-              onClick={onGetCaptcha}
-            >
-              {count ? `${count} s` : '获取验证码'}
-            </Button>
-          </Col>
-        </Row> */}
           <FormItem>
             <Button
               size="large"
