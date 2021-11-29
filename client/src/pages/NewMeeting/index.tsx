@@ -11,18 +11,32 @@ import {
   InputNumber,
   Space,
   Button,
+  Upload,
+  message,
 } from 'antd';
-import { useModel } from 'umi';
+import { InboxOutlined } from '@ant-design/icons';
 import { SpacedContainer } from '@/components/SpacedContainer';
-import { ONE_HOUR_MILLIS } from '@/constants';
-import { getCurrentTimePart } from '@/utils/timeUtil';
 import { useMemo, useState } from 'react';
 import UserSelector from '@/components/UserSelector';
 import MultipleDatePicker from '@/components/MultipleDatePicker';
+import { useRequest } from 'ahooks';
+import { planMeeting, sheetUpload } from '@/services/meeting';
+import { RcFile } from 'antd/lib/upload';
+import { MYSQL_DATE_LOWER_LIMIT, MYSQL_DATE_UPPER_LIMIT } from '@/constants';
 
-// 1 -> new meeting form
-// 2 -> new meeting result
-// need admin priviledge
+const { Dragger } = Upload;
+
+export interface IUploadEvent {
+  file: RcFile;
+  fileList: RcFile[];
+}
+
+const normalizeFile = (e: IUploadEvent) => {
+  if (Array.isArray(e)) {
+    return e;
+  }
+  return e?.fileList;
+};
 
 const stepBarLayout = {
   xs: {
@@ -34,12 +48,12 @@ const stepBarLayout = {
     offset: 0,
   },
   lg: {
-    span: 12,
-    offset: 6,
+    span: 16,
+    offset: 4,
   },
   xl: {
-    span: 12,
-    offset: 6,
+    span: 14,
+    offset: 5,
   },
   xxl: {
     span: 12,
@@ -47,9 +61,17 @@ const stepBarLayout = {
   },
 };
 
+// 0 -> new meeting form
+// 1 -> new meeting result
+
 type NewMeetingSteps = 0 | 1;
 
-export const formLayout = {
+interface SheetFile extends RcFile {
+  response?: any;
+  error?: unknown;
+}
+
+const formLayout = {
   labelCol: { span: 9 },
   wrapperCol: {
     xs: { span: 12 },
@@ -67,7 +89,7 @@ const buttonLayout = {
   },
 };
 
-export function titleWithOffset(title: string) {
+function titleWithOffset(title: string) {
   const colLayout = {
     xs: {
       span: 12,
@@ -80,7 +102,7 @@ export function titleWithOffset(title: string) {
   };
 
   return (
-    <Row>
+    <Row style={{ margin: '50px 0px 20px' }}>
       <Col {...colLayout}>
         <Typography.Title level={5}>{title}</Typography.Title>
       </Col>
@@ -88,9 +110,9 @@ export function titleWithOffset(title: string) {
   );
 }
 
-export enum ParticipantSourceType {
-  Internal,
-  External,
+enum ParticipantSourceType {
+  Internal, // 0
+  External, // 1
 }
 
 const initialFormValues = {
@@ -98,14 +120,37 @@ const initialFormValues = {
   participantList: [],
   spreadsheets: [],
   dates: [],
-  duration: 1,
+  duration: 30,
 };
 
-const NewMeetingForm = ({ setCurrentStep }) => {
+const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
   const [form] = Form.useForm();
 
   const handleUsersChange = (users: string[]) => {
     form.setFieldsValue({ participantList: users });
+  };
+
+  const customRequest = (customRequest: any) => {
+    return sheetUpload({ file: customRequest.file })
+      .then((res) =>
+        res.reason ? customRequest.onError(res) : customRequest.onSuccess(res),
+      )
+      .catch(customRequest.onError);
+  };
+
+  const handleSheetsChange = (info: { file: any; fileList: [] }) => {
+    const file = info.file;
+    const status = file?.status;
+    if (status === 'done') {
+      message.success(`${file?.name} file uploaded successfully.`);
+    } else if (status === 'error') {
+      const error = file.error;
+      if (error && error?.reason) {
+        message.error(error.reason);
+      } else {
+        message.error(`${file?.name} file upload failed.`);
+      }
+    }
   };
 
   const handleDatesChange = (dates: string[]) => {
@@ -120,12 +165,18 @@ const NewMeetingForm = ({ setCurrentStep }) => {
         return (
           <Form.Item
             name="participantList"
-            label="Participant list"
+            label="Participants"
             rules={[
               {
                 required:
                   form.getFieldValue('participantSource') ===
                   ParticipantSourceType.Internal,
+                validator: (_, value) =>
+                  Array.isArray(value) && value.length >= 2
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error('Should select at least two people'),
+                      ),
               },
             ]}
           >
@@ -137,15 +188,37 @@ const NewMeetingForm = ({ setCurrentStep }) => {
           <Form.Item
             label="Spreadsheets"
             name="spreadsheets"
+            valuePropName="fileList"
+            getValueFromEvent={normalizeFile}
             rules={[
               {
                 required:
                   form.getFieldValue('participantSource') ===
                   ParticipantSourceType.External,
+                validator: (_, value) =>
+                  Array.isArray(value) &&
+                  value.filter((file) => file.response).length >= 2
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error('Should at least upload two valid sheets'),
+                      ),
               },
             ]}
           >
-            <div>spreadsheets</div>
+            <Dragger
+              // accept={SPREADSHEET_EXTS.map((ext) => '.' + ext).join(',')}
+              multiple
+              name="spreadsheets"
+              onChange={handleSheetsChange}
+              customRequest={customRequest}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Click or drag files here to upload
+              </p>
+            </Dragger>
           </Form.Item>
         );
       default:
@@ -160,7 +233,34 @@ const NewMeetingForm = ({ setCurrentStep }) => {
 
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);
-    // runLogin(values);
+    let reqBody;
+    if (values.participantSource === ParticipantSourceType.Internal) {
+      reqBody = {
+        participantSource: values.participantSource,
+        participantList: values.participantList,
+        dates: values.dates,
+        duration: values.duration, // in minutes
+      };
+    } else if (values.participantSource === ParticipantSourceType.External) {
+      reqBody = {
+        participantSource: values.participantSource,
+        spreadsheets: values.spreadsheets
+          .filter((file: SheetFile) => {
+            return file.response.filePath && !file.error;
+          })
+          .map((file: SheetFile) => ({
+            uid: file.uid,
+            name: file.name,
+            path: file.response.filePath,
+          })),
+        dates: values.dates,
+        duration: values.duration, // in minutes
+      };
+    } else {
+      return;
+    }
+    runPlanMeeting(reqBody);
+    setCurrentStep(1);
   };
 
   return (
@@ -174,7 +274,7 @@ const NewMeetingForm = ({ setCurrentStep }) => {
       {titleWithOffset('Participants')}
       <Form.Item
         name="participantSource"
-        label="Participant source"
+        label="Source"
         rules={[
           {
             required: true,
@@ -183,7 +283,6 @@ const NewMeetingForm = ({ setCurrentStep }) => {
       >
         <Radio.Group
           optionType="button"
-          buttonStyle="solid"
           options={[
             {
               label: 'Database',
@@ -209,10 +308,19 @@ const NewMeetingForm = ({ setCurrentStep }) => {
       {titleWithOffset('Meeting info')}
       <Form.Item
         name="dates"
-        label="Dates (in UTC 0)"
+        label="Potential dates" // (in UTC 0)
         rules={[
           {
             required: true,
+            validator: (_, value) =>
+              Array.isArray(value) &&
+              value.every(
+                (date) =>
+                  date >= MYSQL_DATE_LOWER_LIMIT &&
+                  date <= MYSQL_DATE_UPPER_LIMIT,
+              )
+                ? Promise.resolve()
+                : Promise.reject(new Error(`Date out of bound.`)),
           },
         ]}
       >
@@ -228,44 +336,61 @@ const NewMeetingForm = ({ setCurrentStep }) => {
         ]}
       >
         <InputNumber
-          addonAfter="hours"
-          min={0.1}
-          max={12}
+          addonAfter="minutes"
+          min={1}
+          max={720}
+          step={1}
           style={{ width: '100%' }}
         />
       </Form.Item>
-      <Form.Item {...buttonLayout}>
+      <Form.Item {...buttonLayout} style={{ marginTop: 40 }}>
         <Space size="large">
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
-          <Button onClick={onReset}> 重置 </Button>
+          <Button onClick={onReset}>Reset</Button>
         </Space>
       </Form.Item>
     </Form>
   );
 };
 
-const FormResult = () => {
+const FormResult = ({ setCurrentStep, planResult, planLoading, planError }) => {
   return <div>FormResult</div>;
 };
 
 export default () => {
   const [currentStep, setCurrentStep] = useState<NewMeetingSteps>(0);
 
+  const {
+    data: planResult,
+    loading: planLoading,
+    error: planError,
+    run: runPlanMeeting,
+  } = useRequest(planMeeting, {
+    manual: true,
+    debounceWait: 100,
+    onSuccess: () => {},
+    onError: () => {},
+  });
+
   const currComponent = useMemo(() => {
     const getCurrentStepAndComponent = (currStep = 1) => {
       const stepAndComponent: { [key: string]: React.ReactElement } = {
         0: (
           <NewMeetingForm
-            currentStep={currentStep}
+            // currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            runPlanMeeting={runPlanMeeting}
           />
         ),
         1: (
           <FormResult
-            currentStep={currentStep}
+            // currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            planResult={planResult}
+            planLoading={planLoading}
+            planError={planError}
           />
         ),
       };

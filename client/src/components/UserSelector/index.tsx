@@ -33,7 +33,6 @@ export default (props: UserSelectorProps) => {
   });
 
   const handleChange = (value: any) => {
-    console.log(value);
     props.onChange?.(value);
   };
 

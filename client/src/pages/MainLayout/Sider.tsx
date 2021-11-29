@@ -99,6 +99,10 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
     }
   }, [isCollapsed]);
 
+  useEffect(() => {
+    isCollapsed && setOpenedKeys([]);
+  }, []);
+
   const { appTheme } = useModel('theme', (model) => ({
     appTheme: model.appTheme,
   }));
