@@ -5,7 +5,7 @@ export async function planMeeting(
   body: any,
   options?: { [key: string]: any },
 ): Promise<any> {
-  const res = await axiosReq('/schedule/plan', {
+  const res = await axiosReq('/meeting/plan', {
     method: 'POST',
     data: body,
     ...(options || {}),

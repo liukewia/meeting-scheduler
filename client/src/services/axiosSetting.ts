@@ -1,8 +1,9 @@
-import { LOGIN_PATH, UN_AUTH_PATHS } from '@/constants';
-import { getJwt } from '@/utils/jwtUtil';
 import { message, notification } from 'antd';
 import axios from 'axios';
 import { matchPath, history } from 'umi';
+import { LOGIN_PATH, UN_AUTH_PATHS } from '@/constants';
+import { getJwt } from '@/utils/jwtUtil';
+import { isDev } from '@/utils/nodeUtil';
 
 function createAxiosInstance() {
   const instance = axios.create({
@@ -66,13 +67,14 @@ function createAxiosInstance() {
       // cannot get response from backend
       console.log(JSON.stringify(error));
       console.log(JSON.stringify(error.response));
-      notification.error({
-        // expose the potential error explicitly
-        message: `DEV: ${error.response?.config?.method || error.config?.method} ${
-          error.response?.config?.url || error.config?.url
-        } Failed.`,
-        description: error.response?.data?.msg || error.message,
-      });
+      isDev &&
+        notification.error({
+          // expose the potential error explicitly
+          message: `${error.response?.config?.method || error.config?.method} ${
+            error.response?.config?.url || error.config?.url
+          } Failed.`,
+          description: error.response?.data?.msg || error.message,
+        });
       // the rejected error returned will be caught by useRequest and goes into onError callback
       return Promise.reject(error);
     },

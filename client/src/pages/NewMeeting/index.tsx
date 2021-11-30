@@ -175,7 +175,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
                   Array.isArray(value) && value.length >= 2
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error('Should select at least two people'),
+                        new Error('Should select at least two people.'),
                       ),
               },
             ]}
@@ -200,7 +200,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
                   value.filter((file) => file.response).length >= 2
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error('Should at least upload two valid sheets'),
+                        new Error('Should at least upload two valid spreadsheets.'),
                       ),
               },
             ]}

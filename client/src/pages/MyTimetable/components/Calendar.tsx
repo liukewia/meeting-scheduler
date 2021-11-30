@@ -25,6 +25,7 @@ import {
 } from '@/utils/scheduleUtil';
 import { updateSchdule } from '@/services/schedule';
 import type { stringOrDate } from 'react-big-calendar';
+import { utcNow } from '@/utils/timeUtil';
 
 // Is there a way to change your timezone in Chrome devtools?
 // https://stackoverflow.com/a/60008052/14756060
@@ -82,7 +83,7 @@ const Calendar: React.FC = (props) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isFormVisible, setFormVisible] = useState(false);
   const visibleRange = useReactive({
-    midTime: new Date().getTime() + utcOffset,
+    midTime: utcNow() + utcOffset,
     startTime: 0,
     endTime: 0,
   });
@@ -179,10 +180,18 @@ const Calendar: React.FC = (props) => {
     visibleRange.endTime = endTime;
   };
 
+  console.log('utcNow(): ', utcNow());
+  console.log(`utcNow().startOf('minute'): `, utcNow().startOf('minute'));
+  console.log(
+    `utcNow().startOf('minute').add(utcOffset, 'ms'): `,
+    utcNow().startOf('minute').add(utcOffset, 'ms'),
+  );
+
   const showCreateForm = () => {
     isEditRef.current = false;
     // Round up to the nearest minute
     selectedEventRef.current = {
+      // do not use utcNow() here because antd will offset time again
       start: moment.utc().startOf('minute').add(utcOffset, 'ms'),
       end: moment.utc().startOf('minute').add(utcOffset, 'ms').add(1, 'h'), // dont use shallow copy
       priority: 50,
@@ -274,7 +283,7 @@ const Calendar: React.FC = (props) => {
     };
   };
 
-  const currentDate = new Date(visibleRange.midTime) || new Date() + utcOffset;
+  const currentDate = new Date(visibleRange.midTime) || utcNow() + utcOffset;
 
   return (
     <Card>

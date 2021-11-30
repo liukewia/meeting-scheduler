@@ -27,7 +27,7 @@ export const getTimezoneSelectOptions = () => {
 };
 
 export const getCurrentTimePart = (utcOffset: number): string => {
-  const hours = moment.utc().hours() + utcOffset / ONE_HOUR_MILLIS;
+  const hours = utcNow().hours() + utcOffset / ONE_HOUR_MILLIS;
   let time = '';
   if (hours < 12) {
     time = 'morning';
@@ -42,3 +42,7 @@ export const getCurrentTimePart = (utcOffset: number): string => {
 export function utcOffsetToTxt(utcOffset: number) {
   return `UTC ${(utcOffset > 0 ? '+' : '') + utcOffset / ONE_HOUR_MILLIS}`;
 }
+
+export const utcNow = () => {
+  return moment.utc().subtract(moment().utcOffset(), 'minute');
+};

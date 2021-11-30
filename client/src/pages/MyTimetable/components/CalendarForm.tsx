@@ -6,6 +6,7 @@ import { useRequest } from 'ahooks';
 import { addSchdule, deleteSchdule } from '@/services/schedule';
 import { useModel } from 'umi';
 import { CalendarEvent } from './Calendar';
+import { utcNow } from '@/utils/timeUtil';
 
 const { RangePicker } = DatePicker;
 
@@ -148,16 +149,16 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
             format="DD/MM/YYYY HH:mm"
             ranges={{
               '1h': [
-                moment.utc().startOf('minute').add(utcOffset, 'ms'),
-                moment.utc().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
+                utcNow().startOf('minute').add(utcOffset, 'ms'),
+                utcNow().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
               ],
               '2h': [
-                moment.utc().startOf('minute').add(utcOffset, 'ms'),
-                moment.utc().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
+                utcNow().startOf('minute').add(utcOffset, 'ms'),
+                utcNow().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
               ],
               '3h': [
-                moment.utc().startOf('minute').add(utcOffset, 'ms'),
-                moment.utc().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
+                utcNow().startOf('minute').add(utcOffset, 'ms'),
+                utcNow().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
               ],
             }}
             placeholder={['Start Time', 'End Time']}
