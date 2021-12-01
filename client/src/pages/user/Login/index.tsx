@@ -24,7 +24,6 @@ const Login: React.FC = (props) => {
       if (userInfo) {
         await setInitialState((s) => ({ ...s, currentUser: userInfo }));
       }
-      console.log('userInfo: ', userInfo);
       if (!history) return;
       const { query } = history.location;
       const { redirect } = query as {

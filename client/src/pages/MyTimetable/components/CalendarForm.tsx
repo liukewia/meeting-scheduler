@@ -19,7 +19,7 @@ const marks = {
 
 interface CalendarFormProp {
   visible: boolean;
-  isEditRef: React.MutableRefObject<boolean>;
+  isEditRef: React.MutableRefObject<Boolean>;
   selectedEventRef: React.MutableRefObject<Partial<CalendarFormEvent>>;
   onCancel: () => void;
   fetchEventsInRange: () => void;
@@ -92,13 +92,12 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
       priorityId: mapPercentToPriorityId(values.priority),
       note: values.note,
     };
-    console.log(`schedule: `, schedule);
     schedule.id === undefined
       ? runAddSchedule(schedule)
       : runUpdateSchedule(schedule);
   };
 
-  const onDeleteEvent = (event: Partial<CalendarEvent>) => {
+  const onDeleteEvent = (event: Partial<CalendarFormEvent>) => {
     if (event.id === undefined) {
       console.error('The event id is undefined');
       return;

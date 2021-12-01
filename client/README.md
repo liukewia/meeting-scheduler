@@ -37,8 +37,3 @@ https://codesandbox.io/s/pedantic-dhawan-rhoy0?file=/demo.js -->
 
 https://momentjs.com/timezone/docs/#/use-it/webpack/ -->
 
-
-
-2个问题
-1.search schedule返回回来的时区正确，但前端显示出来不正确
-2.search schedule穿过去的param不对，比如day

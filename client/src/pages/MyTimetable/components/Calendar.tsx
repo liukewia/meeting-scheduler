@@ -7,12 +7,13 @@ import {
   Calendar as BaseCalendar,
   Views,
   momentLocalizer,
+  NavigateAction,
 } from 'react-big-calendar';
 import type { View } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
-
+import 'moment-timezone';
 import CustomToolbar from './CustomToolbar';
 import CalendarForm from './CalendarForm';
 import { useReactive, useRequest } from 'ahooks';
@@ -38,7 +39,7 @@ moment.locale('en-gb', {
     doy: 1,
   },
 });
-
+moment.tz.setDefault('UTC');
 const localizer = momentLocalizer(moment);
 // @ts-ignore
 const DragAndDropCalendar = withDragAndDrop(BaseCalendar);
@@ -90,7 +91,7 @@ const Calendar: React.FC = (props) => {
     endTime: 0,
   });
   const isEditRef = useRef<Boolean>(false);
-  const viewRef = useRef<View>(Views.AGENDA);
+  const viewRef = useRef<View>(Views.DAY);
   const selectedEventRef = useRef<Partial<CalendarFormEvent>>({});
 
   const {
@@ -209,6 +210,14 @@ const Calendar: React.FC = (props) => {
       startTime = moment(dates[0]);
       endTime = moment(dates[dates.length - 1]).endOf('day');
     } else if (viewRef.current === Views.DAY) {
+      if (!Array.isArray(dates)) {
+        // from month to day
+        return;
+      }
+      // from week to day
+      if (dates.length === 7) {
+        return;
+      }
       startTime = moment(dates[0]);
       endTime = moment(startTime).endOf('day');
     } else if (viewRef.current === Views.AGENDA) {
@@ -322,9 +331,20 @@ const Calendar: React.FC = (props) => {
     .subtract(moment().utcOffset(), 'minute')
     .toDate();
 
+  // const events =
+  //   eventData?.schedules.map((schedule: any) => ({
+  //     id: schedule.id,
+  //     title: schedule.title,
+  //     location: schedule.location,
+  //     start: moment.utc(schedule.startTime).toDate(),
+  //     end: moment.utc(schedule.endTime).toDate(),
+  //     priority: mapPriorityIdToPercent(schedule.priorityId),
+  //     note: schedule.note,
+  //   })) || [];
+
   return (
     <Card>
-      <Spin tip="Loading..." size="large" spinning={fetchLoading} delay={100}>
+      <Spin tip="Loading..." size="large" spinning={fetchLoading}>
         <DragAndDropCalendar
           popup
           defaultDate={currentDate}
@@ -352,6 +372,16 @@ const Calendar: React.FC = (props) => {
           }}
           onEventResize={updateEventOnResizeOrDrop}
           onEventDrop={updateEventOnResizeOrDrop}
+          onNavigate={(newDate: Date, view: View, action: NavigateAction) => {
+            if (action === 'DATE') {
+              if (view === Views.MONTH || view === Views.WEEK) {
+                visibleRange.startTime = moment(newDate)
+                  .startOf('day')
+                  .valueOf();
+                visibleRange.endTime = moment(newDate).endOf('day').valueOf();
+              }
+            }
+          }}
           style={{ minHeight: 800 }}
         />
         <CalendarForm

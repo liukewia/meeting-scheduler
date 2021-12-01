@@ -1,6 +1,7 @@
 // https://umijs.org/config/
 // there should be only one setting, config/config.js OR /.umirc.js.
 import { defineConfig } from 'umi';
+const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin');
 import { join } from 'path';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
@@ -41,7 +42,15 @@ export default defineConfig({
   },
   mfsu: {},
   webpack5: {},
-
+  chainWebpack: (memo, { webpack }) => {
+    memo.plugin('MomentTimezoneDataPlugin').use(MomentTimezoneDataPlugin, [
+      {
+        startYear: 1970,
+        endYear: 2039,
+        matchZones: 'UTC',
+      },
+    ]);
+  },
   // https://github.com/umijs/umi/issues/917
   // https://github.com/mzohaibqc/antd-theme-webpack-plugin/blob/master/examples/customize-cra/config-overrides.js
   extraBabelPlugins: [

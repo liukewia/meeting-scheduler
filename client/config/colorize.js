@@ -2,6 +2,25 @@ const path = require('path');
 const fs = require('fs');
 const { generateTheme, getLessVars } = require('antd-theme-generator');
 const _root = path.join(__dirname, '../');
+
+fs.readFile(
+  path.join(_root, '/node_modules/antd/lib/style/themes/index.less'),
+  'utf8',
+  function (err, files) {
+    var result = files.replace(/@\{root-entry-name\}/g, 'default');
+    fs.writeFile(
+      path.join(_root, '/node_modules/antd/lib/style/themes/index.less'),
+      result,
+      'utf8',
+      function (err) {
+        if (err) {
+          console.log(err);
+        }
+      },
+    );
+  },
+);
+
 const themeVariables = getLessVars(path.join(_root, '/src/styles/vars.less'));
 const defaultVars = getLessVars(
   path.join(_root, '/node_modules/antd/lib/style/themes/default.less'),

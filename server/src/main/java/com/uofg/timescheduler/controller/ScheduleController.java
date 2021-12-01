@@ -18,7 +18,6 @@ import com.uofg.timescheduler.service.PriorityService;
 import com.uofg.timescheduler.service.ScheduleService;
 import com.uofg.timescheduler.service.UserService;
 import com.uofg.timescheduler.service.ZoneOffsetService;
-import com.uofg.timescheduler.service.constant.TimeConsts;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.ShiroUtil;
 import io.swagger.annotations.Api;
@@ -27,7 +26,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -101,45 +99,35 @@ public class ScheduleController {
         }
         long utcOffset = updateAndGetUtcOffsetBy(userInDatabase.getZoneId());
 
-        String midTimeStr = request.getParameter("midTime");
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
         List<Schedule> scheduleList;
-        if (midTimeStr != null && startTimeStr == null && endTimeStr == null) {
-            // query by a mid date, need to show a range from 30th day before to 30th day after.
-            long midTime = Long.parseLong(midTimeStr);
-            scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
-                    .eq("user_id", userId)
-//                    .ge("start_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
-                    .lt("start_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
-                    .gt("end_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
-//                    .le("end_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
-                    .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
-        } else if (midTimeStr == null && startTimeStr != null && endTimeStr != null) {
-            long startTime = Long.parseLong(startTimeStr);
-            Date startDate = DateUtil.date(startTime - utcOffset).toJdkDate();
-            long endTime = Long.parseLong(endTimeStr);
-            Date endDate = DateUtil.date(endTime - utcOffset).toJdkDate();
-            scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
-                    .eq("user_id", userId)
-                    .lt("start_time", endDate)
-                    .gt("end_time", startDate)
-                    .orderByAsc("id")
-                    .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
-        } else {
-            return Result.fail("Illegal param combination.");
+        if (startTimeStr == null || endTimeStr == null) {
+            return Result.fail("Did not provide start time and end time as params.");
         }
-
-        // distribute time with offset registered
-        scheduleList = scheduleList.stream()
-                .peek(schedule -> {
-                    schedule.setStartTime(new Date(schedule.getStartTime().getTime() + utcOffset));
-                    schedule.setEndTime(new Date(schedule.getEndTime().getTime() + utcOffset));
-                })
-                .collect(Collectors.toList());
+        long startTime = Long.parseLong(startTimeStr);
+        Date startDate = DateUtil.date(startTime - utcOffset).toJdkDate();
+        long endTime = Long.parseLong(endTimeStr);
+        Date endDate = DateUtil.date(endTime - utcOffset).toJdkDate();
+        scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
+                .eq("user_id", userId)
+                .le("start_time", endDate)
+                .ge("end_time", startDate)
+                .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
 
         return Result.succ(MapUtil.builder()
-                .put("schedules", scheduleList)
+                .put("schedules", scheduleList.stream()
+                        .map(schedule -> MapUtil.builder()
+                                .put("id", schedule.getId())
+                                .put("title", schedule.getTitle())
+                                .put("location", schedule.getLocation())
+                                // with utc offset
+                                .put("startTime", new Date(schedule.getStartTime().getTime() + utcOffset))
+                                .put("endTime", new Date(schedule.getEndTime().getTime() + utcOffset))
+                                .put("priorityId", schedule.getPriorityId())
+                                .put("note", schedule.getNote())
+                                .map()
+                        ))
                 .map()
         );
 
