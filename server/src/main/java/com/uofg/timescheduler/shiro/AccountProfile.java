@@ -1,9 +1,13 @@
 package com.uofg.timescheduler.shiro;
 
 
+import com.uofg.timescheduler.service.ZoneOffsetService;
 import java.io.Serializable;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @Data
 public class AccountProfile implements Serializable {
 
@@ -12,15 +16,13 @@ public class AccountProfile implements Serializable {
     private String username;
     private String avatar;
     private String email;
-    private Long utcOffset;
+    private String zoneId;
     private String status;
-    //    private Integer role;
     private Long created;
     private Long lastLogin;
 
-    public Long getUtcOffsetTimeStamp() {
-        return utcOffset / 1000;
-    }
+    @Autowired
+    private ZoneOffsetService zoneOffsetService;
 
     public Long getCreatedTimeStamp() {
         return created / 1000;
@@ -29,4 +31,5 @@ public class AccountProfile implements Serializable {
     public Long getLastLoginTimeStamp() {
         return lastLogin / 1000;
     }
+
 }

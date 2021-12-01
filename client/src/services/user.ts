@@ -1,10 +1,10 @@
 import axiosReq from './axiosSetting';
 
-/** get currentUser GET /api/user/currentUser */
+/** get currentUser GET /api/user/current */
 export async function queryCurrentUser(options?: {
   [key: string]: any;
 }): Promise<any> {
-  const res = await axiosReq('/user/currentUser', {
+  const res = await axiosReq('/user/current', {
     method: 'GET',
     ...(options || {}),
   });

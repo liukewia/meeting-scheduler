@@ -40,11 +40,11 @@ VALUES ('2', 'david', 'e3ceb5881a0a1fdaad01296d7554868d',
 
 
 
-# finn 111111 +0
-# david 222222 +1
-# mary 333333 +0
-# martin 444444 +0
-# frank 555555 +10
+# Finn 111111 +0
+# David 111111 +1
+# Lucy 111111 +0
+# Martin 111111 +0
+# Frank 111111 +10
 
 
 CREATE TABLE role
@@ -155,3 +155,13 @@ VALUES ('1', '1', 'Learn Python', '2021-11-18 08:00:00', '2021-11-18 09:00:00', 
 #   default charset = utf8mb4
 #   collate = utf8mb4_0900_ai_ci;
 
+
+CREATE TABLE zone_offset
+(
+    zone_id            varchar(64) NOT NULL,
+    current_utc_offset bigint DEFAULT NULL,
+    PRIMARY KEY (zone_id),
+    KEY IDX_ZONE_ID (zone_id) USING BTREE
+) engine = InnoDB
+  default charset = utf8mb4
+  collate = utf8mb4_0900_ai_ci;

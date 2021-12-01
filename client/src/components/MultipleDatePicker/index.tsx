@@ -72,7 +72,7 @@ export default function MultipleDatePicker({
   return (
     <Select
       allowClear
-      placeholder={'Please select at least one'}
+      placeholder={'Please select at least one date'}
       {...selectProps}
       mode="multiple"
       value={selectedDate}

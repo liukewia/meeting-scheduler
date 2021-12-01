@@ -11,7 +11,8 @@ public class SignUpDto implements Serializable {
     @NotBlank(message = "Username cannot be blank.")
     private String username;
 
-    private Long utcOffset;
+    @NotBlank
+    private String zoneId;
 
     @Email(message = "The email format is not correct.")
     private String email;

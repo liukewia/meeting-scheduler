@@ -3,7 +3,7 @@ package com.uofg.timescheduler.shiro;
 import cn.hutool.core.bean.BeanUtil;
 import com.uofg.timescheduler.entity.User;
 import com.uofg.timescheduler.service.UserService;
-import com.uofg.timescheduler.util.JwtUtils;
+import com.uofg.timescheduler.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class AccountRealm extends AuthorizingRealm {
 
     @Autowired
-    JwtUtils jwtUtils;
+    JwtUtil jwtUtil;
 
     @Autowired
     UserService userService;
@@ -43,7 +43,7 @@ public class AccountRealm extends AuthorizingRealm {
 
         log.info("jwt----------------->{}", jwt);
 
-        String userId = jwtUtils.getClaimByToken((String) jwt.getPrincipal()).getSubject();
+        String userId = jwtUtil.getClaimByToken((String) jwt.getPrincipal()).getSubject();
 
         User user = userService.getById(Long.parseLong(userId));
         if (user == null) {

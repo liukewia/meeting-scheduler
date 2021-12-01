@@ -27,7 +27,8 @@ public class TimeConsts {
     public final static Map<Long, String> TIMESTAMP_TO_DAY_MAP = new HashMap<>();
     public final static HashMap<SchedulePriority, Double> PRIORITY_TO_RATING_MAP = new HashMap<>();
 
-    public final static long MAX_TIME_MILLIS = 2147454847000L;
+    public final static long MYSQL_MIN_TIMESTAMP = -3599000L;
+    public final static long MYSQL_MAX_TIMESTAMP = 2147454847000L;
 
     static {
         DAY_TO_TIMESTAMP_MAP.put("mon", 0L);

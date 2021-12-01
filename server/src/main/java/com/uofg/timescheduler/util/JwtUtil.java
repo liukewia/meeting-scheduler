@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "uofg.scheduler.jwt")
-public class JwtUtils {
+public class JwtUtil {
 
     private String secret;
     private long expire;

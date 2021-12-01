@@ -1,13 +1,13 @@
-import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { Form, Button, Input, Popover, Progress, message, Select } from 'antd';
 import { Link, history } from 'umi';
-
-import styles from './style.less';
 import { useRequest } from 'ahooks';
+import moment from 'moment';
 import { signup } from '@/services/user';
-import { getTimezoneSelectOptions } from '@/utils/timeUtil';
 import { ONE_HOUR_MILLIS } from '@/constants';
+import { getZoneOffsetList } from '@/services/zoneOffset';
+import styles from './style.less';
+import { utcOffsetToTxt } from '@/utils/timeUtil';
 
 const FormItem = Form.Item;
 
@@ -39,19 +39,17 @@ const passwordProgressMap: {
   poor: 'exception',
 };
 
-const Register: FC = (props) => {
-  const [visible, setVisible]: [boolean, any] = useState(false);
-  const [popover, setPopover]: [boolean, any] = useState(false);
+const SignUpForm: React.FC = (props) => {
+  const [visible, setVisible] = useState<Boolean>(false);
+  const [popover, setPopover] = useState<Boolean>(false);
   const confirmDirty = false;
-  let interval: number | undefined;
   const [form] = Form.useForm();
 
-  useEffect(
-    () => () => {
-      clearInterval(interval);
+  const { data, loading: getListLoading } = useRequest(getZoneOffsetList, {
+    onError: () => {
+      message.error('Cannot get zone id list, please contact adminstrator.');
     },
-    [interval],
-  );
+  });
 
   const getPasswordStatus = () => {
     const value = form.getFieldValue('password');
@@ -76,14 +74,12 @@ const Register: FC = (props) => {
   });
 
   const onFinish = (values: any) => {
-    const valsToSubmit = {
+    runRegister({
       username: values.username,
-      utcOffset:
-        parseFloat(values.timezone.match(/=(\S*)/)[1]) * ONE_HOUR_MILLIS,
+      zoneId: values.zoneId,
       email: values.email,
       password: values.password,
-    };
-    runRegister(valsToSubmit);
+    });
   };
 
   const checkConfirm = (_: any, value: string) => {
@@ -151,19 +147,29 @@ const Register: FC = (props) => {
             <Input size="large" placeholder="Username" />
           </FormItem>
           <FormItem
-            name="timezone"
+            name="zoneId"
             rules={[
               {
                 required: true,
               },
             ]}
           >
-            <Select size="large" placeholder="Time Zone">
-              {getTimezoneSelectOptions().map((item) => (
-                <Select.Option key={item.key} value={item.key}>
-                  {item.label}
-                </Select.Option>
-              ))}
+            <Select
+              size="large"
+              placeholder="Zone ID"
+              showSearch
+              loading={getListLoading}
+            >
+              {data?.zoneOffsetList && Array.isArray(data.zoneOffsetList)
+                ? data.zoneOffsetList.map(
+                    (item: { zoneId: string; currentUtcOffset: number }) => (
+                      <Select.Option key={item.zoneId} value={item.zoneId}>
+                        ({utcOffsetToTxt(item.currentUtcOffset)}
+                        )&nbsp;&nbsp;&nbsp;{item.zoneId}
+                      </Select.Option>
+                    ),
+                  )
+                : null}
             </Select>
           </FormItem>
           <FormItem
@@ -252,4 +258,4 @@ const Register: FC = (props) => {
     </div>
   );
 };
-export default Register;
+export default SignUpForm;

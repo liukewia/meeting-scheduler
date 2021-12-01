@@ -2,7 +2,7 @@ package com.uofg.timescheduler.shiro;
 
 import cn.hutool.json.JSONUtil;
 import com.uofg.timescheduler.common.lang.Result;
-import com.uofg.timescheduler.util.JwtUtils;
+import com.uofg.timescheduler.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
 import javax.servlet.ServletRequest;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class JwtFilter extends AuthenticatingFilter {
 
     @Autowired
-    JwtUtils jwtUtils;
+    JwtUtil jwtUtil;
 
     @Override
     protected AuthenticationToken createToken(ServletRequest servletRequest, ServletResponse servletResponse)
@@ -55,8 +55,8 @@ public class JwtFilter extends AuthenticatingFilter {
         } else {
 
             // 判断是否已过期
-            Claims claim = jwtUtils.getClaimByToken(token);
-            if (claim == null || jwtUtils.isTokenExpired(claim.getExpiration())) {
+            Claims claim = jwtUtil.getClaimByToken(token);
+            if (claim == null || jwtUtil.isTokenExpired(claim.getExpiration())) {
                 throw new ExpiredCredentialsException("The token has expired, please log in again!");
             }
         }

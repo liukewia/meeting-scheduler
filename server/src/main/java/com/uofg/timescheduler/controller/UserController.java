@@ -4,20 +4,25 @@ package com.uofg.timescheduler.controller;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.uofg.timescheduler.common.dto.LoginDto;
 import com.uofg.timescheduler.common.dto.SignUpDto;
 import com.uofg.timescheduler.common.lang.Result;
 import com.uofg.timescheduler.entity.Role;
 import com.uofg.timescheduler.entity.User;
 import com.uofg.timescheduler.entity.UserRole;
+import com.uofg.timescheduler.entity.ZoneOffset;
 import com.uofg.timescheduler.service.RoleService;
 import com.uofg.timescheduler.service.UserRoleService;
 import com.uofg.timescheduler.service.UserService;
+import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.shiro.AccountProfile;
-import com.uofg.timescheduler.util.JwtUtils;
+import com.uofg.timescheduler.util.JwtUtil;
 import com.uofg.timescheduler.util.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Autowired
-    JwtUtils jwtUtils;
+    JwtUtil jwtUtil;
 
     @Autowired
     UserService userService;
@@ -59,6 +64,25 @@ public class UserController {
     @Autowired UserRoleService userRoleService;
 
     @Autowired RoleService roleService;
+
+    @Autowired ZoneOffsetService zoneOffsetService;
+
+    private long updateAndGetUtcOffsetBy(String zoneIdStr) {
+        // update current utc offset by zoneIdStr, for dynamic offset reasons like daylight saving time.
+        ZoneId zoneId = ZoneId.of(zoneIdStr);
+        ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        long newOffset = zdt.getOffset().getTotalSeconds() * 1000L;
+        zoneOffsetService.update(new ZoneOffset(zoneIdStr, newOffset),
+                new UpdateWrapper<ZoneOffset>().eq("zone_id", zoneIdStr));
+        return newOffset;
+    }
+
+    private long getUtcOffsetBy(String zoneIdStr) {
+        return zoneOffsetService.getOne(new UpdateWrapper<ZoneOffset>()
+                .eq("zone_id", zoneIdStr))
+                .getCurrentUtcOffset();
+    }
+
 
     @PostMapping("/login")
     @ApiOperation("login")
@@ -76,7 +100,7 @@ public class UserController {
         }
 
         long userId = user.getId();
-        String jwt = jwtUtils.generateToken(userId);
+        String jwt = jwtUtil.generateToken(userId);
 
         UserRole userRole = userRoleService.getOne(new QueryWrapper<UserRole>().eq("user_id", userId));
         Role role = roleService.getById(userRole.getRoleId());
@@ -84,6 +108,10 @@ public class UserController {
         // update last login time
         user.setLastLogin(new Date());
         userService.updateById(user);
+
+        // update current utc offset, for dynamic offset reasons like daylight saving time.
+        String zoneIdStr = user.getZoneId();
+        long newUtcOffset = updateAndGetUtcOffsetBy(zoneIdStr);
 
         response.setHeader("Authorization", jwt);
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization");
@@ -93,7 +121,8 @@ public class UserController {
                 .put("username", user.getUsername())
                 .put("avatar", user.getAvatar())
                 .put("email", user.getEmail())
-                .put("utcOffset", user.getUtcOffset())
+                .put("zoneId", user.getZoneId())
+                .put("utcOffset", newUtcOffset)
                 .put("access", role.getName())
                 .map()
         );
@@ -103,7 +132,7 @@ public class UserController {
     @ApiOperation("sign up")
     public Result signup(@Validated @RequestBody SignUpDto signUpDto, HttpServletResponse response) {
         User newUser = null;
-        newUser = userService.getOne(new QueryWrapper<User>().eq("username", signUpDto.getUsername()));
+        newUser = userService.getOne(new QueryWrapper<User>().eq("username", signUpDto.getUsername().toLowerCase()));
         if (newUser != null) {
             return Result.fail("The username has been occupied!");
         }
@@ -122,16 +151,17 @@ public class UserController {
         newUser.setAvatar(avatars.get(new Random().nextInt(avatars.size())));
         newUser.setEmail(signUpDto.getEmail());
 
-        Long utcOffset = signUpDto.getUtcOffset();
-        if (utcOffset == null) {
-            utcOffset = 0L;
+        String zoneId = signUpDto.getZoneId();
+        ZoneOffset zoneOffset = zoneOffsetService.getOne(new QueryWrapper<ZoneOffset>().eq("zone_id", zoneId));
+        if (zoneOffset == null) {
+            return Result.fail("Illegal zone id \"" + zoneId + "\" .");
         }
-        newUser.setUtcOffset(utcOffset);
-        newUser.setStatus(0);
+        newUser.setZoneId(zoneId);
+        newUser.setStatus(0); // active account.
         newUser.setCreated(new Date(System.currentTimeMillis()));
         userService.save(newUser);
 
-        // update user-role
+        // update user role
         Long userId = userService.getOne(new QueryWrapper<User>().eq("username", signUpDto.getUsername())).getId();
         UserRole userRole = new UserRole();
         userRole.setUserId(userId);
@@ -143,9 +173,9 @@ public class UserController {
     }
 
     @RequiresAuthentication // done jwt validation here, including not passing it and passing an illegal one
-    @GetMapping("/currentUser")
+    @GetMapping("/current")
     @ApiOperation("fetch current user info")
-    public Result currentUser() {
+    public Result current() {
         // https://blog.csdn.net/suki_rong/article/details/80445880
         AccountProfile user = ShiroUtil.getProfile();
         UserRole userRole = userRoleService.getOne(new QueryWrapper<UserRole>().eq("user_id", user.getId()));
@@ -155,7 +185,7 @@ public class UserController {
                 .put("username", user.getUsername())
                 .put("avatar", user.getAvatar())
                 .put("email", user.getEmail())
-                .put("utcOffset", user.getUtcOffset())
+                .put("utcOffset", getUtcOffsetBy(user.getZoneId()))
                 .put("access", role.getName())
                 .map()
         );
@@ -165,14 +195,14 @@ public class UserController {
     @GetMapping("/allUsers")
     @ApiOperation("fetch all users' basic info")
     public Result allUsers() {
-        List<User> users = userService.list(new QueryWrapper<User>().select("id", "username", "avatar", "utc_offset"));
+        List<User> users = userService.list(new QueryWrapper<User>().select("id", "username", "avatar", "zone_id"));
 
         return Result.succ(MapUtil.builder()
                 .put("users", users.stream().map(user -> MapUtil.builder()
                         .put("id", user.getId())
                         .put("username", user.getUsername())
                         .put("avatar", user.getAvatar())
-                        .put("utcOffset", user.getUtcOffset())
+                        .put("utcOffset", getUtcOffsetBy(user.getZoneId()))
                         .map()))
                 .map()
         );

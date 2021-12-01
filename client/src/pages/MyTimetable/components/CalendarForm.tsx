@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
-import { mapPercentToPriorityId, parseEventInForm } from '@/utils/scheduleUtil';
 import moment from 'moment';
 import { useRequest } from 'ahooks';
-import { addSchdule, deleteSchdule } from '@/services/schedule';
 import { useModel } from 'umi';
-import { CalendarEvent } from './Calendar';
-import { utcNow } from '@/utils/timeUtil';
+import { mapPercentToPriorityId, parseEventInForm } from '@/utils/scheduleUtil';
+import { addSchdule, deleteSchdule } from '@/services/schedule';
+import { CalendarFormEvent } from './Calendar';
 
 const { RangePicker } = DatePicker;
 
@@ -21,7 +20,7 @@ const marks = {
 interface CalendarFormProp {
   visible: boolean;
   isEditRef: React.MutableRefObject<boolean>;
-  selectedEventRef: React.MutableRefObject<Partial<CalendarEvent>>;
+  selectedEventRef: React.MutableRefObject<Partial<CalendarFormEvent>>;
   onCancel: () => void;
   fetchEventsInRange: () => void;
   updateLoading: boolean;
@@ -41,8 +40,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
   runUpdateSchedule,
 }) => {
   const [form] = Form.useForm();
-  const { initialState } = useModel('@@initialState');
-  const utcOffset = initialState?.currentUser?.utcOffset || 0;
+  const { getZonedUtcNow } = useModel('time');
 
   useEffect(() => {
     if (visible) {
@@ -58,7 +56,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
     onSuccess: () => {
       onCancel();
       fetchEventsInRange();
-      message.success('Successfully delete schedule.');
+      message.success('Successfully add schedule.');
     },
     onError: () => {
       fetchEventsInRange();
@@ -94,7 +92,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
       priorityId: mapPercentToPriorityId(values.priority),
       note: values.note,
     };
-
+    console.log(`schedule: `, schedule);
     schedule.id === undefined
       ? runAddSchedule(schedule)
       : runUpdateSchedule(schedule);
@@ -149,16 +147,16 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
             format="DD/MM/YYYY HH:mm"
             ranges={{
               '1h': [
-                utcNow().startOf('minute').add(utcOffset, 'ms'),
-                utcNow().startOf('minute').add(utcOffset, 'ms').add(1, 'h'),
+                getZonedUtcNow().startOf('minute'),
+                getZonedUtcNow().startOf('minute').add(1, 'h'),
               ],
               '2h': [
-                utcNow().startOf('minute').add(utcOffset, 'ms'),
-                utcNow().startOf('minute').add(utcOffset, 'ms').add(2, 'h'),
+                getZonedUtcNow().startOf('minute'),
+                getZonedUtcNow().startOf('minute').add(2, 'h'),
               ],
               '3h': [
-                utcNow().startOf('minute').add(utcOffset, 'ms'),
-                utcNow().startOf('minute').add(utcOffset, 'ms').add(3, 'h'),
+                getZonedUtcNow().startOf('minute'),
+                getZonedUtcNow().startOf('minute').add(3, 'h'),
               ],
             }}
             placeholder={['Start Time', 'End Time']}

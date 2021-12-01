@@ -1,7 +1,7 @@
 package com.uofg.timescheduler.controller;
 
 
-import com.uofg.timescheduler.common.dto.ScheduleDto;
+import com.uofg.timescheduler.common.dto.PlanMeetingDto;
 import com.uofg.timescheduler.common.lang.Result;
 import com.uofg.timescheduler.service.PriorityService;
 import com.uofg.timescheduler.service.ScheduleService;
@@ -30,6 +30,7 @@ public class PlanMeetingController {
 
     @Autowired
     ScheduleService scheduleService;
+
     @Autowired
     PriorityService priorityService;
 
@@ -37,9 +38,8 @@ public class PlanMeetingController {
     @RequiresAuthentication
     @PostMapping("/plan")
     @ApiOperation("plan a meeting")
-    public Result planMeeting(@RequestBody ScheduleDto scheduleDto, HttpServletResponse response) {
+    public Result planMeeting(@RequestBody PlanMeetingDto planMeetingDto, HttpServletResponse response) {
+
         return Result.succ(null);
     }
-
-
 }

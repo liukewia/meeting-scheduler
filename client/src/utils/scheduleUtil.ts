@@ -41,8 +41,8 @@ export function mapPriorityPercentToColor(percentage: number) {
     0: 'lime', // none
     25: 'magenta', // low
     50: 'orange', // normal
-    75: 'volcano', // high
-    100: 'red', // inf
+    75: 'gold', // high
+    100: 'volcano', // inf
   };
 
   const color = map[percentage];

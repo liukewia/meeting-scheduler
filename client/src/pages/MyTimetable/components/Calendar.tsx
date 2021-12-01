@@ -4,17 +4,19 @@ import type { Moment } from 'moment';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useModel } from 'umi';
 import {
-  Calendar as BigCalendar,
+  Calendar as BaseCalendar,
   Views,
   momentLocalizer,
 } from 'react-big-calendar';
+import type { View } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
 import CustomToolbar from './CustomToolbar';
 import CalendarForm from './CalendarForm';
 import { useReactive, useRequest } from 'ahooks';
-import { ONE_DAY_MILLIS, ONE_MINUTE_MILLIS } from '@/constants';
+import { ONE_MINUTE_MILLIS } from '@/constants';
 import { isString } from 'lodash';
 import { searchSchdule } from '@/services/schedule';
 import {
@@ -25,7 +27,6 @@ import {
 } from '@/utils/scheduleUtil';
 import { updateSchdule } from '@/services/schedule';
 import type { stringOrDate } from 'react-big-calendar';
-import { utcNow } from '@/utils/timeUtil';
 
 // Is there a way to change your timezone in Chrome devtools?
 // https://stackoverflow.com/a/60008052/14756060
@@ -40,7 +41,7 @@ moment.locale('en-gb', {
 
 const localizer = momentLocalizer(moment);
 // @ts-ignore
-const DragAndDropCalendar = withDragAndDrop(BigCalendar);
+const DragAndDropCalendar = withDragAndDrop(BaseCalendar);
 
 export interface CalendarEvent {
   id?: number;
@@ -68,7 +69,7 @@ function EventAgenda({ event }) {
       <a style={{ color: 'magenta' }}>{event.title}</a>
       <Tag
         color={mapPriorityPercentToColor(event.priority)}
-        style={{ marginLeft: 10 }}
+        style={{ float: 'right' }}
       >
         {mapPriorityPercentToTxt(event.priority)} Priority
       </Tag>
@@ -82,13 +83,14 @@ const Calendar: React.FC = (props) => {
   // solve flicker problem
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isFormVisible, setFormVisible] = useState(false);
+  const { getUtcNow, getZonedUtcNow } = useModel('time');
   const visibleRange = useReactive({
-    midTime: utcNow() + utcOffset,
+    midTime: getZonedUtcNow().valueOf(),
     startTime: 0,
     endTime: 0,
   });
-
-  const isEditRef = useRef(false);
+  const isEditRef = useRef<Boolean>(false);
+  const viewRef = useRef<View>(Views.AGENDA);
   const selectedEventRef = useRef<Partial<CalendarFormEvent>>({});
 
   const {
@@ -109,14 +111,13 @@ const Calendar: React.FC = (props) => {
             id: schedule.id,
             title: schedule.title,
             location: schedule.location,
-            start: new Date(schedule.startTime),
-            end: new Date(schedule.endTime),
+            start: moment.utc(schedule.startTime).toDate(),
+            end: moment.utc(schedule.endTime).toDate(),
             priority: mapPriorityIdToPercent(schedule.priorityId),
             note: schedule.note,
           })),
         );
       }
-      // message.success('Successfully fetch schedules.');
     },
     onError: () => {
       message.error('Fetch schedules failed.');
@@ -141,59 +142,97 @@ const Calendar: React.FC = (props) => {
   );
 
   const fetchEventsInRange = useCallback(() => {
-    const { midTime, startTime, endTime } = visibleRange;
-    runFetch(
-      startTime && endTime
-        ? {
-            startTime,
-            endTime,
-          }
-        : {
-            midTime,
-          },
-    );
+    if (!visibleRange.startTime && !visibleRange.endTime) {
+      if (viewRef.current === Views.MONTH) {
+        visibleRange.startTime = moment
+          .utc(visibleRange.midTime)
+          .startOf('month')
+          .startOf('week')
+          .valueOf();
+        visibleRange.endTime = moment
+          .utc(visibleRange.midTime)
+          .endOf('month')
+          .endOf('week')
+          .valueOf();
+      } else if (viewRef.current === Views.WEEK) {
+        visibleRange.startTime = moment
+          .utc(visibleRange.midTime)
+          .startOf('week')
+          .valueOf();
+        visibleRange.endTime = moment
+          .utc(visibleRange.midTime)
+          .endOf('week')
+          .valueOf();
+      } else if (viewRef.current === Views.DAY) {
+        visibleRange.startTime = moment
+          .utc(visibleRange.midTime)
+          .startOf('day')
+          .valueOf();
+        visibleRange.endTime = moment
+          .utc(visibleRange.midTime)
+          .endOf('day')
+          .valueOf();
+      } else if (viewRef.current === Views.AGENDA) {
+        const startOfAgenda = moment
+          .utc(visibleRange.midTime)
+          .startOf('day')
+          .valueOf();
+        visibleRange.startTime = startOfAgenda;
+        visibleRange.endTime = moment
+          .utc(startOfAgenda)
+          .add(30, 'day')
+          .endOf('day')
+          .valueOf();
+      } else {
+        console.error('Unknown calendar view');
+        return;
+      }
+    }
+    runFetch({
+      startTime: visibleRange.startTime,
+      endTime: visibleRange.endTime,
+    });
   }, [visibleRange.midTime, visibleRange.startTime, visibleRange.endTime]);
 
   useEffect(() => {
     fetchEventsInRange();
   }, [visibleRange.midTime, visibleRange.startTime, visibleRange.endTime]);
 
-  const onRangeChange = (dates: any, view: string | undefined) => {
-    let startTime = 0;
-    let endTime = 0;
-    if (Array.isArray(dates)) {
-      if (dates.length === 7) {
-        // is week view
-        startTime = dates[0].getTime();
-        endTime = dates[dates.length - 1].getTime() + ONE_DAY_MILLIS;
-      } else if (dates.length === 1) {
-        // is day view
-        startTime = dates[0].getTime();
-        endTime = startTime + ONE_DAY_MILLIS;
-      }
+  // normalize start time and end time
+  const onRangeChange = (dates: any, _: View | undefined) => {
+    let startTime: Moment;
+    let endTime: Moment;
+    if (viewRef.current === Views.MONTH) {
+      startTime = moment(dates.start);
+      endTime = moment(dates.end);
+    } else if (viewRef.current === Views.WEEK) {
+      startTime = moment(dates[0]);
+      endTime = moment(dates[dates.length - 1]).endOf('day');
+    } else if (viewRef.current === Views.DAY) {
+      startTime = moment(dates[0]);
+      endTime = moment(startTime).endOf('day');
+    } else if (viewRef.current === Views.AGENDA) {
+      startTime = moment(dates.start).startOf('day');
+      endTime = moment(dates.end).endOf('day');
     } else {
-      // is month or agenda view
-      startTime = dates.start?.getTime();
-      endTime = dates.end?.getTime();
+      console.error('Unknown calendar view');
+      return;
     }
-    visibleRange.startTime = startTime;
-    visibleRange.endTime = endTime;
+    // update visible range
+    visibleRange.startTime = startTime
+      .add(moment().utcOffset(), 'minute')
+      .valueOf();
+    visibleRange.endTime = endTime
+      .add(moment().utcOffset(), 'minute')
+      .valueOf();
   };
-
-  console.log('utcNow(): ', utcNow());
-  console.log(`utcNow().startOf('minute'): `, utcNow().startOf('minute'));
-  console.log(
-    `utcNow().startOf('minute').add(utcOffset, 'ms'): `,
-    utcNow().startOf('minute').add(utcOffset, 'ms'),
-  );
 
   const showCreateForm = () => {
     isEditRef.current = false;
     // Round up to the nearest minute
     selectedEventRef.current = {
-      // do not use utcNow() here because antd will offset time again
-      start: moment.utc().startOf('minute').add(utcOffset, 'ms'),
-      end: moment.utc().startOf('minute').add(utcOffset, 'ms').add(1, 'h'), // dont use shallow copy
+      start: getZonedUtcNow().startOf('minute'),
+      end: getZonedUtcNow().startOf('minute').add(1, 'h'), // dont use shallow copy
       priority: 50,
     };
     setFormVisible(true);
@@ -243,10 +282,6 @@ const Calendar: React.FC = (props) => {
       latterEndDate = new Date(latterEndTime);
     }
 
-    // console.log('formerStartDate: ', new Date(formerStartTime));
-    // console.log('formerEndTime: ', new Date(formerEndTime));
-    // console.log('latterStartDate: ', latterStartDate);
-    // console.log('latterEndDate: ', latterEndDate);
     const updatedEvent = events.map((existingEvent) => {
       return existingEvent.id == _event.id
         ? { ...existingEvent, start: latterStartDate, end: latterEndDate }
@@ -283,7 +318,9 @@ const Calendar: React.FC = (props) => {
     };
   };
 
-  const currentDate = new Date(visibleRange.midTime) || utcNow() + utcOffset;
+  const currentDate = getZonedUtcNow()
+    .subtract(moment().utcOffset(), 'minute')
+    .toDate();
 
   return (
     <Card>
@@ -303,7 +340,8 @@ const Calendar: React.FC = (props) => {
               event: EventAgenda,
             },
           }}
-          defaultView={Views.MONTH}
+          defaultView={viewRef.current}
+          onView={(view: View) => (viewRef.current = view)}
           resizable
           selectable
           onSelectSlot={onDoubleClickSlot}

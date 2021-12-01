@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import {
   Card,
   Steps,
@@ -15,14 +16,18 @@ import {
   message,
 } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
+import { RcFile, UploadChangeParam } from 'antd/lib/upload';
+import { UploadFile } from 'antd/lib/upload/interface';
+import { useRequest } from 'ahooks';
 import { SpacedContainer } from '@/components/SpacedContainer';
-import { useMemo, useState } from 'react';
+import { planMeeting, sheetUpload } from '@/services/meeting';
 import UserSelector from '@/components/UserSelector';
 import MultipleDatePicker from '@/components/MultipleDatePicker';
-import { useRequest } from 'ahooks';
-import { planMeeting, sheetUpload } from '@/services/meeting';
-import { RcFile } from 'antd/lib/upload';
-import { MYSQL_DATE_LOWER_LIMIT, MYSQL_DATE_UPPER_LIMIT } from '@/constants';
+import {
+  MYSQL_MIN_TIMESTAMP,
+  MYSQL_MAX_TIMESTAMP,
+  SPREADSHEET_EXTS,
+} from '@/constants';
 
 const { Dragger } = Upload;
 
@@ -138,7 +143,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
       .catch(customRequest.onError);
   };
 
-  const handleSheetsChange = (info: { file: any; fileList: [] }) => {
+  const handleSheetsChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const file = info.file;
     const status = file?.status;
     if (status === 'done') {
@@ -157,75 +162,6 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
     form.setFieldsValue({ dates });
   };
 
-  const getParticipantSourceComponent = (
-    radioValue: ParticipantSourceType | undefined,
-  ) => {
-    switch (radioValue) {
-      case ParticipantSourceType.Internal:
-        return (
-          <Form.Item
-            name="participantList"
-            label="Participants"
-            rules={[
-              {
-                required:
-                  form.getFieldValue('participantSource') ===
-                  ParticipantSourceType.Internal,
-                validator: (_, value) =>
-                  Array.isArray(value) && value.length >= 2
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error('Should select at least two people.'),
-                      ),
-              },
-            ]}
-          >
-            <UserSelector onChange={handleUsersChange} />
-          </Form.Item>
-        );
-      case ParticipantSourceType.External:
-        return (
-          <Form.Item
-            label="Spreadsheets"
-            name="spreadsheets"
-            valuePropName="fileList"
-            getValueFromEvent={normalizeFile}
-            rules={[
-              {
-                required:
-                  form.getFieldValue('participantSource') ===
-                  ParticipantSourceType.External,
-                validator: (_, value) =>
-                  Array.isArray(value) &&
-                  value.filter((file) => file.response).length >= 2
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error('Should at least upload two valid spreadsheets.'),
-                      ),
-              },
-            ]}
-          >
-            <Dragger
-              // accept={SPREADSHEET_EXTS.map((ext) => '.' + ext).join(',')}
-              multiple
-              name="spreadsheets"
-              onChange={handleSheetsChange}
-              customRequest={customRequest}
-            >
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">
-                Click or drag files here to upload
-              </p>
-            </Dragger>
-          </Form.Item>
-        );
-      default:
-        return null;
-    }
-  };
-
   const onReset = () => {
     // Not to clear the form, but to reset to the value of the initialValues property of the form component
     form.resetFields();
@@ -233,34 +169,73 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
 
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);
+
     let reqBody;
-    if (values.participantSource === ParticipantSourceType.Internal) {
+    const source = values.participantSource;
+    if (source === ParticipantSourceType.Internal) {
+      const people = values.participantList;
+      if (!Array.isArray(people) || people.length <= 2) {
+        message.error('Please select at least 2 people.');
+        return;
+      }
       reqBody = {
-        participantSource: values.participantSource,
-        participantList: values.participantList,
+        participantSource: source,
+        participantList: people,
         dates: values.dates,
         duration: values.duration, // in minutes
       };
-    } else if (values.participantSource === ParticipantSourceType.External) {
+    } else if (source === ParticipantSourceType.External) {
+      const sheets = values.spreadsheets;
+      if (!Array.isArray(sheets) || sheets.length <= 2) {
+        message.error('Please upload at least 2 valid spreadsheets');
+        return;
+      }
+      const validSheets = [];
+      for (let i = 0; i < sheets.length; i++) {
+        if (sheets[i].error || !sheets[i].response?.filePath) {
+          message.error(`The ${i + 1}th spreadsheet in the list has error.`);
+          return;
+        } else {
+          validSheets.push(sheets[i]);
+        }
+      }
       reqBody = {
-        participantSource: values.participantSource,
-        spreadsheets: values.spreadsheets
-          .filter((file: SheetFile) => {
-            return file.response.filePath && !file.error;
-          })
-          .map((file: SheetFile) => ({
-            uid: file.uid,
-            name: file.name,
-            path: file.response.filePath,
-          })),
+        participantSource: source,
+        spreadsheets: validSheets.map((file: SheetFile) => ({
+          uid: file.uid,
+          name: file.name,
+          path: file.response.filePath,
+        })),
         dates: values.dates,
         duration: values.duration, // in minutes
       };
     } else {
+      console.error('Unknown participant source.');
       return;
     }
+    console.log(`reqBody: `, reqBody);
     runPlanMeeting(reqBody);
     setCurrentStep(1);
+  };
+
+  // manage side effect manually
+  const onSourceRadioChange = (e: {
+    target: { value: ParticipantSourceType };
+  }) => {
+    switch (e.target.value) {
+      case ParticipantSourceType.Internal:
+        form.setFieldsValue({
+          spreadsheets: [],
+        });
+        break;
+      case ParticipantSourceType.External:
+        form.setFieldsValue({
+          participantList: [],
+        });
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -293,6 +268,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
               value: ParticipantSourceType.External,
             },
           ]}
+          onChange={onSourceRadioChange}
         />
       </Form.Item>
       <Form.Item
@@ -301,11 +277,76 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
           prev.participantSource !== curr.participantSource
         }
       >
-        {() =>
-          getParticipantSourceComponent(form.getFieldValue('participantSource'))
-        }
+        {({ getFieldValue }) => {
+          switch (getFieldValue('participantSource')) {
+            case ParticipantSourceType.Internal:
+              return (
+                <Form.Item
+                  name="participantList"
+                  label="Participants"
+                  rules={[
+                    {
+                      required:
+                        form.getFieldValue('participantSource') ===
+                        ParticipantSourceType.Internal,
+                      validator: (_, value) =>
+                        Array.isArray(value) && value.length >= 2
+                          ? Promise.resolve()
+                          : Promise.reject(
+                              new Error('Should select at least two people.'),
+                            ),
+                    },
+                  ]}
+                >
+                  <UserSelector onChange={handleUsersChange} />
+                </Form.Item>
+              );
+            case ParticipantSourceType.External:
+              return (
+                <Form.Item
+                  label="Spreadsheets"
+                  name="spreadsheets"
+                  valuePropName="fileList"
+                  getValueFromEvent={normalizeFile}
+                  rules={[
+                    {
+                      required:
+                        form.getFieldValue('participantSource') ===
+                        ParticipantSourceType.External,
+                      validator: (_, value) =>
+                        Array.isArray(value) &&
+                        value.filter((file) => file.response).length >= 2
+                          ? Promise.resolve()
+                          : Promise.reject(
+                              new Error(
+                                'Should at least upload two valid spreadsheets.',
+                              ),
+                            ),
+                    },
+                  ]}
+                >
+                  <Dragger
+                    // accept={SPREADSHEET_EXTS.map((ext) => '.' + ext).join(',')}
+                    multiple
+                    name="spreadsheets"
+                    onChange={handleSheetsChange}
+                    customRequest={customRequest}
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined />
+                    </p>
+                    <p className="ant-upload-text">
+                      Click or drag files here to upload
+                    </p>
+                  </Dragger>
+                </Form.Item>
+              );
+            default:
+              return null;
+          }
+        }}
       </Form.Item>
-      {titleWithOffset('Meeting info')}
+      {titleWithOffset('Meeting Requirements')}
       <Form.Item
         name="dates"
         label="Potential dates" // (in UTC 0)
@@ -315,9 +356,9 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
             validator: (_, value) =>
               Array.isArray(value) &&
               value.every(
-                (date) =>
-                  date >= MYSQL_DATE_LOWER_LIMIT &&
-                  date <= MYSQL_DATE_UPPER_LIMIT,
+                (timestamp) =>
+                  timestamp >= MYSQL_MIN_TIMESTAMP &&
+                  timestamp <= MYSQL_MAX_TIMESTAMP,
               )
                 ? Promise.resolve()
                 : Promise.reject(new Error(`Date out of bound.`)),

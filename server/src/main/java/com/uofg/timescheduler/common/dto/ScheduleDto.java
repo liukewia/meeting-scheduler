@@ -16,10 +16,10 @@ public class ScheduleDto implements Serializable {
 
     private String location;
 
-    @Range(max = TimeConsts.MAX_TIME_MILLIS, message = "The time exceeds lower limit.")
+    @Range(min = TimeConsts.MYSQL_MIN_TIMESTAMP, max = TimeConsts.MYSQL_MAX_TIMESTAMP, message = "The time exceeds lower limit.")
     private Long startTime;
 
-    @Range(max = TimeConsts.MAX_TIME_MILLIS, message = "The time exceeds upper limit.")
+    @Range(min = TimeConsts.MYSQL_MIN_TIMESTAMP, max = TimeConsts.MYSQL_MAX_TIMESTAMP, message = "The time exceeds upper limit.")
     private Long endTime;
 
     //    @Range(max = 100L, message = "The priority is in illegal range.")

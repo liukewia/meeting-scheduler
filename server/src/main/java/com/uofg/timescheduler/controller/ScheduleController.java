@@ -7,19 +7,24 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.uofg.timescheduler.common.dto.ScheduleDto;
 import com.uofg.timescheduler.common.lang.Result;
 import com.uofg.timescheduler.entity.Priority;
 import com.uofg.timescheduler.entity.Schedule;
 import com.uofg.timescheduler.entity.User;
+import com.uofg.timescheduler.entity.ZoneOffset;
 import com.uofg.timescheduler.service.PriorityService;
 import com.uofg.timescheduler.service.ScheduleService;
 import com.uofg.timescheduler.service.UserService;
+import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.service.constant.TimeConsts;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,12 +56,26 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "Schedule Controller")
 public class ScheduleController {
 
-    @Autowired
-    UserService userService;
-
+    @Autowired UserService userService;
     @Autowired ScheduleService scheduleService;
     @Autowired PriorityService priorityService;
+    @Autowired ZoneOffsetService zoneOffsetService;
 
+    private long updateAndGetUtcOffsetBy(String zoneIdStr) {
+        // update current utc offset by zoneIdStr, for dynamic offset reasons like daylight saving time.
+        ZoneId zoneId = ZoneId.of(zoneIdStr);
+        ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        long newOffset = zdt.getOffset().getTotalSeconds() * 1000L;
+        zoneOffsetService.update(new ZoneOffset(zoneIdStr, newOffset),
+                new UpdateWrapper<ZoneOffset>().eq("zone_id", zoneIdStr));
+        return newOffset;
+    }
+
+    private long getUtcOffsetBy(String zoneIdStr) {
+        return zoneOffsetService.getOne(new UpdateWrapper<ZoneOffset>()
+                .eq("zone_id", zoneIdStr))
+                .getCurrentUtcOffset();
+    }
 
     /**
      * Search schedules by a range
@@ -76,11 +95,11 @@ public class ScheduleController {
 
         // get user info from jwt in header
         Long userId = user.getId();
-        Long utcOffset = user.getUtcOffset();
         User userInDatabase = userService.getOne(new QueryWrapper<User>().eq("id", userId));
         if (userInDatabase == null) {
             return Result.fail("The user does not exist!");
         }
+        long utcOffset = updateAndGetUtcOffsetBy(userInDatabase.getZoneId());
 
         String midTimeStr = request.getParameter("midTime");
         String startTimeStr = request.getParameter("startTime");
@@ -91,11 +110,10 @@ public class ScheduleController {
             long midTime = Long.parseLong(midTimeStr);
             scheduleList = scheduleService.list(new QueryWrapper<Schedule>()
                     .eq("user_id", userId)
-                    // https://baomidou.com/guide/wrapper.html#abstractwrapper
-                    .ge("start_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
+//                    .ge("start_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .lt("start_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .gt("end_time", DateUtil.date(midTime - 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
-                    .le("end_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
+//                    .le("end_time", DateUtil.date(midTime + 30 * TimeConsts.ONE_DAY_MILLIS - utcOffset).toJdkDate())
                     .select("id", "title", "start_time", "end_time", "priority_id", "location", "note"));
         } else if (midTimeStr == null && startTimeStr != null && endTimeStr != null) {
             long startTime = Long.parseLong(startTimeStr);
@@ -140,11 +158,10 @@ public class ScheduleController {
 
         // userid
         AccountProfile user = ShiroUtil.getProfile();
-        Long userId = user.getId();
-        schedule.setUserId(userId);
+        schedule.setUserId(user.getId());
 
         // eliminate utc offset
-        Long utcOffset = user.getUtcOffset();
+        Long utcOffset = getUtcOffsetBy(user.getZoneId());
         long newStartTime = scheduleDto.getStartTime() - utcOffset;
         schedule.setStartTime(new Date(newStartTime));
         long newEndTime = scheduleDto.getEndTime() - utcOffset;
@@ -196,7 +213,7 @@ public class ScheduleController {
         schedule.setPriorityId(priorityId);
 
         // eliminate utc offset
-        Long utcOffset = user.getUtcOffset();
+        long utcOffset = updateAndGetUtcOffsetBy(user.getZoneId());
         long newStartTime = scheduleDto.getStartTime() - utcOffset;
         schedule.setStartTime(new Date(newStartTime));
         long newEndTime = scheduleDto.getEndTime() - utcOffset;
