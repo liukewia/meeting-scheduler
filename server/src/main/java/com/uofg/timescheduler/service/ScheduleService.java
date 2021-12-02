@@ -1,11 +1,11 @@
 package com.uofg.timescheduler.service;
 
-import com.uofg.timescheduler.entity.Schedule;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.uofg.timescheduler.entity.Schedule;
 
 /**
  * <p>
- *  服务类
+ * service class
  * </p>
  *
  * @author Finn

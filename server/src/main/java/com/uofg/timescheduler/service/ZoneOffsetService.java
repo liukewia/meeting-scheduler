@@ -1,11 +1,11 @@
 package com.uofg.timescheduler.service;
 
-import com.uofg.timescheduler.entity.ZoneOffset;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.uofg.timescheduler.entity.ZoneOffset;
 
 /**
  * <p>
- *  服务类
+ * service class
  * </p>
  *
  * @author Finn
@@ -13,4 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ZoneOffsetService extends IService<ZoneOffset> {
 
+    long updateAndGetUtcOffsetBy(String zoneIdStr);
+
+    long getUtcOffsetBy(String zoneIdStr);
 }

@@ -12,12 +12,12 @@ import com.uofg.timescheduler.entity.User;
 import com.uofg.timescheduler.service.PriorityService;
 import com.uofg.timescheduler.service.ScheduleService;
 import com.uofg.timescheduler.service.UserService;
+import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.service.constant.TimeConsts;
 import com.uofg.timescheduler.service.internal.Owner;
 import com.uofg.timescheduler.service.internal.SchedulePriority;
 import com.uofg.timescheduler.service.internal.TimeRange;
 import com.uofg.timescheduler.service.internal.Timetable;
-import com.uofg.timescheduler.util.ZoneOffsetUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
@@ -51,6 +51,8 @@ public class PlanMeetingController {
 
     @Autowired
     PriorityService priorityService;
+
+    @Autowired ZoneOffsetService zoneOffsetService;
 
     @RequiresAuthentication
     @PostMapping("/plan")
@@ -109,7 +111,7 @@ public class PlanMeetingController {
             Long userId = user.getId();
             owner.setId(userId);
             owner.setName(user.getUsername());
-            owner.setZoneOffset(ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId()));
+            owner.setZoneOffset(zoneOffsetService.getUtcOffsetBy(user.getZoneId()));
             Timetable timetable = new Timetable();
             timetable.setOwner(owner);
             List<com.uofg.timescheduler.entity.Schedule> schedulesInDB = scheduleService
@@ -202,7 +204,7 @@ public class PlanMeetingController {
 //        if (!intersections.isEmpty()) {
 //            return;
 //        }
-
+        return null;
     }
 
     private void planByExternalData(List<SheetsDto> spreadsheets, List<Long> dates, Long duration) {

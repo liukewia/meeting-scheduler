@@ -37,3 +37,4 @@ https://codesandbox.io/s/pedantic-dhawan-rhoy0?file=/demo.js -->
 
 https://momentjs.com/timezone/docs/#/use-it/webpack/ -->
 
+_this.props.handleDragStart in popup in rbc needs bugfix manually,

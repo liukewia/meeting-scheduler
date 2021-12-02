@@ -18,7 +18,6 @@ import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.JwtUtil;
 import com.uofg.timescheduler.util.ShiroUtil;
-import com.uofg.timescheduler.util.ZoneOffsetUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class UserController {
 
         // update current utc offset, for dynamic offset reasons like daylight saving time.
         String zoneIdStr = user.getZoneId();
-        long newUtcOffset = ZoneOffsetUtil.updateAndGetUtcOffsetBy(zoneIdStr);
+        long newUtcOffset = zoneOffsetService.updateAndGetUtcOffsetBy(zoneIdStr);
 
         response.setHeader("Authorization", jwt);
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization");
@@ -166,7 +165,7 @@ public class UserController {
                 .put("username", user.getUsername())
                 .put("avatar", user.getAvatar())
                 .put("email", user.getEmail())
-                .put("utcOffset", ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId()))
+                .put("utcOffset", zoneOffsetService.getUtcOffsetBy(user.getZoneId()))
                 .put("access", role.getName())
                 .map()
         );
@@ -183,7 +182,7 @@ public class UserController {
                         .put("id", user.getId())
                         .put("username", user.getUsername())
                         .put("avatar", user.getAvatar())
-                        .put("utcOffset", ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId()))
+                        .put("utcOffset", zoneOffsetService.getUtcOffsetBy(user.getZoneId()))
                         .map()))
                 .map()
         );

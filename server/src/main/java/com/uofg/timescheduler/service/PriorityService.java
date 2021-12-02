@@ -5,7 +5,7 @@ import com.uofg.timescheduler.entity.Priority;
 
 /**
  * <p>
- * 服务类
+ * service class
  * </p>
  *
  * @author Yi Liu

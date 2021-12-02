@@ -5,7 +5,7 @@ import com.uofg.timescheduler.entity.User;
 
 /**
  * <p>
- * 服务类
+ * service class
  * </p>
  *
  * @author Yi Liu

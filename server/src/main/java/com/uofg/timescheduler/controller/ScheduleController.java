@@ -15,9 +15,9 @@ import com.uofg.timescheduler.entity.User;
 import com.uofg.timescheduler.service.PriorityService;
 import com.uofg.timescheduler.service.ScheduleService;
 import com.uofg.timescheduler.service.UserService;
+import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.ShiroUtil;
-import com.uofg.timescheduler.util.ZoneOffsetUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.Date;
@@ -53,6 +53,7 @@ public class ScheduleController {
     @Autowired UserService userService;
     @Autowired ScheduleService scheduleService;
     @Autowired PriorityService priorityService;
+    @Autowired ZoneOffsetService zoneOffsetService;
 
     /**
      * Search schedules by a range
@@ -76,7 +77,7 @@ public class ScheduleController {
         if (userInDB == null) {
             return Result.fail("The user does not exist!");
         }
-        long utcOffset = ZoneOffsetUtil.updateAndGetUtcOffsetBy(userInDB.getZoneId());
+        long utcOffset = zoneOffsetService.updateAndGetUtcOffsetBy(userInDB.getZoneId());
 
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
@@ -128,7 +129,7 @@ public class ScheduleController {
         schedule.setUserId(user.getId());
 
         // eliminate utc offset
-        Long utcOffset = ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId());
+        Long utcOffset = zoneOffsetService.getUtcOffsetBy(user.getZoneId());
         long newStartTime = scheduleDto.getStartTime() - utcOffset;
         schedule.setStartTime(new Date(newStartTime));
         long newEndTime = scheduleDto.getEndTime() - utcOffset;
@@ -180,7 +181,7 @@ public class ScheduleController {
         schedule.setPriorityId(priorityId);
 
         // eliminate utc offset
-        long utcOffset = ZoneOffsetUtil.updateAndGetUtcOffsetBy(user.getZoneId());
+        long utcOffset = zoneOffsetService.updateAndGetUtcOffsetBy(user.getZoneId());
         long newStartTime = scheduleDto.getStartTime() - utcOffset;
         schedule.setStartTime(new Date(newStartTime));
         long newEndTime = scheduleDto.getEndTime() - utcOffset;
