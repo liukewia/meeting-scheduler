@@ -1,37 +1,35 @@
 package com.uofg.timescheduler.service.internal;
 
+import static com.uofg.timescheduler.service.constant.TimeConsts.ONE_HOUR_MILLIS;
 import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_LOWER_BOUND;
 import static com.uofg.timescheduler.service.constant.TimeConsts.UTC_UPPER_BOUND;
 
 import com.uofg.timescheduler.util.TimeUtil;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.poi.ss.usermodel.Cell;
 
 @Data
 @Log4j2
+@NoArgsConstructor
 public class User {
-
 
     private Integer id;
     private String Name;
-    // ranges from -12 to +14, the smallest decimal possible is 1/4 (see Nepal). Chose UTC rather than GMT as the standard.
-    // https://www.zhihu.com/question/20705971
-    private Float UTCTimeZone;
-    private List<Long> preferences;
+    private Long zoneOffset;
+//    private List<Long> preferences;
+//
+//    public User() {
+//        this.preferences = new ArrayList<>();
+//    }
 
-    public User() {
-        this.preferences = new ArrayList<>();
-    }
-
-    public void setUTCTimeZone(Float temp) {
+    public void setUTCTimeZone(Long temp) {
         if (!TimeUtil.isUTCTimeZoneValid(temp)) {
             throw new OutOfRangeException(temp, UTC_LOWER_BOUND, UTC_UPPER_BOUND);
         }
-        this.UTCTimeZone = temp;
+        this.zoneOffset = temp;
     }
 
     public void updateCorrespondingField(String key, Cell value) {
@@ -48,8 +46,7 @@ public class User {
         }
         if (lowerCaseKey.equals("time zone")) {
             float temp = TimeUtil.parseTimeZone(strVal);
-            this.setUTCTimeZone(temp); // The time zone deviation could be decimal numbers, like +10.5, -2.25.
-
+            this.setUTCTimeZone((long) Math.round(temp * ONE_HOUR_MILLIS));
             return;
         }
 //        if (Pattern.matches("^preference[0-9]+$", lowerCaseKey)) {
