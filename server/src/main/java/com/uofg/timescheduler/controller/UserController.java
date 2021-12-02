@@ -4,7 +4,6 @@ package com.uofg.timescheduler.controller;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.uofg.timescheduler.common.dto.LoginDto;
 import com.uofg.timescheduler.common.dto.SignUpDto;
 import com.uofg.timescheduler.common.lang.Result;
@@ -19,10 +18,9 @@ import com.uofg.timescheduler.service.ZoneOffsetService;
 import com.uofg.timescheduler.shiro.AccountProfile;
 import com.uofg.timescheduler.util.JwtUtil;
 import com.uofg.timescheduler.util.ShiroUtil;
+import com.uofg.timescheduler.util.ZoneOffsetUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,23 +65,6 @@ public class UserController {
 
     @Autowired ZoneOffsetService zoneOffsetService;
 
-    private long updateAndGetUtcOffsetBy(String zoneIdStr) {
-        // update current utc offset by zoneIdStr, for dynamic offset reasons like daylight saving time.
-        ZoneId zoneId = ZoneId.of(zoneIdStr);
-        ZonedDateTime zdt = ZonedDateTime.now(zoneId);
-        long newOffset = zdt.getOffset().getTotalSeconds() * 1000L;
-        zoneOffsetService.update(new ZoneOffset(zoneIdStr, newOffset),
-                new UpdateWrapper<ZoneOffset>().eq("zone_id", zoneIdStr));
-        return newOffset;
-    }
-
-    private long getUtcOffsetBy(String zoneIdStr) {
-        return zoneOffsetService.getOne(new UpdateWrapper<ZoneOffset>()
-                .eq("zone_id", zoneIdStr))
-                .getCurrentUtcOffset();
-    }
-
-
     @PostMapping("/login")
     @ApiOperation("login")
     public Result login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response) {
@@ -111,7 +92,7 @@ public class UserController {
 
         // update current utc offset, for dynamic offset reasons like daylight saving time.
         String zoneIdStr = user.getZoneId();
-        long newUtcOffset = updateAndGetUtcOffsetBy(zoneIdStr);
+        long newUtcOffset = ZoneOffsetUtil.updateAndGetUtcOffsetBy(zoneIdStr);
 
         response.setHeader("Authorization", jwt);
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization");
@@ -185,7 +166,7 @@ public class UserController {
                 .put("username", user.getUsername())
                 .put("avatar", user.getAvatar())
                 .put("email", user.getEmail())
-                .put("utcOffset", getUtcOffsetBy(user.getZoneId()))
+                .put("utcOffset", ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId()))
                 .put("access", role.getName())
                 .map()
         );
@@ -202,7 +183,7 @@ public class UserController {
                         .put("id", user.getId())
                         .put("username", user.getUsername())
                         .put("avatar", user.getAvatar())
-                        .put("utcOffset", getUtcOffsetBy(user.getZoneId()))
+                        .put("utcOffset", ZoneOffsetUtil.getUtcOffsetBy(user.getZoneId()))
                         .map()))
                 .map()
         );

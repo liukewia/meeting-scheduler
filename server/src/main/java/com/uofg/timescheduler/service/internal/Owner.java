@@ -14,9 +14,9 @@ import org.apache.poi.ss.usermodel.Cell;
 @Data
 @Log4j2
 @NoArgsConstructor
-public class User {
+public class Owner {
 
-    private Integer id;
+    private Long id;
     private String Name;
     private Long zoneOffset;
 //    private List<Long> preferences;
@@ -36,7 +36,7 @@ public class User {
         // prevents errors from users mixing upper and lower cases when setting keys.
         String lowerCaseKey = key.toLowerCase();
         if (lowerCaseKey.equals("id")) {
-            this.setId((int) value.getNumericCellValue());
+            this.setId((long) value.getNumericCellValue());
             return;
         }
         String strVal = value.getStringCellValue();

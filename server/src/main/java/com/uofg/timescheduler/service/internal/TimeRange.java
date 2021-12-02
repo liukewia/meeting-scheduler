@@ -46,6 +46,11 @@ public class TimeRange {
                 || this.getStartTime() >= that.getEndTime());
     }
 
+    public boolean hasOverlapWith(Long startTime, Long endTime) {
+        return !(this.getEndTime() <= startTime
+                || this.getStartTime() >= endTime);
+    }
+
     public boolean hasStrictOverlapWith(TimeRange that) {
         return !(this.getEndTime() < that.getStartTime()
                 || this.getStartTime() > that.getEndTime());

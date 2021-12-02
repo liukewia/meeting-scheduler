@@ -132,7 +132,7 @@ public class FileUtil {
             }
             timetable.getOwner().updateCorrespondingField(key.getStringCellValue(), value);
         }
-        long timeZoneDeviation = Math.round(timetable.getOwner().getUTCTimeZone() * ONE_HOUR_MILLIS);
+        long timeZoneDeviation = timetable.getOwner().getZoneOffset();
 
         // read sheet 1
         XSSFSheet sheet1 = book.getSheetAt(0);

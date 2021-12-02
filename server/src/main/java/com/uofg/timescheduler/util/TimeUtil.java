@@ -217,6 +217,10 @@ public class TimeUtil {
         return temp >= UTC_LOWER_BOUND && temp <= UTC_UPPER_BOUND;
     }
 
+    public static boolean isUTCTimeZoneValid(Long temp) {
+        return temp >= -12 * ONE_HOUR_MILLIS && temp <= 14 * ONE_HOUR_MILLIS;
+    }
+
     public static long getStartTimeOfWeek() {
         Instant instant = Instant.now();
         ZoneId zoneId = ZoneId.of("UTC");

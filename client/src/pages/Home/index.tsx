@@ -1,10 +1,11 @@
 import { Card, Col, PageHeader, Row } from 'antd';
 import moment from 'moment';
-import { useModel } from 'umi';
+import { Link, useModel } from 'umi';
 import { useRequest } from 'ahooks';
 import { SpacedContainer } from '@/components/SpacedContainer';
 import { utcOffsetToTxt } from '@/utils/timeUtil';
 import { searchSchdule } from '@/services/schedule';
+import { useMemo } from 'react';
 
 export default function index() {
   const { initialState } = useModel('@@initialState');
@@ -34,6 +35,27 @@ export default function index() {
     return time;
   };
 
+  const numOfSchedulesDone = (eventData?.schedules || []).filter((schedule) => {
+    const end = moment.utc(schedule.endTime).valueOf();
+    const now = getZonedUtcNow().valueOf();
+    return end < now;
+  }).length;
+
+  const { numOfDone, numOfLast } = useMemo(() => {
+    let numOfDone = -1;
+    let numOfLast = -1;
+    if (!eventData || !Array.isArray(eventData.schedules)) {
+      return { numOfDone, numOfLast };
+    }
+    numOfDone = eventData.schedules.filter((schedule) => {
+      const end = moment.utc(schedule.endTime).valueOf();
+      const now = getZonedUtcNow().valueOf();
+      return end < now;
+    }).length;
+    numOfLast = eventData.schedules.length - numOfDone;
+    return { numOfDone, numOfLast };
+  }, [eventData]);
+
   return (
     <>
       <PageHeader ghost={false} title="Home">
@@ -45,11 +67,12 @@ export default function index() {
           <Row>
             <Col span={16} offset={4}>
               <h3>
-                Good {getCurrentTimePart()}, {username}. You have&nbsp;&nbsp;
-                {eventData && eventData.schedules
-                  ? eventData.schedules.length
-                  : '...'}
-                &nbsp;&nbsp;schedules today.
+                Good {getCurrentTimePart()}, {username}. You have finished&nbsp;
+                {numOfDone === -1 ? '...' : numOfDone}
+                &nbsp;schedules today, and&nbsp;
+                {numOfLast === -1 ? '...' : numOfLast}
+                &nbsp;to go. More detail in&nbsp;
+                <Link to="/timetable">My timetable</Link>.
               </h3>
               <h3>
                 The time zone you are in is&nbsp;&nbsp;

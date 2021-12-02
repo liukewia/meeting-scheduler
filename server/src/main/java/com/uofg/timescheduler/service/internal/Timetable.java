@@ -10,10 +10,10 @@ public class Timetable {
 
     private TimeRange coverage;
     private List<Schedule> scheduleList;
-    private User owner;
+    private Owner owner;
 
     public Timetable() {
-        this.owner = new User();
+        this.owner = new Owner();
         this.scheduleList = null;
     }
 

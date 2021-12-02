@@ -13,6 +13,15 @@ public enum SchedulePriority {
         this.value = value;
     }
 
+    public static SchedulePriority forId(int id) {
+        for (SchedulePriority type : values()) {
+            if (type.value == id) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     public int getValue() {
         return value;
     }

@@ -125,7 +125,7 @@ const initialFormValues = {
   participantList: [],
   spreadsheets: [],
   dates: [],
-  duration: 30,
+  duration: 180,
 };
 
 const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
@@ -174,14 +174,19 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
     const source = values.participantSource;
     if (source === ParticipantSourceType.Internal) {
       const people = values.participantList;
-      if (!Array.isArray(people) || people.length <= 2) {
+      if (!Array.isArray(people) || people.length < 2) {
         message.error('Please select at least 2 people.');
+        return;
+      }
+      const dates = values.dates;
+      if (!Array.isArray(dates) || dates.length === 0) {
+        message.error('Please select at least 1 dates.');
         return;
       }
       reqBody = {
         participantSource: source,
         participantList: people,
-        dates: values.dates,
+        dates: dates,
         duration: values.duration, // in minutes
       };
     } else if (source === ParticipantSourceType.External) {
@@ -293,7 +298,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
                         Array.isArray(value) && value.length >= 2
                           ? Promise.resolve()
                           : Promise.reject(
-                              new Error('Should select at least two people.'),
+                              new Error('Please select at least two people.'),
                             ),
                     },
                   ]}
@@ -326,7 +331,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
                   ]}
                 >
                   <Dragger
-                    // accept={SPREADSHEET_EXTS.map((ext) => '.' + ext).join(',')}
+                    accept={SPREADSHEET_EXTS.map((ext) => '.' + ext).join(',')}
                     multiple
                     name="spreadsheets"
                     onChange={handleSheetsChange}
@@ -353,15 +358,21 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
         rules={[
           {
             required: true,
-            validator: (_, value) =>
-              Array.isArray(value) &&
-              value.every(
-                (timestamp) =>
-                  timestamp >= MYSQL_MIN_TIMESTAMP &&
-                  timestamp <= MYSQL_MAX_TIMESTAMP,
-              )
-                ? Promise.resolve()
-                : Promise.reject(new Error(`Date out of bound.`)),
+            validator: (_, value) => {
+              if (!Array.isArray(value) || value.length === 0) {
+                return Promise.reject(new Error(`Please select dates.`));
+              }
+              if (
+                value.some(
+                  (timestamp) =>
+                    timestamp < MYSQL_MIN_TIMESTAMP &&
+                    timestamp > MYSQL_MAX_TIMESTAMP,
+                )
+              ) {
+                return Promise.reject(new Error(`Date out of bound.`));
+              }
+              return Promise.resolve();
+            },
           },
         ]}
       >

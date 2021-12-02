@@ -5,7 +5,7 @@ import { cloneDeep } from 'lodash';
 import './index.less';
 
 function getTimestamp(value) {
-  return value.startOf('day').valueOf();
+  return moment.utc(value).startOf('day').valueOf();
 }
 
 export default function MultipleDatePicker({

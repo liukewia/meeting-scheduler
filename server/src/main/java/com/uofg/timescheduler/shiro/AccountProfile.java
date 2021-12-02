@@ -1,10 +1,8 @@
 package com.uofg.timescheduler.shiro;
 
 
-import com.uofg.timescheduler.service.ZoneOffsetService;
 import java.io.Serializable;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,16 +18,4 @@ public class AccountProfile implements Serializable {
     private String status;
     private Long created;
     private Long lastLogin;
-
-    @Autowired
-    private ZoneOffsetService zoneOffsetService;
-
-    public Long getCreatedTimeStamp() {
-        return created / 1000;
-    }
-
-    public Long getLastLoginTimeStamp() {
-        return lastLogin / 1000;
-    }
-
 }
