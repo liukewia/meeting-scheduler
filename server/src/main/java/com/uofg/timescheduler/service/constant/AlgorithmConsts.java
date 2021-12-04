@@ -7,5 +7,5 @@ public interface AlgorithmConsts {
     int ITERATION_TIMES = 10;
     double CROSSOVER_PROB = 0.8;
     double MUTATION_PROB = 0.2;
-
+    double PUNISHMENT_SCORE = -10.0;
 }

@@ -37,4 +37,14 @@ https://codesandbox.io/s/pedantic-dhawan-rhoy0?file=/demo.js -->
 
 https://momentjs.com/timezone/docs/#/use-it/webpack/ -->
 
-_this.props.handleDragStart in popup in rbc needs bugfix manually,
+<!-- _this.props.handleDragStart in popup in rbc needs bugfix manually, -->
+
+pics:
+db table
+whole arch
+timezone design: left-client, right-server
+ui: general layout at right, left shows misc tab content, right has illustrations by woeds
+
+server:
+set time to utc
+set db

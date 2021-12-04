@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
-import moment from 'moment';
 import { useRequest } from 'ahooks';
 import { useModel } from 'umi';
 import { mapPercentToPriorityId, parseEventInForm } from '@/utils/scheduleUtil';

@@ -41,19 +41,26 @@ export default function index() {
     return end < now;
   }).length;
 
-  const { numOfDone, numOfLast } = useMemo(() => {
+  const { numOfDone, numOfOngoing, numOfLast } = useMemo(() => {
     let numOfDone = -1;
+    let numOfOngoing = -1;
     let numOfLast = -1;
     if (!eventData || !Array.isArray(eventData.schedules)) {
-      return { numOfDone, numOfLast };
+      return { numOfDone, numOfOngoing, numOfLast };
     }
     numOfDone = eventData.schedules.filter((schedule) => {
       const end = moment.utc(schedule.endTime).valueOf();
       const now = getZonedUtcNow().valueOf();
       return end < now;
     }).length;
-    numOfLast = eventData.schedules.length - numOfDone;
-    return { numOfDone, numOfLast };
+    numOfOngoing = eventData.schedules.filter((schedule) => {
+      const start = moment.utc(schedule.startTime).valueOf();
+      const end = moment.utc(schedule.endTime).valueOf();
+      const now = getZonedUtcNow().valueOf();
+      return start <= now && end >= now;
+    }).length;
+    numOfLast = eventData.schedules.length - numOfDone - numOfOngoing;
+    return { numOfDone, numOfOngoing, numOfLast };
   }, [eventData]);
 
   return (
@@ -69,7 +76,9 @@ export default function index() {
               <h3>
                 Good {getCurrentTimePart()}, {username}. You have finished&nbsp;
                 {numOfDone === -1 ? '...' : numOfDone}
-                &nbsp;schedules today, and&nbsp;
+                &nbsp;schedules today,&nbsp;
+                {numOfOngoing === -1 ? '...' : numOfOngoing}
+                &nbsp;ongoing, and&nbsp;
                 {numOfLast === -1 ? '...' : numOfLast}
                 &nbsp;to go. More detail in&nbsp;
                 <Link to="/timetable">My timetable</Link>.

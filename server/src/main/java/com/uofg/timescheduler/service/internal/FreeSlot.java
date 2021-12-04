@@ -27,8 +27,8 @@ public class FreeSlot extends TimeRange {
         java.util.Date endDate = new Date(super.endTime);
         String str2 = sdf.format(endDate);
         return "FreeSlot {" +
-                "startdate=" + str1 +
-                ", enddate=" + str2 +
+                "startDate=" + str1 +
+                ", endDate=" + str2 +
                 '}';
     }
 }

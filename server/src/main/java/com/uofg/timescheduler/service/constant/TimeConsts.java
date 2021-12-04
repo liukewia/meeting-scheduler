@@ -51,7 +51,7 @@ public class TimeConsts {
         PRIORITY_TO_RATING_MAP.put(SchedulePriority.LOW, 0.75);
         PRIORITY_TO_RATING_MAP.put(SchedulePriority.NORMAL, 0.5);
         PRIORITY_TO_RATING_MAP.put(SchedulePriority.HIGH, 0.25);
-        PRIORITY_TO_RATING_MAP.put(SchedulePriority.INF, -Double.MAX_VALUE / 2);
+        PRIORITY_TO_RATING_MAP.put(SchedulePriority.INF, AlgorithmConsts.PUNISHMENT_SCORE);
     }
 
 }

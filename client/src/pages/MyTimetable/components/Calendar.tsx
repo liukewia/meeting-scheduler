@@ -331,17 +331,6 @@ const Calendar: React.FC = (props) => {
     .subtract(moment().utcOffset(), 'minute')
     .toDate();
 
-  // const events =
-  //   eventData?.schedules.map((schedule: any) => ({
-  //     id: schedule.id,
-  //     title: schedule.title,
-  //     location: schedule.location,
-  //     start: moment.utc(schedule.startTime).toDate(),
-  //     end: moment.utc(schedule.endTime).toDate(),
-  //     priority: mapPriorityIdToPercent(schedule.priorityId),
-  //     note: schedule.note,
-  //   })) || [];
-
   return (
     <Card>
       <Spin tip="Loading..." size="large" spinning={fetchLoading}>

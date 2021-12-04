@@ -8,9 +8,8 @@ import lombok.Data;
 public class RatedTimeRange {
 
     private final TimeRange timeRange;
-    private double score = 0.0;
+    private Double score = null;
     private String note = "";
-
 
     public RatedTimeRange(TimeRange timeRange, List<Timetable> ratingBasis) {
         this.timeRange = timeRange;
@@ -18,6 +17,10 @@ public class RatedTimeRange {
                 .map(timetable -> TimeUtil.rate(this.timeRange, timetable))
                 .reduce(Double::sum)
                 .orElse(0.0);
+    }
+
+    public RatedTimeRange(TimeRange timeRange) {
+        this.timeRange = timeRange;
     }
 
     public long getStartTime() {
@@ -43,6 +46,16 @@ public class RatedTimeRange {
     @Override
     public int hashCode() {
         return this.getTimeRange().hashCode();
+    }
+
+    public void appendNotes(List<String> peopleNotAvailable) {
+        this.note += String.join(", ", peopleNotAvailable)
+                + " " + (peopleNotAvailable.size() > 1 ? "are" : "is")
+                + " not available for this slot.";
+    }
+
+    public void appendNotes(String s) {
+        this.note += s;
     }
 
 }

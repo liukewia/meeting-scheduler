@@ -28,11 +28,6 @@ public class TimeRange {
         this.endTime = endTime;
     }
 
-    public static void main(String[] args) {
-        TimeRange r = new TimeRange(0, 3 * ONE_HOUR_MILLIS);
-        System.out.println(r.getPossibleSlotsBy(1 * ONE_HOUR_MILLIS));
-    }
-
     public boolean hasOverlapWith(List<Schedule> schedules) {
         return schedules.stream().anyMatch(schedule -> {
             TimeRange that = schedule.getTimeRange();
@@ -75,7 +70,10 @@ public class TimeRange {
         // prerequisite: those has no overlaps
         List<TimeRange> res = new ArrayList<>();
         for (TimeRange that : those) {
-            res.add(this.getOverlapWith(that));
+            TimeRange overlap = this.getOverlapWith(that);
+            if (overlap != null) {
+                res.add(overlap);
+            }
         }
         return res;
     }
@@ -125,8 +123,8 @@ public class TimeRange {
         java.util.Date endDate = new Date(endTime);
         String str2 = sdf.format(endDate);
         return "TimeRange{" +
-                "startdate=" + str1 +
-                ", enddate=" + str2 +
+                "startDate=" + str1 +
+                ", endDate=" + str2 +
                 '}';
     }
 }

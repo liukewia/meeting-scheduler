@@ -289,6 +289,9 @@ public class TimeUtil {
         // after combination, the calculation's difficulty is reduced
         List<Object> fullList = new ArrayList<>();
         List<Schedule> scheduleList = timetable.getScheduleList();
+        if (scheduleList.size() == 0) {
+            return 0.0;
+        }
         long covStartTime = timetable.getCoverage().getStartTime();
         long schedule1StartTime = scheduleList.get(0).getStartTime();
         if (covStartTime < schedule1StartTime) {

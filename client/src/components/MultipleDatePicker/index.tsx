@@ -8,6 +8,13 @@ function getTimestamp(value) {
   return moment.utc(value).startOf('day').valueOf();
 }
 
+moment.locale('en-gb', {
+  week: {
+    dow: 1,
+    doy: 1,
+  },
+});
+
 export default function MultipleDatePicker({
   value: selectedDate = [],
   onChange,

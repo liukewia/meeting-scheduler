@@ -14,11 +14,16 @@ import {
   Button,
   Upload,
   message,
+  Result,
+  Skeleton,
+  Table,
+  Spin,
+  Tooltip,
 } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { RcFile, UploadChangeParam } from 'antd/lib/upload';
 import { UploadFile } from 'antd/lib/upload/interface';
-import { useRequest } from 'ahooks';
+import { useRequest, useUpdate } from 'ahooks';
 import { SpacedContainer } from '@/components/SpacedContainer';
 import { planMeeting, sheetUpload } from '@/services/meeting';
 import UserSelector from '@/components/UserSelector';
@@ -28,6 +33,10 @@ import {
   MYSQL_MAX_TIMESTAMP,
   SPREADSHEET_EXTS,
 } from '@/constants';
+import moment from 'moment';
+import { useModel } from 'umi';
+import QuestionCircleOutlined from '@ant-design/icons/lib/icons/QuestionCircleOutlined';
+import { utcOffsetToTxt } from '@/utils/timeUtil';
 
 const { Dragger } = Upload;
 
@@ -407,50 +416,142 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
   );
 };
 
-const FormResult = ({ setCurrentStep, planResult, planLoading, planError }) => {
-  return <div>FormResult</div>;
+const FormResult = ({
+  setCurrentStep,
+  runAgain,
+  planData,
+  planLoading,
+  planError,
+}) => {
+  const { initialState } = useModel('@@initialState');
+
+  const utcOffset = initialState?.currentUser?.utcOffset || '...';
+
+  const columns = [
+    {
+      title: (
+        <>
+          <Space>
+            <span>Start Time</span>
+            <Tooltip title={`in your time zone (${utcOffsetToTxt(utcOffset)})`}>
+              <QuestionCircleOutlined />
+            </Tooltip>
+          </Space>
+        </>
+      ),
+      dataIndex: 'start',
+      key: 'start',
+    },
+    {
+      title: (
+        <>
+          <Space>
+            <span>End Time</span>
+            <Tooltip title={`in your time zone (${utcOffsetToTxt(utcOffset)})`}>
+              <QuestionCircleOutlined />
+            </Tooltip>
+          </Space>
+        </>
+      ),
+      dataIndex: 'end',
+      key: 'end',
+    },
+    {
+      title: 'Score',
+      dataIndex: 'score',
+      key: 'score',
+    },
+    {
+      title: 'Note',
+      dataIndex: 'note',
+      key: 'note',
+    },
+  ];
+
+  const failReason = planData?.reason;
+
+  if (planError || failReason || planData?.result?.length === 0) {
+    return (
+      <Result
+        status="error"
+        title="Plan failed, an error has occurred."
+        subTitle={failReason || null}
+        extra={[
+          <Button type="primary" key="goback" onClick={() => setCurrentStep(0)}>
+            Go Back
+          </Button>,
+          <Button key="tryagain" onClick={runAgain}>
+            Try Again
+          </Button>,
+        ]}
+      />
+    );
+  }
+
+  if (planData?.result) {
+    const dataSource = planData.result.map((slot, index) => {
+      return {
+        key: index,
+        start: moment(slot.start).format('DD/MM/YYYY hh:mm'),
+        end: moment(slot.end).format('DD/MM/YYYY hh:mm'),
+        score: slot.score || '-',
+        note: slot.note || '-',
+      };
+    });
+
+    return (
+      <Table
+        bordered
+        dataSource={dataSource}
+        columns={columns}
+        title={() => (
+          <Row justify="space-between" align="middle">
+            <span>Solutions</span>
+            <Button type="primary" onClick={() => setCurrentStep(0)}>
+              Plan new meeting
+            </Button>
+          </Row>
+        )}
+      />
+    );
+  }
+
+  return <Skeleton active />;
 };
 
 export default () => {
   const [currentStep, setCurrentStep] = useState<NewMeetingSteps>(0);
 
   const {
-    data: planResult,
+    data: planData,
     loading: planLoading,
     error: planError,
     run: runPlanMeeting,
+    params: [reqBody, ..._],
   } = useRequest(planMeeting, {
     manual: true,
-    debounceWait: 100,
+    debounceWait: 500,
     onSuccess: () => {},
     onError: () => {},
   });
 
-  const currComponent = useMemo(() => {
-    const getCurrentStepAndComponent = (currStep = 1) => {
-      const stepAndComponent: { [key: string]: React.ReactElement } = {
-        0: (
-          <NewMeetingForm
-            // currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            runPlanMeeting={runPlanMeeting}
-          />
-        ),
-        1: (
-          <FormResult
-            // currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            planResult={planResult}
-            planLoading={planLoading}
-            planError={planError}
-          />
-        ),
-      };
-      return stepAndComponent[currStep];
-    };
-
-    return getCurrentStepAndComponent(currentStep);
-  }, [currentStep]);
+  const stepAndComponent: { [key: string]: React.ReactElement } = {
+    0: (
+      <NewMeetingForm
+        setCurrentStep={setCurrentStep}
+        runPlanMeeting={runPlanMeeting}
+      />
+    ),
+    1: (
+      <FormResult
+        setCurrentStep={setCurrentStep}
+        runAgain={() => runPlanMeeting(reqBody)}
+        planData={planData}
+        planLoading={planLoading}
+        planError={planError}
+      />
+    ),
+  };
 
   return (
     <>
@@ -466,7 +567,7 @@ export default () => {
             </Col>
           </Row>
           <Divider />
-          {currComponent}
+          {stepAndComponent[currentStep]}
         </Card>
       </SpacedContainer>
     </>
