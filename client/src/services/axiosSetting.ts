@@ -8,7 +8,7 @@ import { isDev } from '@/utils/nodeUtil';
 function createAxiosInstance() {
   const instance = axios.create({
     baseURL: API_URL,
-    timeout: 30000,
+    timeout: 6000,
     // withCredentials: true,
     // headers: { 'Content-Type': 'application/json' },
   });

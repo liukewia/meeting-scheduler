@@ -120,7 +120,7 @@ export default ({ siderPrefixCls }: { siderPrefixCls: string }) => {
         setIsCollapsed(bool);
       }}
       // https://chinese.freecodecamp.org/news/fixed-side-and-bottom-navbar-with-css-flexbox/
-      style={{ overflowY: 'scroll' }}
+      // style={{ overflowY: 'scroll' }}
     >
       <div
         className={`${siderPrefixCls}-logo`}

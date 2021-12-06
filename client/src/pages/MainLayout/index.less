@@ -6,6 +6,21 @@
 .@{sider-prefix-cls} {
   z-index: 3;
 
+  .ant-layout-sider-children {
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(50, 50, 50, 0.3);
+      border-radius: 1em;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: rgba(50, 50, 50, 0.1);
+      border-radius: 1em;
+    }
+  }
+
   // only show in light mode
   &-light {
     box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);

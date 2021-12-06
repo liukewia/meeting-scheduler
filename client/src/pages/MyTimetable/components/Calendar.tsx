@@ -79,12 +79,10 @@ function EventAgenda({ event }) {
 }
 
 const Calendar: React.FC = (props) => {
-  const { initialState } = useModel('@@initialState');
-  const utcOffset = initialState?.currentUser?.utcOffset || 0;
   // solve flicker problem
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isFormVisible, setFormVisible] = useState(false);
-  const { getUtcNow, getZonedUtcNow } = useModel('time');
+  const { getZonedUtcNow } = useModel('time');
   const visibleRange = useReactive({
     midTime: getZonedUtcNow().valueOf(),
     startTime: 0,
@@ -102,11 +100,7 @@ const Calendar: React.FC = (props) => {
     manual: true,
     debounceWait: 100,
     onSuccess: () => {
-      if (
-        eventData &&
-        eventData.schedules &&
-        Object.keys(eventData.schedules).length > 0
-      ) {
+      if (Array.isArray(eventData?.schedules)) {
         setEvents(
           eventData.schedules.map((schedule: any) => ({
             id: schedule.id,
@@ -133,7 +127,7 @@ const Calendar: React.FC = (props) => {
       onSuccess: () => {
         handleCancel();
         fetchEventsInRange();
-        message.success('Update sccueeded.');
+        message.success('Update succeeded.');
       },
       onError: () => {
         fetchEventsInRange();

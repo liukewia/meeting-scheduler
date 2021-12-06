@@ -5,23 +5,23 @@ import { useRequest } from 'ahooks';
 import { signup } from '@/services/user';
 import { getZoneOffsetList } from '@/services/zoneOffset';
 import { utcOffsetToTxt } from '@/utils/timeUtil';
-import styles from './style.less';
+import './index.less';
 
 const FormItem = Form.Item;
 
 const passwordStatusMap = {
   ok: (
-    <div className={styles.success}>
+    <div className="success">
       <span>Strength: good</span>
     </div>
   ),
   pass: (
-    <div className={styles.warning}>
+    <div className="warning">
       <span>Strength: moderate</span>
     </div>
   ),
   poor: (
-    <div className={styles.error}>
+    <div className="error">
       <span>Strength: poor</span>
     </div>
   ),
@@ -113,10 +113,10 @@ const SignUpForm: React.FC = (props) => {
     const value = form.getFieldValue('password');
     const passwordStatus = getPasswordStatus();
     return value && value.length ? (
-      <div className={styles[`progress-${passwordStatus}`]}>
+      <div className={`progress-${passwordStatus}`}>
         <Progress
           status={passwordProgressMap[passwordStatus]}
-          className={styles.progress}
+          className="progress"
           strokeWidth={6}
           percent={value.length * 10 > 100 ? 100 : value.length * 10}
           showInfo={false}
@@ -126,8 +126,8 @@ const SignUpForm: React.FC = (props) => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.main}>
+    <div className="signup-container">
+      <div className="signup-main">
         <h1>Sign Up</h1>
         <Form form={form} name="UserRegister" onFinish={onFinish}>
           <FormItem
@@ -208,7 +208,7 @@ const SignUpForm: React.FC = (props) => {
               className={
                 form.getFieldValue('password') &&
                 form.getFieldValue('password').length > 0 &&
-                styles.password
+                'password'
               }
               rules={[
                 {
@@ -241,13 +241,13 @@ const SignUpForm: React.FC = (props) => {
             <Button
               size="large"
               loading={submitting}
-              className={styles.submit}
+              className="submit"
               type="primary"
               htmlType="submit"
             >
               <span>Sign up</span>
             </Button>
-            <Link className={styles.login} to="/user/login">
+            <Link className="login" to="/user/login">
               <span>Login with existing account</span>
             </Link>
           </FormItem>
