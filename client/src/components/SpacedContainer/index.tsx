@@ -1,5 +1,5 @@
 import { Space } from 'antd';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import styles from './index.less';
 
 export const SpacedContainer: FC<{}> = (props) => {

@@ -58,3 +58,9 @@ Backup of *.doc*
 *.~vsd*
 
 /client/public/color.less
+
+# crt
+server/src/main/resources/application-prod.yml
+server/src/main/resources/crt/
+server/Dockerfile
+server/nginx.conf

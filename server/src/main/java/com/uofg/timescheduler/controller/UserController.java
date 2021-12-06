@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RestController
 @Slf4j
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @Api(tags = "User Controller")
 public class UserController {
 

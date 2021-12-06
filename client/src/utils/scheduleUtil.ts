@@ -1,5 +1,5 @@
-import { CalendarEvent } from '@/pages/MyTimetable/components/Calendar';
 import moment from 'moment';
+import { CalendarEvent } from '@/pages/MyTimetable/components/Calendar';
 
 export function parseEventInForm(event: Partial<CalendarEvent>) {
   return {

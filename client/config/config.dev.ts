@@ -15,7 +15,7 @@ export default defineConfig({
   devServer: {
     port: 7000,
     proxy: {
-      '/api': 'http://localhost:8000',
+      '/api': 'http://localhost:8004',
     },
   },
 });

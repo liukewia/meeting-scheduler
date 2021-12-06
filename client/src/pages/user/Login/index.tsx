@@ -1,16 +1,13 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Space, message, Tabs, Form } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { message, Form } from 'antd';
+import React, { useEffect } from 'react';
 import { Link, history, useModel } from 'umi';
-import { login, queryCurrentUser } from '@/services/user';
-import logoSrc from 'public/logo.svg';
-import './index.less';
-import { businessTitle } from '@/constants';
 import { Input, Button, Checkbox } from 'antd';
-import Background from '@/components/Background';
+import { login } from '@/services/user';
+import logoSrc from 'public/logo.svg';
+import { businessTitle } from '@/constants';
 import { useRequest } from 'ahooks';
-import Omit from 'omit.js';
-import { getJwt } from '@/utils/jwtUtil';
+import './index.less';
 
 const Login: React.FC = (props) => {
   const { initialState, setInitialState } = useModel('@@initialState');
@@ -20,7 +17,6 @@ const Login: React.FC = (props) => {
     throttleWait: 1000,
     manual: true,
     onSuccess: async (userInfo, params) => {
-      console.log('params: ', params);
       if (userInfo) {
         await setInitialState((s) => ({ ...s, currentUser: userInfo }));
       }

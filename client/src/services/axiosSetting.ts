@@ -1,20 +1,18 @@
 import { message, notification } from 'antd';
 import axios from 'axios';
-import { matchPath, history } from 'umi';
-import { LOGIN_PATH, UN_AUTH_PATHS } from '@/constants';
+import { matchPath } from 'umi';
+import { API_URL, LOGIN_PATH, UN_AUTH_PATHS } from '@/constants';
 import { getJwt } from '@/utils/jwtUtil';
 import { isDev } from '@/utils/nodeUtil';
 
 function createAxiosInstance() {
   const instance = axios.create({
-    baseURL: 'http://localhost:8081/api',
-    timeout: 3000000000000,
+    baseURL: API_URL,
+    timeout: 30000,
     // withCredentials: true,
     // headers: { 'Content-Type': 'application/json' },
   });
   instance.interceptors.request.use((config) => {
-    console.log('config: ', config);
-    console.log('history.location.pathname: ', history.location.pathname);
     const jwt = getJwt();
     if (
       !matchPath(config.url || '', {
@@ -30,7 +28,6 @@ function createAxiosInstance() {
   });
   instance.interceptors.response.use(
     (axiosRes) => {
-      console.log('in axios success cb');
       const { data: res } = axiosRes;
       // request succeeded, but may have business logic error
       const requestSucceed = /^(2|3)\d{2}$/; // Code starting with 2 or 3 is regarded as a successful request
@@ -63,10 +60,7 @@ function createAxiosInstance() {
       return Promise.reject(res);
     },
     (error) => {
-      console.log('in axios error cb');
       // cannot get response from backend
-      console.log(JSON.stringify(error));
-      console.log(JSON.stringify(error.response));
       isDev &&
         notification.error({
           // expose the potential error explicitly

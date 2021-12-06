@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Form, Button, Input, Popover, Progress, message, Select } from 'antd';
 import { Link, history } from 'umi';
 import { useRequest } from 'ahooks';
-import moment from 'moment';
 import { signup } from '@/services/user';
-import { ONE_HOUR_MILLIS } from '@/constants';
 import { getZoneOffsetList } from '@/services/zoneOffset';
-import styles from './style.less';
 import { utcOffsetToTxt } from '@/utils/timeUtil';
+import styles from './style.less';
 
 const FormItem = Form.Item;
 

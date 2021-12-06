@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RestController
 @Slf4j
-@RequestMapping("/api/schedule")
+@RequestMapping("/schedule")
 @Api(tags = "Schedule Controller")
 public class ScheduleController {
 

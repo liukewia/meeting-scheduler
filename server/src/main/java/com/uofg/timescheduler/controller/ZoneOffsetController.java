@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2021-11-30
  */
 @RestController
-@RequestMapping("/api/zoneoffset")
+@RequestMapping("/zoneoffset")
 public class ZoneOffsetController {
 
     @Autowired ZoneOffsetService zoneOffsetService;

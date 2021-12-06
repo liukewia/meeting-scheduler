@@ -13,7 +13,7 @@ export async function queryCurrentUser(options?: {
 
 /** log in POST /api/user/login */
 export async function login(
-  body: API.LoginParams,
+  body: any,
   options?: { [key: string]: any },
 ): Promise<any> {
   const res = await axiosReq('/user/login', {

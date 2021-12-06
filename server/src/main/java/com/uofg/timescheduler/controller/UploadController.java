@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartResolver;
 @CrossOrigin
 @RestController
 @Slf4j
-@RequestMapping("/api")
 @Api(tags = "PlanMeetingController")
 public class UploadController {
 

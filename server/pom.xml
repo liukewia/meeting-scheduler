@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.uofg</groupId>
     <artifactId>time-scheduler</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>time-scheduler</name>
     <description>Demo project for Spring Boot</description>
     <properties>
@@ -56,11 +56,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
+            <version>8.0.26</version>
         </dependency>
+
 
         <!--mp代码生成器-->
         <dependency>
@@ -148,6 +150,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+        <finalName>scheduler-server</finalName>
     </build>
 
 </project>

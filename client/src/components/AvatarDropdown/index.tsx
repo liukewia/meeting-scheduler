@@ -1,22 +1,19 @@
 import React, { useCallback } from 'react';
 import {
-  EditOutlined,
-  LoginOutlined,
   LogoutOutlined,
-  PlusOutlined,
   SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Menu, message, Spin } from 'antd';
 import { history, matchPath, useModel } from 'umi';
 import { stringify } from 'querystring';
-import HeaderDropdown from '../HeaderDropdown';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 import { useAccess } from 'umi';
-import { logout } from '@/services/user';
 import { useRequest } from 'ahooks';
-import './index.less';
+import HeaderDropdown from '../HeaderDropdown';
+import { logout } from '@/services/user';
 import { LOGIN_PATH } from '@/constants';
+import './index.less';
 
 const loading = (
   <span className="action account">
@@ -58,7 +55,7 @@ const AvatarDropdown: React.FC = () => {
         }) &&
         !redirect
       ) {
-        setAppTheme('light'); // rollback to default theme, but not colors
+        // setAppTheme('light'); // rollback to default theme, but not colors
         history.replace({
           pathname: '/user/login',
           search: stringify({
@@ -72,14 +69,6 @@ const AvatarDropdown: React.FC = () => {
   const onMenuClick = useCallback(
     (event: MenuInfo) => {
       const { key } = event;
-      // if (key === 'login') {
-      //   if (initialState?.currentUser?.access === 'guest') {
-      //     login();
-      //   } else {
-      //     window.location.reload();
-      //   }
-      //   return;
-      // }
       if (key === 'logout') {
         runLogout();
         return;

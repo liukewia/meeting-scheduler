@@ -7,9 +7,6 @@ import { UN_AUTH_PATHS } from '@/constants';
 const LayoutWrapper = ({
   children,
   location,
-  route,
-  history,
-  match,
 }: IRouteComponentProps) => {
   const pathname = location.pathname;
   const { initialState } = useModel('@@initialState');

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Card,
   Steps,
@@ -177,8 +177,6 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
   };
 
   const onFinish = (values: any) => {
-    console.log('Received values of form: ', values);
-
     let reqBody;
     const source = values.participantSource;
     if (source === ParticipantSourceType.Internal) {
@@ -227,7 +225,6 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
       console.error('Unknown participant source.');
       return;
     }
-    console.log(`reqBody: `, reqBody);
     runPlanMeeting(reqBody);
     setCurrentStep(1);
   };

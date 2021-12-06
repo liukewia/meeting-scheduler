@@ -1,6 +1,5 @@
 import moment from 'moment';
 import type { Moment } from 'moment';
-import { ONE_HOUR_MILLIS } from '@/constants';
 
 export function disabledDate(current: Moment) {
   return (

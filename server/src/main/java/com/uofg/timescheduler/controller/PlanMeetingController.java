@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RestController
 @Slf4j
-@RequestMapping("/api/meeting")
+@RequestMapping("/meeting")
 @Api(tags = "PlanMeetingController")
 public class PlanMeetingController {
 

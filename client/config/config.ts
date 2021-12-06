@@ -2,11 +2,8 @@
 // there should be only one setting, config/config.js OR /.umirc.js.
 import { defineConfig } from 'umi';
 const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin');
-import { join } from 'path';
-import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   alias: {
     public: '/public',
@@ -21,17 +18,13 @@ export default defineConfig({
   },
   // umi routes: https://umijs.org/docs/routing
   routes,
-  // Theme for antd: https://ant.design/docs/react/customize-theme-cn
-  // theme: {
-  //   'primary-color': defaultSettings.primaryColor,
-  // },
 
   // esbuild is father build tools
   // https://umijs.org/plugins/plugin-esbuild
   // esbuild: {},
   title: false,
   ignoreMomentLocale: true,
-  // proxy: proxy[REACT_APP_ENV || 'dev'],
+  proxy: proxy['dev'],
   manifest: {
     basePath: '/',
   },
