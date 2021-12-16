@@ -20,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,29 +181,38 @@ public class TimeUtil {
     public static void main(String[] args) throws Exception {
 //        System.out.println(parseTimeZone("UTC+10"));
 
-        if (parseMoment("Mon5pm") == 147600000
-                && parseMoment("Mon5:00pm") == 147600000
-                && parseMoment("Thurs 10 AM") == 381600000
-                && parseMoment("Thurs 10:30 AM") == 383400000
-                && parseMoment("Thurs 10:30 PM") == 426600000
-                && parseMoment("Thurs 10:45 PM") == 427500000
-                && parseMoment("fri-11.00") == 471600000
-                && parseMoment("Saturday 11") == 558000000
-        ) {
-            System.out.println("---------------------pass---------------------");
-        }
+//        if (parseMoment("Mon5pm") == 147600000
+//                && parseMoment("Mon5:00pm") == 147600000
+//                && parseMoment("Thurs 10 AM") == 381600000
+//                && parseMoment("Thurs 10:30 AM") == 383400000
+//                && parseMoment("Thurs 10:30 PM") == 426600000
+//                && parseMoment("Thurs 10:45 PM") == 427500000
+//                && parseMoment("fri-11.00") == 471600000
+//                && parseMoment("Saturday 11") == 558000000
+//        ) {
+//            System.out.println("---------------------pass---------------------");
+//        }
 
 //        String input = "Sun 0";
 //        System.out.println("input: " + input);
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy E h:mm a");
 //        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 //        System.out.println(sdf.parse("2001 fri 01:10 pm"));
-        long m = parseMoment("fri 01:10 pm");
-        System.out.println("startTime= Day " + ((int) m / ONE_DAY_MILLIS + 1) + " @ "
-                + (m % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
-                + (m % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60);
+//        long m = parseMoment("fri 01:10 pm");
+//        System.out.println("startTime= Day " + ((int) m / ONE_DAY_MILLIS + 1) + " @ "
+//                + (m % ONE_DAY_MILLIS) / ONE_HOUR_MILLIS + ":"
+//                + (m % ONE_DAY_MILLIS) % ONE_HOUR_MILLIS / 1000 / 60);
 
 //        getStartTimeOfWeek();
+
+        TimeRange t1 = new TimeRange(1638316800000L, 1638403200000L);
+        TimeRange t2 = new TimeRange(1638403200000L, 1638489600000L);
+        TimeRange t3 = new TimeRange(1638144000000L, 1638230400000L);
+        List<TimeRange> l = new ArrayList<>();
+        l.add(t1);
+        l.add(t2);
+        l.add(t3);
+        System.out.println(mergeIntervals(l));
     }
 
     public static List<TimeRange> computeIntersection(List<List<TimeRange>> atts) {
@@ -236,7 +246,7 @@ public class TimeUtil {
     }
 
     public static TimeRange generateRandomSlotWithin(List<TimeRange> ranges, long durationMillis) {
-        long totalLength = ranges.stream()
+        long totalLength = mergeIntervals(ranges).stream()
                 .map(range -> range.getLength() - durationMillis)
                 .reduce(Long::sum)
                 .orElse(0L);
@@ -338,5 +348,24 @@ public class TimeUtil {
                 .orElse(0.0);
         return score;
     }
+
+    public static List<TimeRange> mergeIntervals(List<TimeRange> intervals) {
+        if (intervals == null || intervals.size() == 0) {
+            return new ArrayList<>();
+        }
+        intervals.sort(Comparator.comparingLong(TimeRange::getStartTime));
+        List<TimeRange> merged = new ArrayList<>();
+        for (TimeRange range : intervals) {
+            long L = range.getStartTime();
+            long R = range.getEndTime();
+            if (merged.size() == 0 || merged.get(merged.size() - 1).getEndTime() < L) {
+                merged.add(new TimeRange(L, R));
+            } else {
+                merged.get(merged.size() - 1).setEndTime(Math.max(merged.get(merged.size() - 1).getEndTime(), R));
+            }
+        }
+        return merged;
+    }
+
 
 }
