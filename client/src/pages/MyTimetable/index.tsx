@@ -14,7 +14,7 @@ export default () => {
           <ul>
             <li>
               To create an event: either by clicking the create button in the
-              top right, or selecting a slot by dragging and dropping on a
+              top right, or selecting a slot by dragging and dropping on an
               available period inside the timetable.
             </li>
             <li>

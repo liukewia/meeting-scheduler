@@ -28,6 +28,10 @@ public class TimeRange {
         this.endTime = endTime;
     }
 
+    public TimeRange copy() {
+        return new TimeRange(this.getStartTime(), this.getEndTime());
+    }
+
     public boolean hasOverlapWith(List<Schedule> schedules) {
         return schedules.stream().anyMatch(schedule -> {
             TimeRange that = schedule.getTimeRange();

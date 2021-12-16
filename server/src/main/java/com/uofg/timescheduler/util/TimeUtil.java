@@ -245,6 +245,10 @@ public class TimeUtil {
         double accumulatedPercentage = 0.0;
         for (int i = 0; i < rangeNum; i++) {
             long possibleStartLength = ranges.get(i).getLength() - durationMillis;
+            if (possibleStartLength < 0) {
+                throw new IllegalStateException(
+                        "The " + i + " th range passed in the args is shorter than the given duration.");
+            }
             accumulatedPercentage = accumulatedPercentage + ((double) possibleStartLength) / ((double) totalLength);
             randToRangeIdxMap.put(accumulatedPercentage, i);
         }
@@ -260,18 +264,15 @@ public class TimeUtil {
         int randedIdx = randToRangeIdxMap.get(endFellInto);
         TimeRange randedRange = ranges.get(randedIdx);
 
-        long startTime =
-                randedRange.getStartTime() + Math
-                        .round((rand - (randedIdx <= 0 ? 0.0 : sortedKeyList.get(randedIdx - 1))) * (totalLength
-                                - durationMillis));
+        long startTime = randedRange.getStartTime()
+                + Math.round((rand - (randedIdx <= 0 ? 0.0 : sortedKeyList.get(randedIdx - 1))) * totalLength);
 
-        // round each slot to the nearest whole minute
+        // round the slot to the nearest whole minute
         long remainder = startTime % ONE_MINUTE_MILLIS;
         long roundedStartTime = remainder >= ONE_MINUTE_MILLIS / 2
                 ? startTime - remainder + ONE_MINUTE_MILLIS
                 : startTime - remainder;
-        TimeRange res = new TimeRange(roundedStartTime, roundedStartTime + durationMillis);
-        return res;
+        return new TimeRange(roundedStartTime, roundedStartTime + durationMillis);
     }
 
     // define rating function

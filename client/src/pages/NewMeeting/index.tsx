@@ -133,7 +133,7 @@ const initialFormValues = {
   participantList: [],
   spreadsheets: [],
   dates: [],
-  duration: 180,
+  duration: 30,
 };
 
 const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
@@ -293,7 +293,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
               return (
                 <Form.Item
                   name="participantList"
-                  label="Participants"
+                  label="Participant List"
                   rules={[
                     {
                       required:
@@ -359,7 +359,7 @@ const NewMeetingForm = ({ setCurrentStep, runPlanMeeting }) => {
       {titleWithOffset('Meeting Requirements')}
       <Form.Item
         name="dates"
-        label="Potential dates" // (in UTC 0)
+        label="Dates" // (in UTC 0)
         rules={[
           {
             required: true,
@@ -485,11 +485,12 @@ const FormResult = ({
   }
 
   if (planData?.result) {
+    console.log(planData);
     const dataSource = planData.result.map((slot, index) => {
       return {
         key: index,
-        start: moment(slot.start).format('DD/MM/YYYY hh:mm'),
-        end: moment(slot.end).format('DD/MM/YYYY hh:mm'),
+        start: moment.utc(slot.start).format('DD/MM/YYYY HH:mm'),
+        end: moment.utc(slot.end).format('DD/MM/YYYY HH:mm'),
         score: slot.score || '-',
         note: slot.note || '-',
       };

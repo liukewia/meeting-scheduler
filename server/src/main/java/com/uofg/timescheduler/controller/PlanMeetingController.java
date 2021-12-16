@@ -180,7 +180,7 @@ public class PlanMeetingController {
                         .setEndTime(Math.max(lastUnmergedRange.getEndTime(),
                                 mergedRanges.get(size - 1).getEndTime()));
             } else {
-                mergedRanges.add(lastUnmergedRange);
+                mergedRanges.add(lastUnmergedRange.copy());
             }
         }
 
