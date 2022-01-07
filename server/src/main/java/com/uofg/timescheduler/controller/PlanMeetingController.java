@@ -32,9 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -53,16 +51,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "PlanMeetingController")
 public class PlanMeetingController {
 
-    @Autowired
-    UserService userService;
+    final UserService userService;
+    final ScheduleService scheduleService;
+    final PriorityService priorityService;
+    final ZoneOffsetService zoneOffsetService;
 
     @Autowired
-    ScheduleService scheduleService;
-
-    @Autowired
-    PriorityService priorityService;
-
-    @Autowired ZoneOffsetService zoneOffsetService;
+    public PlanMeetingController(UserService userService, ScheduleService scheduleService,
+            PriorityService priorityService, ZoneOffsetService zoneOffsetService) {
+        this.userService = userService;
+        this.scheduleService = scheduleService;
+        this.priorityService = priorityService;
+        this.zoneOffsetService = zoneOffsetService;
+    }
 
     @RequiresAuthentication
     @PostMapping("/plan")
@@ -266,10 +267,10 @@ public class PlanMeetingController {
         }
 
         // ************************* for debug *************************
-        Map<RatedTimeRange, Double> debugMap = new HashMap<>();
-        for (RatedTimeRange range : population) {
-            debugMap.put(range, range.getScore());
-        }
+//        Map<RatedTimeRange, Double> debugMap = new HashMap<>();
+//        for (RatedTimeRange range : population) {
+//            debugMap.put(range, range.getScore());
+//        }
         // ************************* for debug *************************
 
         List<RatedTimeRange> output = new ArrayList<>();

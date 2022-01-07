@@ -52,17 +52,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "User Controller")
 public class UserController {
 
-    @Autowired
-    JwtUtil jwtUtil;
+    final JwtUtil jwtUtil;
+    final UserService userService;
+    final UserRoleService userRoleService;
+    final RoleService roleService;
+    final ZoneOffsetService zoneOffsetService;
 
     @Autowired
-    UserService userService;
-
-    @Autowired UserRoleService userRoleService;
-
-    @Autowired RoleService roleService;
-
-    @Autowired ZoneOffsetService zoneOffsetService;
+    public UserController(JwtUtil jwtUtil, UserService userService,
+            UserRoleService userRoleService, RoleService roleService,
+            ZoneOffsetService zoneOffsetService) {
+        this.jwtUtil = jwtUtil;
+        this.userService = userService;
+        this.userRoleService = userRoleService;
+        this.roleService = roleService;
+        this.zoneOffsetService = zoneOffsetService;
+    }
 
     @PostMapping("/login")
     @ApiOperation("login")

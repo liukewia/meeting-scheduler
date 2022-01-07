@@ -50,10 +50,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "Schedule Controller")
 public class ScheduleController {
 
-    @Autowired UserService userService;
-    @Autowired ScheduleService scheduleService;
-    @Autowired PriorityService priorityService;
-    @Autowired ZoneOffsetService zoneOffsetService;
+    final UserService userService;
+    final ScheduleService scheduleService;
+    final PriorityService priorityService;
+    final ZoneOffsetService zoneOffsetService;
+
+    @Autowired
+    public ScheduleController(UserService userService, ScheduleService scheduleService,
+            PriorityService priorityService, ZoneOffsetService zoneOffsetService) {
+        this.userService = userService;
+        this.scheduleService = scheduleService;
+        this.priorityService = priorityService;
+        this.zoneOffsetService = zoneOffsetService;
+    }
 
     /**
      * Search schedules by a range

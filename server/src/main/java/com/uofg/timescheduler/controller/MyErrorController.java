@@ -31,7 +31,7 @@ public class MyErrorController extends BasicErrorController {
         Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
         HttpStatus status = getStatus(request);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("code", HttpStatus.BAD_REQUEST.value());
         map.put("msg", "".equals(body.get("message")) ? "Server error" : body.get("message"));
         map.put("data", null);

@@ -26,14 +26,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/zoneoffset")
 public class ZoneOffsetController {
 
-    @Autowired ZoneOffsetService zoneOffsetService;
+    final ZoneOffsetService zoneOffsetService;
+
+    @Autowired
+    public ZoneOffsetController(ZoneOffsetService zoneOffsetService) {
+        this.zoneOffsetService = zoneOffsetService;
+    }
 
     /**
      * internal update zone_offset table.
      *
      * @return
      */
-    public Result initOrUpdate() {
+    private Result initOrUpdate() {
         for (String zoneid : ZoneId.getAvailableZoneIds()) {
             ZoneId zoneId = ZoneId.of(zoneid);
             ZonedDateTime zdt = ZonedDateTime.now(zoneId);
