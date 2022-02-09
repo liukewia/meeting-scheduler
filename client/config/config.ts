@@ -4,6 +4,7 @@ import { defineConfig } from 'umi';
 const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin');
 import proxy from './proxy';
 import routes from './routes';
+
 export default defineConfig({
   alias: {
     public: '/public',
@@ -36,6 +37,7 @@ export default defineConfig({
   mfsu: {},
   webpack5: {},
   chainWebpack: (memo, { webpack }) => {
+    // https://momentjs.com/timezone/docs/#/use-it/webpack/
     memo.plugin('MomentTimezoneDataPlugin').use(MomentTimezoneDataPlugin, [
       {
         startYear: 1970,
