@@ -1,7 +1,7 @@
 import axiosReq from './axiosSetting';
 
 /** get currentUser GET /api/schedule/search */
-export async function searchSchdule(
+export async function searchSchedule(
   params?: {
     [key: string]: any;
   },
@@ -17,8 +17,8 @@ export async function searchSchdule(
   return res;
 }
 
-/** add Schdule POST /api/schedule/add */
-export async function addSchdule(
+/** add Schedule POST /api/schedule/add */
+export async function addSchedule(
   body: any,
   options?: { [key: string]: any },
 ): Promise<any> {
@@ -30,8 +30,8 @@ export async function addSchdule(
   return res;
 }
 
-/** update Schdule POST /api/schedule/update */
-export async function updateSchdule(
+/** update Schedule POST /api/schedule/update */
+export async function updateSchedule(
   body: any,
   options?: { [key: string]: any },
 ): Promise<any> {
@@ -43,8 +43,8 @@ export async function updateSchdule(
   return res;
 }
 
-/** delete Schdule POST /api/schedule/delete */
-export async function deleteSchdule(
+/** delete Schedule POST /api/schedule/delete */
+export async function deleteSchedule(
   body: any,
   options?: { [key: string]: any },
 ): Promise<any> {

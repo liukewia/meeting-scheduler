@@ -3,7 +3,7 @@ import { Modal, Form, Input, DatePicker, message, Button, Slider } from 'antd';
 import { useRequest } from 'ahooks';
 import { useModel } from 'umi';
 import { mapPercentToPriorityId, parseEventInForm } from '@/utils/scheduleUtil';
-import { addSchdule, deleteSchdule } from '@/services/schedule';
+import { addSchedule, deleteSchedule } from '@/services/schedule';
 import { CalendarFormEvent } from './Calendar';
 
 const { RangePicker } = DatePicker;
@@ -49,7 +49,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
     }
   }, [selectedEventRef.current, visible, form]);
 
-  const { loading: addLoading, run: runAddSchedule } = useRequest(addSchdule, {
+  const { loading: addLoading, run: runAddSchedule } = useRequest(addSchedule, {
     manual: true,
     debounceWait: 100,
     onSuccess: () => {
@@ -64,7 +64,7 @@ const CalendarForm: React.FC<CalendarFormProp> = ({
   });
 
   const { loading: deleteLoading, run: runDeleteSchedule } = useRequest(
-    deleteSchdule,
+    deleteSchedule,
     {
       manual: true,
       debounceWait: 100,

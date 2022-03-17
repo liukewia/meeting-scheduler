@@ -19,14 +19,14 @@ import CalendarForm from './CalendarForm';
 import { useReactive, useRequest } from 'ahooks';
 import { ONE_MINUTE_MILLIS } from '@/constants';
 import { isString } from 'lodash';
-import { searchSchdule } from '@/services/schedule';
+import { searchSchedule } from '@/services/schedule';
 import {
   mapPercentToPriorityId,
   mapPriorityIdToPercent,
   mapPriorityPercentToColor,
   mapPriorityPercentToTxt,
 } from '@/utils/scheduleUtil';
-import { updateSchdule } from '@/services/schedule';
+import { updateSchedule } from '@/services/schedule';
 import type { stringOrDate } from 'react-big-calendar';
 
 // Is there a way to change your timezone in Chrome devtools?
@@ -96,7 +96,7 @@ const Calendar: React.FC = (props) => {
     data: eventData,
     loading: fetchLoading,
     run: runFetch,
-  } = useRequest(searchSchdule, {
+  } = useRequest(searchSchedule, {
     manual: true,
     debounceWait: 100,
     onSuccess: () => {
@@ -120,7 +120,7 @@ const Calendar: React.FC = (props) => {
   });
 
   const { loading: updateLoading, run: runUpdateSchedule } = useRequest(
-    updateSchdule,
+    updateSchedule,
     {
       manual: true,
       debounceWait: 100,

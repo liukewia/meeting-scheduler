@@ -4,7 +4,7 @@ import { Link, useModel } from 'umi';
 import { useRequest } from 'ahooks';
 import { SpacedContainer } from '@/components/SpacedContainer';
 import { utcOffsetToTxt } from '@/utils/timeUtil';
-import { searchSchdule } from '@/services/schedule';
+import { searchSchedule } from '@/services/schedule';
 import { useMemo } from 'react';
 
 export default function index() {
@@ -13,7 +13,7 @@ export default function index() {
   const utcOffset = initialState?.currentUser?.utcOffset || 0;
   const { getUtcNow, getZonedUtcNow } = useModel('time');
 
-  const { data: eventData } = useRequest(searchSchdule, {
+  const { data: eventData } = useRequest(searchSchedule, {
     defaultParams: [
       {
         startTime: getUtcNow().startOf('day').valueOf(),
